@@ -28,17 +28,19 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'userapp.UserLogin'
+
 
 # Application definition
 
 INSTALLED_APPS = [
+    'userapp',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'userapp',
     'adminapp',
     'super_adminapp',
     
@@ -81,7 +83,7 @@ WSGI_APPLICATION = 'RevolutionAuto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'revolutionAuto',
+        'NAME': 'revolution',
         'USER': 'postgres',
         'PASSWORD': 'root',
         'HOST': 'localhost',
@@ -126,7 +128,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR/ 'static/']
-CURRENT_URL = 'http://127.0.0.1:8000/'
+CURRENT_URL = 'http://127.0.0.1:8000'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
