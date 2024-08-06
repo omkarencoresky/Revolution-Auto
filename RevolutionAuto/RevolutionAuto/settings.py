@@ -28,8 +28,15 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-AUTH_USER_MODEL = 'userapp.UserLogin'
+AUTH_USER_MODEL = 'userapp.CustomUser'
 
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# SUPER_USER_EMAIL = 'superuser@example.com'
+# SUPER_USER_PASSWORD = 'superuser@123'
 
 # Application definition
 
@@ -83,7 +90,7 @@ WSGI_APPLICATION = 'RevolutionAuto.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'revolution',
+        'NAME': 'Revolution_Auto',
         'USER': 'postgres',
         'PASSWORD': 'root',
         'HOST': 'localhost',
