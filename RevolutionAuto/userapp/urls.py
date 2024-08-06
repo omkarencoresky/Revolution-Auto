@@ -20,10 +20,9 @@ from userapp import views
 urlpatterns = [
     path('register/', views.register, name='register'),
     path('home/',views.index, name='Home'),
-    path('error/', views.error, name='error'),
     path('about/',views.about, name='About'),
     path('service/',views.service, name='Service'),
     path('team/',views.team, name='Team'),
     path('booking/',views.booking, name='Booking'),
-    path('login/', views.login, name="login")
+    path('login/', views.user_login, name="login")
 ]

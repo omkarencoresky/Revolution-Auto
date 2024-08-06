@@ -37,14 +37,16 @@
 <div class="container-fluid page-header mb-5 p-0" style="background-image: url(img/carousel-bg-1.jpg);">
     <div class="container-fluid page-header-inner py-5">
         <div class="container text-center">
+            <div>
+                {% if messages %}
+                    <ul class="messages" style="color: rgb(247, 240, 240); padding-left: 0px; margin-bottom: 15px; ">
+                        {% for message in messages %}
+                            <li class="{{ message.tags }}">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
             <h1 class="display-3 text-white mb-3 animated slideInDown">Login</h1>
-            <!-- <nav aria-label="breadcrumb">
-                <ol class="breadcrumb justify-content-center text-uppercase">
-                    <li class="breadcrumb-item"><a href="#">Home</a></li>
-                    <li class="breadcrumb-item"><a href="#">Pages</a></li>
-                    <li class="breadcrumb-item text-white active" aria-current="page">Booking</li>
-                </ol>
-            </nav> -->
         </div>
     </div>
 </div>
