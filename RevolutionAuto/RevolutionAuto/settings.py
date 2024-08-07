@@ -10,8 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
 import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+
+# Load the .env or enviremnt variables
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,10 +26,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9mvu18d7zk@8tg))k#48#4h-%i7c&w@(-kd0g^y83vred9vljz'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG')
 
 ALLOWED_HOSTS = []
 
@@ -35,18 +40,21 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-# SUPER_USER_EMAIL = 'superuser@example.com'
-# SUPER_USER_PASSWORD = 'superuser@123'
+# SUPER USER credential use after first migration
+
+SUPER_USER_EMAIL = os.environ.get('SUPER_USER_EMAIL')
+SUPER_USER_PASSWORD = os.environ.get('SUPER_USER_PASSWORD') 
+
 
 # Application definition
 
 INSTALLED_APPS = [
     'userapp',
+    'django.contrib.messages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'adminapp',
     'super_adminapp',
@@ -89,12 +97,12 @@ WSGI_APPLICATION = 'RevolutionAuto.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Revolution_Auto',
-        'USER': 'postgres',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'ENGINE':'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT')
     }
 }
 
@@ -134,8 +142,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR/ 'static/']
-CURRENT_URL = 'http://127.0.0.1:8000'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+CURRENT_URL = os.environ.get('CURRENT_URL')
 
 
 # Default primary key field type
