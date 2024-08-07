@@ -28,6 +28,7 @@ class CustomManager(BaseUserManager):
             
         email = self.normalize_email(email) 
         user = self.model(email=email,**extra_fields)
+        
         if password:
             user.set_password(password)
         else:
