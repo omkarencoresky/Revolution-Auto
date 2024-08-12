@@ -1,5 +1,6 @@
 from django import forms
 from userapp.models import CustomUser
+from adminapp.models import CarBrand
 
 
 
@@ -29,3 +30,11 @@ class AdminRegisterForm(forms.ModelForm):
     class Meta:
         model = CustomUser
         fields = ['first_name', 'last_name', 'email', 'phone_no', 'password']
+
+
+class Addbrandform(forms.ModelForm):
+
+
+    class Meta:
+        model =  CarBrand
+        fields = ['brand', 'description']

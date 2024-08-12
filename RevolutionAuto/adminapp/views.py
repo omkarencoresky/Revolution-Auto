@@ -4,16 +4,19 @@ import fastjsonschema
 import schemas.registration_schema
 
 from django.conf import settings
+from django.urls import reverse
 from django.contrib import messages
 from django.http import JsonResponse
-from .forms import AdminRegisterForm
+from .forms import AdminRegisterForm, Addbrandform
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from schemas.registration_schema import validate_registration
 
 curl = settings.CURRENT_URL
+admincurl = f"{curl}/adminapp/"
 
 def registration(request: HttpRequest) -> HttpResponse:
+
     """
         Handles the registration of a new admin user.
 
@@ -74,3 +77,8 @@ def registration(request: HttpRequest) -> HttpResponse:
     except:
         messages.error(request, "An unexpected error occurred. Please try again.")
         return render(request, 'adminregistration.html', {'form': AdminRegisterForm()}, status=500)
+    
+
+def dashboard(request):
+    return render(request, 'dashboard.html', {'curl':admincurl})
+
