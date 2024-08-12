@@ -1,0 +1,16 @@
+.table th, .table td {
+    padding: 12px;
+  }
+
+  
+.table th {
+    font-weight: bold;
+    color: #333;
+    background-color: #afafaf;
+    
+  }
+
+tr.htmx-swapping td {
+    opacity: 0;
+    transition: opacity 1s ease-out;
+  }
