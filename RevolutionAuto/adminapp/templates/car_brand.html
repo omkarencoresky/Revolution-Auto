@@ -409,7 +409,7 @@
                                 <!-- <li class="breadcrumb-item"><a href="#"><i class="feather icon-home"></i></a></li>
                                 <li class="breadcrumb-item" >Basic UI</li>
                                 <li class="breadcrumb-item active" >Alerts</li> -->
-                                <button class="btn-primary" id="showFormButton" onclick="addModel('show')">Add Brand</button>
+                                <button class="btn-primary" id="showFormButton" hx-get="{{curl}}showaddbrand/" hx-swap="beforeend" hx-target="body">Add Brand</button>
                             </ol>
                         </div>
                         <div>
@@ -418,20 +418,21 @@
                                     {% for message in messages %}
                                         <li class="{{ message.tags }}">{{ message }}</li>
                                     {% endfor %}
-                                </ul>
+                                </ul>   
                             {% endif %}
                         </div>
                         <div id="myForm" style="display: none;">    
                             <div class="vw-100 vh-100 position-fixed"  style="z-index: 9999; top: 0; left: 0;" > 
-                                <div class="vw-100 vh-100 position-absolute"  style="background-color: rgb(0,0,0,0.5); z-index: 1; " onclick="removeModelForm()"></div>   
+                                <div class="vw-100 vh-100 position-absolute" style="background-color: rgb(0,0,0,0.5); z-index: 1;" 
+                                hx-get="{{curl}}carbrand/" id="test" hx-target="body"></div>   
                                 <div class="modal-content mx-auto" style="max-width: 500px; z-index: 2;">
                                     <div class="modal-header">
-                                        <button type="button" class="close" data-dismiss="modal" onclick="removeModelForm()" style="outline: none;">×</button>
+                                        <button type="button" class="close" data-dismiss="modal" hx-get="{{curl}}carbrand/" hx-target="body" style="outline: none;">×</button>
                                         <h4 class="modal-title">Add Car Make</h4>
                                     </div>
                                     <div class="modal-body">
                                         <!-- <form class="form-horizontal" id="form_add_car_service" method="post" action="http://unclefitter.encoreskydev.com/admin/car/makes" enctype="multipart/form-data"> -->
-                                            <form  action="{{curl}}addbrand/" method="post"  enctype="multipart/form-data">
+                                            <!-- <form  action="{{curl}}addbrand/" method="post"  enctype="multipart/form-data">
                                                 {% csrf_token %}
                                             <div class="form-group brand">
                                                 <label class="control-label col-sm-3" for="brand">Make Name:</label>
@@ -457,17 +458,16 @@
                                                 </div>
                                             </div>
                         
-                                            <!-- <input type="hidden" name="_token" value="QQUF3UfiCweczKBFk7jL0eeNcm5nAiKjGo6NWn9Z"> -->
                                             <div class="modal-footer">
                                                 <div class="row w-100">
                                                     <div class="w-100 modal_btn d-flex justify-content-around">
-                                                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="removeModelForm()">Close</button> 
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal" hx-get="{{curl}}carbrand/"  hx-target="body">Close</button> 
                                                         <button type="submit" class="btn btn-info" >Submit</button>
                                                     </div>
                                                     <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner" style="display: none;">
                                                 </div>
                                             </div>
-                                        </form>
+                                        </form> -->
                                     </div>
                                 </div>
                             </div>
@@ -476,7 +476,8 @@
                             <div class="col-md-12">
                                 <div class="card d-flex w-100 mb-4">
                                     <!-- <h6 class="card-header">Alerts</h6> -->
-                                    <div class="row no-gutters row-bordered row-border-light h-100">
+                                    <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+                                        
                                         <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
                                             <caption class="caption-top fs-4 text-dark mb-2">All Available Brand</caption>
                                             <thead class="table-light">
@@ -489,7 +490,7 @@
                                                 <th scope="col">Action</th>
                                               </tr>
                                             </thead>
-                                            <tbody hx-confirm="Are you sure?" hx-target="body" hx-swap="outerHTML swap:1s">
+                                            <tbody  hx-target="body" hx-swap="outerHTML swap:1s">
                                                 {% if brands %}
                                                     {% for brand in brands %}
                                                                                                           
@@ -497,7 +498,7 @@
                                                         <td>{{forloop.counter}}</td>
                                                         <td>{{brand.brand}}</td>
                                                         <td>{{brand.description}}</td>
-                                                        <td>{{brand.image_url}}</td>
+                                                        <td>http://127.0.0.1:8000{{brand.image_url}}</td>
                                                         {% if brand.status == 1 %}
                                                             <td>Active</td>
                                                         {% elif brand.status == 2 %}
@@ -507,13 +508,14 @@
                                                         {% endif %}
                                                         <td>
                                                             <button class="btn" hx-delete="{{curl}}deletebrand/{{brand.id}}"><i  class="fa fa-trash"></i></button>
-                                                            <button class="btn "><i  class="fa fa-edit"></i></button>
+                                                            <button class="btn" hx-get="{{curl}}editbrand/{{brand.id}}" hx-target="body" hx-swap="beforeend"><i  class="fa fa-edit"></i></button>
                                                         </td>
                                                     </tr>
                                                     {% endfor %}
-                                                {% endif %}
-                                            </tbody>
+                                                    {% endif %}
+                                                </tbody>
                                           </table>
+
                                     </div>
                                 </div>
                             </div>

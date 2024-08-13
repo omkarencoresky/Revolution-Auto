@@ -6163,7 +6163,7 @@ html:not(.layout-footer-fixed) .layout-content {
 .layout-navbar-fixed body:not(.modal-open) .layout-2 .layout-navbar,
 .layout-fixed body:not(.modal-open) .layout-2 .layout-navbar,
 .layout-fixed-offcanvas body:not(.modal-open) .layout-2 .layout-navbar {
-  z-index: 1075;
+  z-index: 1000;
 }
 
 .layout-footer-fixed .layout-footer {
@@ -6199,7 +6199,7 @@ html:not(.layout-footer-fixed) .layout-content {
   }
 
   .layout-collapsed:not(.layout-offcanvas):not(.layout-fixed-offcanvas) .layout-1 .layout-sidenav:hover {
-    z-index: 1075 !important;
+    z-index: 1000 !important;
   }
   .layout-collapsed:not(.layout-offcanvas):not(.layout-fixed-offcanvas) .layout-2 .layout-sidenav {
     z-index: 1085 !important;
@@ -6207,7 +6207,7 @@ html:not(.layout-footer-fixed) .layout-content {
 
   .layout-fixed body:not(.modal-open) .layout-1 .layout-sidenav,
   .layout-fixed-offcanvas body:not(.modal-open) .layout-1 .layout-sidenav {
-    z-index: 1075;
+    z-index: 1000;
   }
 
   .layout-navbar-fixed body:not(.modal-open) .layout-2 .layout-sidenav,

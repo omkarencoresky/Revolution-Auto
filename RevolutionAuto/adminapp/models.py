@@ -6,7 +6,7 @@ class CarBrand(models.Model):
     id = models.AutoField(primary_key=True)
     brand = models.CharField(max_length=50, blank=False)
     description = models.CharField(max_length=200, blank=True)
-    image_url = models.ImageField(  upload_to='car_brand_images/')
+    image_url = models.ImageField(  upload_to='media/')
     status = models.SmallIntegerField(blank=False, default=1)
     remember_token = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
