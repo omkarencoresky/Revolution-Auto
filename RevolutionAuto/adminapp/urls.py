@@ -19,6 +19,7 @@ from adminapp import views
 from adminapp import carviews
 from django.urls import path
 
+
 urlpatterns = [
     path('registration/', views.registration),
     path('dashboard/', views.dashboard),
@@ -28,3 +29,5 @@ urlpatterns = [
     path('deletebrand/<int:id>/', carviews.delete_brand, name='deleteBrand'),
     path('editbrand/<int:id>/', carviews.edit_brand, name='editbrand'),
 ]
+
+
