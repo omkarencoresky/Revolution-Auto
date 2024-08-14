@@ -7,16 +7,27 @@ from .forms import Addbrandform
 from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse
+from django.views.generic import ListView
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 curl = settings.CURRENT_URL
-admincurl = f"{curl}/adminapp/"
-media_path = f'{settings.MEDIA_URL}/'   
+admincurl = f"{curl}/adminapp"
+media_path = f'{settings.MEDIA_URL}'   
+
+def pagination(request):
+    all_brands = CarBrand.objects.all()
+    
+    # Pagination setup
+    paginator = Paginator(all_brands, 10)  # Show 10 brands per page
+    page_number = request.GET.get('page')  # Get the page number from the request
+    page_obj = paginator.get_page(page_number)  # Get the page object for the requested page
+    return page_obj
 
 def dashboard(request):
     """This method is use to render the dashboard page for Admin and show other different options.
@@ -27,9 +38,15 @@ def dashboard(request):
     Returns:
         Httprequest: This method is use for render the Admin dashboard page.
     """
-    return render(request, 'dashboard.html', {'curl':admincurl})
+    page_obj = pagination(request)
 
-def car_brand(request): 
+    context = {
+        'page_obj': page_obj,
+        'curl':admincurl
+    }
+    return render(request, 'dashboard.html', context)
+
+def car_brand(request):
     """This method is use to render the main page for car brand and show the brand's list
 
     Args:
@@ -38,9 +55,14 @@ def car_brand(request):
     Returns:
         Httprequest: This method is use for render the car brand page.
     """
-    all_brands = CarBrand.objects.all()
-    count=1
-    return render(request, 'car_brand.html', {'curl':admincurl, 'brands':all_brands, 'count':count})
+    page_obj = pagination(request)
+
+    context = {
+        'page_obj': page_obj,
+        'curl':admincurl
+    }
+
+    return render(request, 'car_brand.html', context)
 
 def add_brand(request):
     """This Method is allow to insert the another one brand of car itno the database. 
@@ -54,6 +76,14 @@ def add_brand(request):
     try:
         if request.method == 'POST':
             form = Addbrandform(request.POST, request.FILES)
+            page_obj = pagination(request)
+            count=1
+
+            context = {
+                'page_obj': page_obj,
+                'curl':admincurl,
+                'count':count
+            }
             try:
                 if form.is_valid():
                     brand = form.save(commit=False)
@@ -74,25 +104,23 @@ def add_brand(request):
                             fp.write(chunk)
                     form.save()
                     messages.success(request, "One more car brand has been added successfully!")
-                    all_brands = CarBrand.objects.all()
-                    count=1
-                    return render(request, 'car_brand.html', {'curl':admincurl, 'brands':all_brands, 'count':count})
+                    return render(request, 'car_brand.html', context)
+                
                 else:
                     messages.error(request, 'Invalid request, Try again')
-                    return render (request, 'car_brand.html', {'curl':admincurl}) 
+                    return render (request, 'car_brand.html', context) 
                 
             except Exception as e:
                 messages.error(request, f"{e}")
-                return render (request, 'car_brand.html', {'curl':admincurl})
+                return render (request, 'car_brand.html', context)
         
     except Exception as e:
         messages.error(request, f"{e}")
-        return render (request, 'car_brand.html', {'curl':admincurl})
+        return render (request, 'car_brand.html', context)
 
 
 def ShowAddBrand(request):
     return render(request, 'showaddbrand.html', {'curl':admincurl})
-
 
 @csrf_exempt # It is used for avoid admin login 
 def delete_brand(request, id):
@@ -110,10 +138,10 @@ def delete_brand(request, id):
     try:
         brand = CarBrand.objects.get(id=id)
         brand.delete()
-        all_brands = CarBrand.objects.all()
+        page_obj = pagination(request)
         
         context = {
-            'brands': all_brands,
+            'page_obj': page_obj,
             'curl': request.build_absolute_uri(admincurl)
         }
         
@@ -123,51 +151,82 @@ def delete_brand(request, id):
     except ObjectDoesNotExist:
         # Handle case where the object does not exist
         messages.error(f"CarBrand with id {id} does not exist.")
-        return HttpResponse("Brand not found.", status=404)
+        return render(request, 'car_brand.html', context, status=404)
     
     except Exception as e:  
         messages.error(f"Error: {str(e)}")
-        return render(request, 'car_brand.html', status=500)
+        return render(request, 'car_brand.html', context, status=500)
     
 
 @csrf_exempt
 def edit_brand(request, id):
     if request.method == 'GET':
+        page_obj = pagination(request)
+        context = {
+                'page_obj': page_obj,
+                'curl':admincurl,
+            }
         brand = CarBrand.objects.get(id=id)
-        return render(request, 'edit.html', {'curl':admincurl, 'brands':brand})
+        return render(request, 'edit.html', context)
     
-    if request.method == 'POST':
-        try:
+   
+    try:
+        page_obj = pagination(request)
+        context = {
+                'page_obj': page_obj,
+                'curl':admincurl,
+            }
+        if request.method == 'POST':
             brand = CarBrand.objects.get(id=id)
-            print('111')
             # brand.brand = request.POST.get('brand')
-            print(brand.brand)
-            print(brand.image_url)
-            image = brand.image_url
-            if request.POST.get('image_url') == None:
-                brand.image_url = image
+            old_make_name = brand.brand
+            old_description = brand.description
+            old_image_url = brand.image_url
+            old_status = brand.status
+
+            # For Brand name
+            if request.POST.get('brand') == '':
+                brand.brand = old_make_name
             else:
-                brand.image_url = request.POST['image_url']
-            print(brand.image_url)
-            brand.brand = request.POST['brand']
-            brand.description = request.POST['description']
-            brand.status = brand.status
+                brand.brand = request.POST['brand']
+            
+            # For Description name
+            if request.POST.get('description') == '':
+                brand.description = old_description
+            else:
+                brand.description = request.POST['description']
+            
+            # For status name
+            if request.POST.get('status') == 1:
+                brand.description = old_status
+            else:
+                brand.status = request.POST['status']
+                
+            # For image_url name
+            if request.POST.get('image_url') == '':
+                brand.image_url = old_image_url
+            else:
+                uploaded_file = request.FILES['image_url']
+                image_name = uploaded_file.name
+                brand.image_url = f"{media_path}{image_name}"
+                media_directory = os.path.join(settings.BASE_DIR, 'media')
+                file_path = os.path.join(media_directory, image_name)
+
+                if not os.path.exists(media_directory):
+                    os.makedirs(media_directory)
+
+                with open(file_path, "wb") as fp:
+                    for chunk in uploaded_file.chunks():
+                        fp.write(chunk)
             brand.remember_token = brand.remember_token
             brand.save()
             messages.success(request, 'Brand is updated successfully!')
-            all_brands = CarBrand.objects.all()
-            count=1
-            return render(request, 'car_brand.html', {'curl':admincurl, 'brands':all_brands, 'count':count})
-            # else:
-            #     print('6666') 
-            #     messages.error(request, 'Invalid inputs, try again')
-            #     all_brands = CarBrand.objects.all()
-            #     count=1
-            #     return render(request, 'car_brand.html', {'curl':admincurl, 'brands':all_brands, 'count':count})
+            return render(request, 'car_brand.html', context)
+        else:
+            messages.error(request, 'Invalid inputs, try again')
+            return render(request, 'car_brand.html', context)
 
-        except Exception as e:
-            print('5555')
-            messages.error(request, f"{e}")
-            all_brands = CarBrand.objects.all()
-            count=1
-            return render(request, 'car_brand.html', {'curl':admincurl, 'brands':all_brands, 'count':count})
+    except Exception as e:
+        messages.error(request, f"{e}")
+        return render(request, 'car_brand.html', context)
+
