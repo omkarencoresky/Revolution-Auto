@@ -2,13 +2,13 @@ import itertools
 import json
 import os
 import hashlib
-from.models import CarBrand
-from .forms import Addbrandform
+from.models import CarBrand, CarYear
+from .forms import Addbrandform, Addyearform
 from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse
+from adminapp.utils.utils import brand_pagination, year_pagination
 from django.views.generic import ListView
-from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
 from django.template.loader import render_to_string
@@ -20,31 +20,6 @@ curl = settings.CURRENT_URL
 admincurl = f"{curl}/adminapp"
 media_path = f'{settings.MEDIA_URL}'   
 
-def pagination(request):
-    all_brands = CarBrand.objects.all()
-    
-    # Pagination setup
-    paginator = Paginator(all_brands, 10)  # Show 10 brands per page
-    page_number = request.GET.get('page')  # Get the page number from the request
-    page_obj = paginator.get_page(page_number)  # Get the page object for the requested page
-    return page_obj
-
-def dashboard(request):
-    """This method is use to render the dashboard page for Admin and show other different options.
-
-    Args:
-        request
-
-    Returns:
-        Httprequest: This method is use for render the Admin dashboard page.
-    """
-    page_obj = pagination(request)
-
-    context = {
-        'page_obj': page_obj,
-        'curl':admincurl
-    }
-    return render(request, 'dashboard.html', context)
 
 def car_brand(request):
     """This method is use to render the main page for car brand and show the brand's list
@@ -55,14 +30,14 @@ def car_brand(request):
     Returns:
         Httprequest: This method is use for render the car brand page.
     """
-    page_obj = pagination(request)
+    page_obj = brand_pagination(request)
 
     context = {
         'page_obj': page_obj,
         'curl':admincurl
     }
 
-    return render(request, 'car_brand.html', context)
+    return render(request, 'carmodel/car_brand.html', context)
 
 def add_brand(request):
     """This Method is allow to insert the another one brand of car itno the database. 
@@ -76,7 +51,7 @@ def add_brand(request):
     try:
         if request.method == 'POST':
             form = Addbrandform(request.POST, request.FILES)
-            page_obj = pagination(request)
+            page_obj = brand_pagination(request)
             count=1
 
             context = {
@@ -104,23 +79,22 @@ def add_brand(request):
                             fp.write(chunk)
                     form.save()
                     messages.success(request, "One more car brand has been added successfully!")
-                    return render(request, 'car_brand.html', context)
+                    return render(request, 'carmodel/car_brand.html', context)
                 
                 else:
                     messages.error(request, 'Invalid request, Try again')
-                    return render (request, 'car_brand.html', context) 
+                    return render (request, 'carmodel/car_brand.html', context) 
                 
             except Exception as e:
                 messages.error(request, f"{e}")
-                return render (request, 'car_brand.html', context)
+                return render (request, 'carmodel/car_brand.html', context)
         
     except Exception as e:
         messages.error(request, f"{e}")
-        return render (request, 'car_brand.html', context)
+        return render (request, 'carmodel/car_brand.html', context)
 
-
-def ShowAddBrand(request):
-    return render(request, 'showaddbrand.html', {'curl':admincurl})
+def show_add_brand(request):
+    return render(request, 'carmodel/showaddbrand.html', {'curl':admincurl})
 
 @csrf_exempt # It is used for avoid admin login 
 def delete_brand(request, id):
@@ -138,7 +112,7 @@ def delete_brand(request, id):
     try:
         brand = CarBrand.objects.get(id=id)
         brand.delete()
-        page_obj = pagination(request)
+        page_obj = brand_pagination(request)
         
         context = {
             'page_obj': page_obj,
@@ -146,32 +120,31 @@ def delete_brand(request, id):
         }
         
         messages.success(request,f"{brand.brand} brand deleted successfully")
-        return render(request, 'car_brand.html',context , status=200)
+        return render(request, 'carmodel/car_brand.html',context , status=200)
     
     except ObjectDoesNotExist:
         # Handle case where the object does not exist
         messages.error(f"CarBrand with id {id} does not exist.")
-        return render(request, 'car_brand.html', context, status=404)
+        return render(request, 'carmodel/car_brand.html', context, status=404)
     
     except Exception as e:  
         messages.error(f"Error: {str(e)}")
-        return render(request, 'car_brand.html', context, status=500)
-    
+        return render(request, 'carmodel/car_brand.html', context, status=500) 
 
-@csrf_exempt
+@csrf_exempt # It is used for avoid admin login 
 def edit_brand(request, id):
     if request.method == 'GET':
-        page_obj = pagination(request)
+        page_obj = brand_pagination(request)
         context = {
                 'page_obj': page_obj,
                 'curl':admincurl,
             }
         brand = CarBrand.objects.get(id=id)
-        return render(request, 'edit.html', context)
+        return render(request, 'carmodel/brand_edit.html', context)
     
    
     try:
-        page_obj = pagination(request)
+        page_obj = brand_pagination(request)
         context = {
                 'page_obj': page_obj,
                 'curl':admincurl,
@@ -198,7 +171,7 @@ def edit_brand(request, id):
             
             # For status name
             if request.POST.get('status') == 1:
-                brand.description = old_status
+                brand.status = old_status
             else:
                 brand.status = request.POST['status']
                 
@@ -221,12 +194,157 @@ def edit_brand(request, id):
             brand.remember_token = brand.remember_token
             brand.save()
             messages.success(request, 'Brand is updated successfully!')
-            return render(request, 'car_brand.html', context)
+            return render(request, 'carmodel/car_brand.html', context)
         else:
             messages.error(request, 'Invalid inputs, try again')
-            return render(request, 'car_brand.html', context)
+            return render(request, 'carmodel/car_brand.html', context)
 
     except Exception as e:
         messages.error(request, f"{e}")
-        return render(request, 'car_brand.html', context)
+        return render(request, 'carmodel/car_brand.html', context)
+
+def car_year(request):
+    """This method is use to render the main page for car brand and show the brand's list
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use for render the car brand page.
+    """
+    page_obj = year_pagination(request)
+
+    context = {
+        'page_obj': page_obj,
+        'curl':admincurl
+    }
+
+    return render(request, 'carmodel/car_year.html', context) 
+
+def show_add_year(request):
+    page_obj = brand_pagination(request)
+
+    context = {
+        'curl':admincurl,
+        'page_obj': page_obj
+    }
+    return render(request, 'carmodel/showaddyear.html',  context)
+
+def add_year(request):
+    """This Method is allow to insert the another one brand of car itno the database. 
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: Added the recored and if success redirect onthe same page and if fail render on same page
+    """
+    try:
+        page_obj = year_pagination(request)
+
+        context = {
+            'curl':admincurl,
+            'page_obj': page_obj
+        }
+        if request.method == 'POST':
+            form = Addyearform(request.POST)
+            # page_obj = brand_pagination(request)
+            count=1
+
+            context = {
+                # 'page_obj': page_obj,
+                'curl':admincurl,
+                'count':count
+            }
+            try:
+                if form.is_valid():
+                    year = form.save(commit=False)
+                    year_brand = request.POST['car_id']
+                    year_input = request.POST['year']
+                    token = hashlib.sha256(year_input.encode()).hexdigest()
+                    year.remember_token = token
+                    form.save()
+                    page_obj = year_pagination(request)
+
+                    context = {
+                        'curl':admincurl,
+                        'page_obj': page_obj
+                    }
+                    messages.success(request, "One more car year has been added successfully!")
+                    return render(request, 'carmodel/car_year.html', context)
+                
+                else:
+                    messages.error(request, 'Invalid request, Try again')
+                    return render (request, 'carmodel/car_year.html', context) 
+                
+            except Exception as e:
+                messages.error(request, f"{e}")
+                return render (request, 'carmodel/car_year.html', context)
+        
+    except Exception as e:
+        messages.error(request, f"{e}")
+        return render (request, 'carmodel/car_year.html', context)
+
+
+def edit_year(request, id):
+    if request.method == 'GET':
+        page_obj = brand_pagination(request)
+        edit_year_obj = CarYear.objects.get(id=id)
+        context = {
+                'page_obj': page_obj,
+                'edit_year_obj':edit_year_obj,
+                'curl':admincurl,
+            }
+        return render(request, 'carmodel/year_edit.html', context)
+    
+   
+    try:
+        page_obj = year_pagination(request)
+        context = {
+                'page_obj': page_obj,
+                'curl':admincurl,
+            }
+        if request.method == 'POST':
+            year = CarYear.objects.get(id=id)
+            # brand.brand = request.POST.get('brand')
+            old_brand = year.car_id
+            old_year = year.year
+            old_status = year.status
+
+            print('post1')
+            # For Brand name
+            if request.POST.get('car_id') == '':
+                year.car_id = old_brand
+            else:
+                year.car_id = request.POST['car_id']
+            
+            print('post2')
+            # For Year name
+            if request.POST.get('year') == '':
+                year.year = old_year
+            else:
+                year.year = request.POST['year']
+            
+            # For status name
+            if request.POST.get('status') == 1:
+                year.status = old_status
+            else:
+                year.status = request.POST['status']
+            year.remember_token = year.remember_token
+                
+            year.save()
+            messages.success(request, 'Brand is updated successfully!')
+            return render(request, 'carmodel/car_brand.html', context)
+        else:
+            messages.error(request, 'Invalid inputs, try again')
+            return render(request, 'carmodel/car_brand.html', context)
+
+    except Exception as e:
+        messages.error(request, f"{e}")
+    return render(request, 'carmodel/year_edit.html')
+        
+
+
+def delete_year(request, id):
+    return render(request, 'carmodel/car_year.html')
 

@@ -5367,6 +5367,17 @@ button.list-group-item-dark.active {
   margin: 0;
   padding: 0;
 }
+
+.sidenav-menu-show {
+  display: block;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  margin: 0;
+  padding: 0;
+}
+
 .sidenav:not(.sidenav-no-animation) .sidenav-menu {
   -webkit-transition: background-color 0.2s;
   transition: background-color 0.2s;

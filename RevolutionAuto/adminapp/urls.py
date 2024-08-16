@@ -25,9 +25,16 @@ urlpatterns = [
     path('dashboard/', views.dashboard),
     path('carbrand/', carviews.car_brand, name='car_brand'),
     path('addbrand/', carviews.add_brand),
-    path('showaddbrand/', carviews.ShowAddBrand),
+    path('showaddbrand/', carviews.show_add_brand),
     path('deletebrand/<int:id>/', carviews.delete_brand, name='deleteBrand'),
     path('editbrand/<int:id>/', carviews.edit_brand, name='editbrand'),
+    
+    # Car Year urls
+    path('caryear/', carviews.car_year, name='caryear'),
+    path('showaddyear/', carviews.show_add_year, name='show_add_year'),
+    path('addyear/', carviews.add_year, name='add_year'),
+    path('edityear/<int:id>/', carviews.edit_year, name='edityear'),
+    path('deleteyear/<int:id>',carviews.delete_year, name='delete_year')
 ]
 
 
