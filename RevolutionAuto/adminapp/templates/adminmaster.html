@@ -35,6 +35,8 @@
     <!-- lib -->
     <link rel="stylesheet" href="{% static 'lib/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'lib/flot/flot.css' %}">
+    
+    
 
 </head>
     
@@ -87,18 +89,18 @@
 
                     <!-- UI elements -->
                     <li class="sidenav-item">
-                        <a href="javascript:" class="sidenav-link sidenav-toggle">
+                        <a href="javascript:" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-Car-Management">
                             <i class="sidenav-icon fa fa-car"></i>
                             <div>Car Management</div>
                         </a>
-                        <ul class="sidenav-menu">   
+                        <ul class="sidenav-menu" id="sidenav-dropdown-menus-Car-Management">   
                             <li class="sidenav-item">
                                 <a href="{{curl}}carbrand/" class="sidenav-link">
                                     <div>Car Brand</div>
                                 </a>
                             </li>
                             <li class="sidenav-item">
-                                <a href="bui_badges.html" class="sidenav-link">
+                                <a href="{{curl}}caryear/" class="sidenav-link">
                                     <div>Car Year</div>
                                 </a>
                             </li>
@@ -117,11 +119,11 @@
 
                     
                     <li class="sidenav-item">
-                        <a href="javascript:" class="sidenav-link sidenav-toggle">
+                        <a href="javascript:" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-Services-Management">
                             <i class="sidenav-icon feather icon-clipboard"></i>
                             <div>Services Management</div>
                         </a>
-                        <ul class="sidenav-menu">
+                        <ul class="sidenav-menu" id="sidenav-dropdown-menu-Services-Management">
                             <li class="sidenav-item">
                                 <a href="forms_layouts.html" class="sidenav-link">
                                     <div>Service Type</div>
@@ -148,12 +150,13 @@
                                 </a>
                             </li>
                         </ul>
-                        <li class="sidenav-item">
-                            <a href="javascript:" class="sidenav-link sidenav-toggle">
+                    </li>
+                    <li class="sidenav-item">
+                        <a href="javascript:" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-User-Management">
                             <i class="sidenav-icon feather icon-users"></i>
                             <div>User Management</div>
                         </a>
-                        <ul class="sidenav-menu">
+                        <ul class="sidenav-menu" id="sidenav-dropdown-menu-User-Management">
                             <li class="sidenav-item">
                                 <a href="icons_feather.html" class="sidenav-link">
                                     <div>Mechanics</div>
@@ -170,7 +173,6 @@
                                 </a>
                             </li>
                         </ul>
-                    </li>
                     </li>
                     <li class="sidenav-item">
                         <a href="tables_bootstrap.html" class="sidenav-link">
@@ -451,7 +453,7 @@
     <script src="{% static 'js/pace.js' %}"></script>
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'lib/popper/popper.js' %}"></script>
-    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <script src="{% static 'js/bootstraps.js' %}"></script>
     <script src="{% static 'js/sidenav.js' %}"></script>
     <script src="{% static 'js/layout-helpers.js' %}"></script>
     <script src="{% static 'js/material-ripple.js' %}"></script>
@@ -467,6 +469,8 @@
 
     <!-- Demo -->
     <script src="{% static 'js/pages/dashboards_index.js' %}"></script>
+    <script src="{% static 'js/additional.js' %}"></script>
+    
 </body>
 
 </html>

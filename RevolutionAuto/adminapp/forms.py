@@ -1,6 +1,6 @@
 from django import forms
 from userapp.models import CustomUser
-from adminapp.models import CarBrand
+from adminapp.models import CarBrand, CarYear
 
 
 
@@ -34,7 +34,14 @@ class AdminRegisterForm(forms.ModelForm):
 
 class Addbrandform(forms.ModelForm):
 
-
     class Meta:
         model =  CarBrand
         fields = ['brand', 'description']
+
+
+
+class Addyearform(forms.ModelForm):
+
+    class Meta:
+        model =  CarYear
+        fields = ['car_id', 'year',]

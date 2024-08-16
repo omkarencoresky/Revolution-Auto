@@ -1,15 +1,14 @@
 import json
 import schemas 
 import fastjsonschema
-import schemas.registration_schema
-
 from django.conf import settings
-from django.urls import reverse
+import schemas.registration_schema
 from django.contrib import messages
 from django.http import JsonResponse
-from .forms import AdminRegisterForm, Addbrandform
+from adminapp.utils.utils import brand_pagination
 from django.shortcuts import render, redirect
 from django.http import HttpRequest, HttpResponse
+from .forms import AdminRegisterForm, Addbrandform
 from schemas.registration_schema import validate_registration
 
 curl = settings.CURRENT_URL
@@ -80,5 +79,19 @@ def registration(request: HttpRequest) -> HttpResponse:
     
 
 def dashboard(request):
-    return render(request, 'dashboard.html', {'curl':admincurl})
+    """This method is use to render the dashboard page for Admin and show other different options.
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use for render the Admin dashboard page.
+    """
+    page_obj = brand_pagination(request)
+
+    context = {
+        'page_obj': page_obj,
+        'curl':admincurl
+    }
+    return render(request, 'dashboard.html', context)
 
