@@ -7,12 +7,12 @@
                 <h4 class="modal-title">Edit Car Brand Details</h4>   
             </div>
             <div class="modal-body">
-               <form  action="{{curl}}/editbrand/{{brands.id}}/" method="post"  enctype="multipart/form-data">
+               <form  action="{{curl}}/editbrand/{{brand.id}}/" method="post"  enctype="multipart/form-data">
                         {% csrf_token %}
                     <div class="form-group brand">
                         <label class="control-label col-sm-3" for="brand">Make Name:</label>
                         <div class="col-sm-6 mw-100">
-                            <input type="text" class="form-control" name="brand" placeholder="Brand"  value="{{brands.brand}}">
+                            <input type="text" class="form-control" name="brand" placeholder="Brand"  value="{{brand.brand}}">
                             <span id="brand"></span>
                         </div>
                     </div>
@@ -20,7 +20,7 @@
                     <div class="form-group description">
                         <label class="control-label col-sm-3" for="description">Description :</label>
                         <div class="col-sm-6 mw-100">
-                            <textarea class="form-control" name="description" placeholder="Description"  >{{brands.description}}</textarea>
+                            <textarea class="form-control" name="description" placeholder="Description"  >{{brand.description}}</textarea>
                             <span id="description"></span>
                         </div>
                     </div>
@@ -28,9 +28,15 @@
                     <div class="form-group description">
                         <label class="control-label col-sm-3" for="description">Status :</label>
                         <div class="col-sm-6 mw-100">
-                            <!-- <textarea class="form-control" name="description" placeholder="Description"  >{{brands.status}}</textarea> -->
                             <select class="form-control" id="exampleSelect" name="status">
-                                <option value="{{brands.status}}" disabled selected>Active</option>
+                                <option value="{{ brand.status }}">
+                                    {% if brand.status == 1 %}
+                                        Active
+                                    {% elif brand.status == 2 %}
+                                        In-active
+                                    {% endif %}
+                                </option>
+                                <option value="1">Active</option>
                                 <option value="2">In-active</option>
                             </select>
                             <span id="Status"></span>   

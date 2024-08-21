@@ -62,15 +62,9 @@
         <div class="layout-inner">
             <!-- [ Layout sidenav ] Start -->
             <div id="layout-sidenav" class="layout-sidenav sidenav sidenav-vertical bg-dark">
-                <!-- Brand demo (see {% static 'css/demo/demo.css' %}' %}) -->
+                <!-- Brand demo (see {% static 'css/demo/demo.css' %}) -->
                 <div class="app-brand demo">
-                    <span class="app-brand-logo demo">
-                        <img src="{% static 'img/logo.png' %}" alt="Brand Logo" class="img-fluid">
-                    </span>
-                    <a href="index.html" class="app-brand-text demo sidenav-text font-weight-normal ml-2">Bhumlu</a>
-                    <a href="javascript:" class="layout-sidenav-toggle sidenav-link text-large ml-auto">
-                        <i class="ion ion-md-menu align-middle"></i>
-                    </a>
+                    <h2 class="m-0" style="color: #e6e4e4; font-size: 24px;"><i class="fa fa-car me-3"></i>  Revolution Auto</h2>
                 </div>
                 <div class="sidenav-divider mt-0"></div>
 
@@ -78,141 +72,135 @@
                 <ul class="sidenav-inner py-1">
 
                     <!-- Dashboards -->
-                    <li class="sidenav-item">
-                        <a href="index.html" class="sidenav-link">
+                    <li class="sidenav-item active">
+                        <a href="{{curl}}/dashboard/" class="sidenav-link">
                             <i class="sidenav-icon feather icon-home"></i>
                             <div>Dashboards</div>
-                            <div class="pl-1 ml-auto">
+                            <!-- <div class="pl-1 ml-auto">
                                 <div class="badge badge-danger">Hot</div>
-                            </div>
+                            </div> -->
                         </a>
                     </li>
 
                     <!-- Layouts -->
-                    <li class="sidenav-divider mb-1"></li>
-                    <li class="sidenav-header small font-weight-semibold">UI Components</li>
+                    <!-- <li class="sidenav-header small font-weight-semibold">UI Components</li> -->
                     <li class="sidenav-item">
                         <a href="typography.html" class="sidenav-link">
-                            <i class="sidenav-icon feather icon-type"></i>
-                            <div>Typography</div>
+                            <i class="sidenav-icon fa fa-calendar-check"></i>
+                            <div>Service Bookings</div>
                         </a>
                     </li>
 
                     <!-- UI elements -->
-                    <li class="sidenav-item active open">
-                        <a href="javascript:" class="sidenav-link sidenav-toggle">
-                            <i class="sidenav-icon feather icon-box"></i>
-                            <div>UI components</div>
+                    <li class="sidenav-item">
+                        <a href="javascript:" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-Car-Management">
+                            <i class="sidenav-icon fa fa-car"></i>
+                            <div>Car Management</div>
                         </a>
-                        <ul class="sidenav-menu">
-                            <li class="sidenav-item active">
-                                <a href="bui_alert.html" class="sidenav-link">
-                                    <div>Car Brands</div>
+                        <ul class="sidenav-menu" id="sidenav-dropdown-menus-Car-Management">   
+                            <li class="sidenav-item">
+                                <a href="{{curl}}/carbrand/" class="sidenav-link">
+                                    <div>Car Brand</div>
                                 </a>
                             </li>
                             <li class="sidenav-item">
-                                <a href="bui_badges.html" class="sidenav-link">
-                                    <div>Badges</div>
+                                <a href="{{curl}}/caryear/" class="sidenav-link">
+                                    <div>Car Year</div>
                                 </a>
                             </li>
                             <li class="sidenav-item">
-                                <a href="bui_button.html" class="sidenav-link">
-                                    <div>Buttons</div>
+                                <a href="{{curl}}/carmodel/" class="sidenav-link">
+                                    <div>Car Model</div>
                                 </a>
                             </li>
                             <li class="sidenav-item">
-                                <a href="charts_morrisjs.html" class="sidenav-link">
-                                    <div>Charts</div>
+                                <a href="{{curl}}/cartrim/" class="sidenav-link">
+                                    <div>Cars Trims</div>
                                 </a>
                             </li>
-                            <li class="sidenav-item">
-                                <a href="bui_dropdowns.html" class="sidenav-link">
-                                    <div>Dropdowns</div>
-                                </a>
-                            </li>
-                            <li class="sidenav-item">
-                                <a href="bui_pagination.html" class="sidenav-link">
-                                    <div>Pagination and breadcrumbs</div>
-                                </a>
-                            </li>
-                            <li class="sidenav-item">
-                                <a href="bui_progress.html" class="sidenav-link">
-                                    <div>Progress bars</div>
-                                </a>
-                            </li>
-
                         </ul>
                     </li>
 
-                    <!-- Forms & Tables -->
-                    <li class="sidenav-divider mb-1"></li>
-                    <li class="sidenav-header small font-weight-semibold">Forms & Tables</li>
+                    
                     <li class="sidenav-item">
-                        <a href="javascript:" class="sidenav-link sidenav-toggle">
+                        <a href="javascript:" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-Services-Management">
                             <i class="sidenav-icon feather icon-clipboard"></i>
-                            <div>Forms</div>
+                            <div>Services Management</div>
                         </a>
-                        <ul class="sidenav-menu">
+                        <ul class="sidenav-menu" id="sidenav-dropdown-menu-Services-Management">
                             <li class="sidenav-item">
                                 <a href="forms_layouts.html" class="sidenav-link">
-                                    <div>Layouts and elements</div>
+                                    <div>Service Type</div>
                                 </a>
                             </li>
                             <li class="sidenav-item">
                                 <a href="forms_input-groups.html" class="sidenav-link">
-                                    <div>Input groups</div>
+                                    <div>Categories</div>
+                                </a>
+                            </li>
+                            <li class="sidenav-item">
+                                <a href="forms_input-groups.html" class="sidenav-link">
+                                    <div>Services</div>
+                                </a>
+                            </li>
+                            <li class="sidenav-item">
+                                <a href="forms_input-groups.html" class="sidenav-link">
+                                    <div>Sub-Services</div>
+                                </a>
+                            </li>
+                            <li class="sidenav-item">
+                                <a href="forms_input-groups.html" class="sidenav-link">
+                                    <div>Sub-Services Options</div>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="sidenav-item">
+                        <a href="javascript:" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-User-Management">
+                            <i class="sidenav-icon feather icon-users"></i>
+                            <div>User Management</div>
+                        </a>
+                        <ul class="sidenav-menu" id="sidenav-dropdown-menu-User-Management">
+                            <li class="sidenav-item">
+                                <a href="icons_feather.html" class="sidenav-link">
+                                    <div>Mechanics</div>
+                                </a>
+                            </li>
+                            <li class="sidenav-item">
+                                <a href="icons_linearicons.html" class="sidenav-link">
+                                    <div>Users</div>
+                                </a>
+                            </li>
+                            <li class="sidenav-item">
+                                <a href="icons_linearicons.html" class="sidenav-link">
+                                    <div>Admins</div>
                                 </a>
                             </li>
                         </ul>
                     </li>
                     <li class="sidenav-item">
                         <a href="tables_bootstrap.html" class="sidenav-link">
-                            <i class="sidenav-icon feather icon-grid"></i>
-                            <div>Tables</div>
+                            <i class="sidenav-icon fa fa-credit-card"></i>
+                            <div>Billings and Payments</div>
                         </a>
                     </li>
 
-                    <!--  Icons -->
-                    <li class="sidenav-divider mb-1"></li>
-                    <li class="sidenav-header small font-weight-semibold">Icons</li>
-                    <li class="sidenav-item">
-                        <a href="javascript:" class="sidenav-link sidenav-toggle">
-                            <i class="sidenav-icon feather icon-feather"></i>
-                            <div>Icons</div>
-                        </a>
-                        <ul class="sidenav-menu">
-                            <li class="sidenav-item">
-                                <a href="icons_feather.html" class="sidenav-link">
-                                    <div>Feather</div>
-                                </a>
-                            </li>
-                            <li class="sidenav-item">
-                                <a href="icons_linearicons.html" class="sidenav-link">
-                                    <div>Linearicons</div>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
-
-                    <!-- Pages -->
-                    <li class="sidenav-divider mb-1"></li>
-                    <li class="sidenav-header small font-weight-semibold">Pages</li>
                     <li class="sidenav-item">
                         <a href="pages_authentication_login-v1.html" class="sidenav-link">
-                            <i class="sidenav-icon feather icon-lock"></i>
-                            <div>Login</div>
+                            <i class="sidenav-icon fa fa-user-friends"></i>
+                            <div>Referrals</div>
                         </a>
                     </li>
                     <li class="sidenav-item">
                         <a href="pages_authentication_register-v1.html" class="sidenav-link">
-                            <i class="sidenav-icon feather icon-user"></i>
-                            <div>Signup</div>
+                            <i class="sidenav-icon fa fa-cogs"></i>
+                            <div>Settings</div>
                         </a>
                     </li>
                     <li class="sidenav-item">
                         <a href="pages_faq.html" class="sidenav-link">
-                            <i class="sidenav-icon feather icon-anchor"></i>
-                            <div>FAQ</div>
+                            <i class="sidenav-icon fa fa-bell"></i>
+                            <div>Notifications</div>
                         </a>
                     </li>
                 </ul>
@@ -528,6 +516,7 @@
 
     <!-- lib -->
     <script src="{% static 'lib/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+    <script src="{% static 'js/additional.js' %}"></script>
 </body>
 
 </html>

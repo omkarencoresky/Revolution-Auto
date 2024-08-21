@@ -11,9 +11,9 @@
                     <form  hx-encoding='multipart/form-data' hx-post="{{curl}}/addbrand/" hx-target="body">
                         {% csrf_token %}
                     <div class="form-group brand">
-                        <label class="control-label col-sm-3" for="brand">Make Name:</label>
+                        <label class="control-label col-sm-3" for="brand">Brand Name:</label>
                         <div class="col-sm-6 mw-100">
-                            <input type="text" class="form-control" name="brand" placeholder="Brand" required value="">
+                            <input type="text" class="form-control" name="brand" placeholder="Brand"  value="">
                             <span id="brand"></span>
                         </div>
                     </div>
@@ -21,7 +21,7 @@
                     <div class="form-group description">
                         <label class="control-label col-sm-3" for="description">Description :</label>
                         <div class="col-sm-6 mw-100">
-                            <textarea class="form-control" name="description" placeholder="Description" required ></textarea>
+                            <textarea class="form-control" name="description" placeholder="Description"  ></textarea>
                             <span id="description"></span>
                         </div>
                     </div>
@@ -29,7 +29,7 @@
                     <div class="form-group car_image">  
                         <label class="control-label col-sm-3" for="image_url">Upload Image :</label>
                         <div class="col-sm-6 mw-100">
-                            <input type="file" class="form-control file" name="image_url" required>
+                            <input type="file" class="form-control file" name="image_url" >
                             <span id="car_image"></span>
                         </div>
                     </div>

@@ -30,19 +30,22 @@ class CarYear(models.Model):
 
 class CarModel(models.Model):
     id = models.AutoField(primary_key=True)
+    car_id = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
     year_id = models.ForeignKey(CarYear, on_delete=models.CASCADE)
     model_name = models.CharField(max_length=50, blank=False)
     status = models.SmallIntegerField(blank=False,default=1)
     remember_token = models.CharField(max_length=100,blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
-
+    
     class Meta:
         db_table = 'car_model'
 
 
-class Car(models.Model):
+class CarTrim(models.Model):
     id = models.AutoField(primary_key=True)
+    car_id = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
+    year_id = models.ForeignKey(CarYear, on_delete=models.CASCADE)
     model_id = models.ForeignKey(CarModel, on_delete=models.CASCADE)
     car_trim_name = models.CharField(max_length=100, blank=False)
     status = models.SmallIntegerField(blank=False,default=1)
@@ -52,4 +55,4 @@ class Car(models.Model):
 
 
     class Meta:
-        db_table = 'car'
+        db_table = 'car_trim'
