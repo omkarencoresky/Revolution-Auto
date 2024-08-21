@@ -14,7 +14,7 @@
                             <label class="control-label col-sm-3" for="brand">Car Name:</label>
                             <div class="col-sm-6 mw-100">
                                 <select name="car_id" class="form-control">
-                                    <option value="{{edit_year_obj.car_id.brand}}">{{edit_year_obj.car_id.brand}}</option>
+                                    <option value="{{edit_year_obj.car_id.id}}">{{edit_year_obj.car_id.brand}}</option>
                                     {% for brand in page_obj %}
                                     <option value="{{brand.id}}">{{brand.brand}}</option>
                                     {% endfor %}
@@ -35,7 +35,14 @@
                             <label class="control-label col-sm-3" for="description">Status :</label>
                             <div class="col-sm-6 mw-100">
                                 <select class="form-control" id="exampleSelect" name="status">
-                                    <option value="{{edit_year_obj.status}}" disabled selected>Active</option>
+                                    <option value="{{ edit_year_obj.status }}">
+                                        {% if edit_year_obj.status == 1 %}
+                                            Active
+                                        {% elif edit_year_obj.status == 2 %}
+                                            In-active
+                                        {% endif %}
+                                    </option>
+                                    <option value="1">Active</option>
                                     <option value="2">In-active</option>
                                 </select>
                                 <span id="Status"></span>   
