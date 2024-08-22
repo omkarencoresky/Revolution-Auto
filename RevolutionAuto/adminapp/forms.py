@@ -24,7 +24,7 @@ class AdminRegisterForm(forms.ModelForm):
         fields = ['first_name', 'last_name', 'email', 'phone_no', 'password']
 
 
-class Addbrandform(forms.ModelForm):
+class AddBrandForm(forms.ModelForm):
     """
     A form for for adding or updating car brand.
 
@@ -42,7 +42,7 @@ class Addbrandform(forms.ModelForm):
 
 
 
-class Addyearform(forms.ModelForm):
+class AddYearForm(forms.ModelForm):
     """
     A form for adding or updating car years.
 
@@ -61,7 +61,7 @@ class Addyearform(forms.ModelForm):
         fields = ['car_id', 'year',]
 
 
-class Addmodelform(forms.ModelForm):
+class AddModelForm(forms.ModelForm):
     """
     A form for adding or updating car models.
 
@@ -78,7 +78,7 @@ class Addmodelform(forms.ModelForm):
         fields = ['car_id', 'year_id', 'model_name']
 
 
-class   Addtrimform(forms.ModelForm):
+class   AddTrimForm(forms.ModelForm):
     """
     A form for adding or updating car trims.
 
