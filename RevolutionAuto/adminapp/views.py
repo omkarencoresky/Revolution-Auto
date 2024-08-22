@@ -1,14 +1,14 @@
 import json
 import schemas 
 import fastjsonschema
-from django.conf import settings
 import schemas.registration_schema
+
+from django.conf import settings
 from django.contrib import messages
-from django.http import JsonResponse
-from adminapp.utils.utils import brand_pagination
+from .forms import AdminRegisterForm
 from django.shortcuts import render, redirect
+from adminapp.utils.utils import brand_pagination
 from django.http import HttpRequest, HttpResponse
-from .forms import AdminRegisterForm, Addbrandform
 from schemas.registration_schema import validate_registration
 
 curl = settings.CURRENT_URL
@@ -39,7 +39,7 @@ def registration(request: HttpRequest) -> HttpResponse:
     try:
         if request.method == 'GET':
             form = AdminRegisterForm()
-            return render(request, 'adminregistration.html', {'form': form, 'curl': curl}, status=200)
+            return render(request, 'admin_registration.html', {'form': form, 'curl': curl}, status=200)
         if request.method == 'POST':
             data = {
                 'first_name': request.POST.get('first_name'),
@@ -61,21 +61,21 @@ def registration(request: HttpRequest) -> HttpResponse:
                     return redirect('Home') 
                 else:
                     messages.error(request, f" This form has not a valid input")
-                return render(request, 'adminregistration.html', {'form': AdminRegisterForm()}, status=400) 
+                return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=400) 
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                 messages.error(request,schemas.registration_schema.registration_schema.
                 get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return render(request, 'adminregistration.html', {'form': AdminRegisterForm()}, status=400)
+                return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=400)
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
-                return render(request, 'adminregistration.html', {'form': AdminRegisterForm()}, status=400)
+                return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=400)
             except:
                 messages.error(request, "Internal error, Please try again")
         messages.error(request, "Invalid request method")        
-        return render(request, 'adminregistration.html', {'form': AdminRegisterForm()}, status=405)
+        return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=405)
     except:
         messages.error(request, "An unexpected error occurred. Please try again.")
-        return render(request, 'adminregistration.html', {'form': AdminRegisterForm()}, status=500)
+        return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=500)
     
 
 def dashboard(request):
@@ -93,5 +93,4 @@ def dashboard(request):
         'page_obj': page_obj,
         'curl':admincurl
     }
-    return render(request, 'dashboard.html', context)
-
+    return render(request, 'admin_dashboard.html', context)

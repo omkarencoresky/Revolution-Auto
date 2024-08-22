@@ -8,14 +8,13 @@ car_brand_schema = {
             "type": "string",
             "minLength": 3,
             "maxLength": 50,
-            "pattern": "^[a-zA-Z]+$",
-            "description": "Car brand must be 3 to 50 characters and allow only alphabets."
+            "pattern": "^[a-zA-Z ]+$",
+            "description": "Car brand must be 3 to 50 characters and allowed only alphabets."
             },
         "description": {
             "type": "string",
-            "minLength": 3,
             "maxLength": 50,
-            "pattern": "^[a-zA-Z0-9]+$",
+            "pattern": "^[a-zA-Z0-9 ]+$",
             "description": "Car description must be 3 to 50 characters and in a valid format."
             },
         "image_format": {
@@ -28,23 +27,24 @@ car_brand_schema = {
     "additionalProperties": True
 }
 
+
+
+
 # Define the schema for years
 car_year_schema = {
     "type": "object",
     "properties": {
         "car_id": {
-            "type": "integer",
-            "minLength": 1,
-            "maxLength": 50,
+            "type": "string",
             "pattern": "^\d+$",
-            "description": "Car car_id length at least between 1 to 50 and only allow the numbers."
+            "description": "Please select a car brand."
             },
         "year": {
-            "type": "integer",
+            "type": "string",
             "minLength": 4,
             "maxLength": 4,
-            "pattern": "^\d+$",
-            "description": "Car year length must be 4 and only allow the numbers."
+            "pattern": "^[0-9]{4}$",
+            "description": "Car year only allowed the 4 digits."
             },
     },
     "required": ["car_id", "year"],
@@ -57,28 +57,24 @@ car_model_schema = {
     "type": "object",
     "properties": {
         "car_id": {
-            "type": "integer",
-            "minLength": 1,
-            "maxLength": 50,
+            "type": "string",
             "pattern": "^\d+$",
-            "description": "Car car_id length at least between 1 to 50 and only allow the numbers."
+            "description":"Please select a car brand."
             },
         "year_id": {
-            "type": "integer",
-            "minLength": 1,
-            "maxLength": 50,
+            "type": "string",
             "pattern": "^\d+$",
-            "description": "Car year length at least between 1 to 50 and only allow the numbers."
+            "description": "Please select a car year."
             },
         "model_name": {
             "type": "string",
-            "minLength": 3,
+            "minLength": 2,
             "maxLength": 50,
-            "pattern": "^[a-zA-Z0-9]*$",
-            "description": "Car model name must be 3 to 50 characters."
+            "pattern": "^[a-zA-Z0-9 ]*$",
+            "description": "Car model name length between 2-50 characters and special character mot allowed."
             },
     },
-    "required": ["car_id", "year", "model_name"],
+    "required": ["car_id", "year_id", "model_name"],
     "additionalProperties": True
 }
 
@@ -88,41 +84,35 @@ car_trim_schema = {
     "type": "object",
     "properties": {
         "car_id": {
-            "type": "integer",
-            "minLength": 1,
-            "maxLength": 50,
+            "type": "string",
             "pattern": "^\d+$",
-            "description": "Car car_id length at least between 1 to 50 and only allow the numbers."
+            "description": "Please select a car brand."
             },
         "year_id": {
-            "type": "integer",
-            "minLength": 1,
-            "maxLength": 50,
+            "type": "string",
             "pattern": "^\d+$",
-            "description": "Car year length at least between 1 to 50 and only allow the numbers."
+            "description": "Please select a car year."
             },
         "model_id": {
             "type": "string",
-            "minLength": 1,
-            "maxLength": 50,
             "pattern": "^\d+$",
-            "description": "Car model length at least between 1 to 50 and only allow the numbers."
+            "description": "Please select a car model."
             },
         "car_trim_name": {
             "type": "string",
             "minLength": 3,
             "maxLength": 50,
-            # "pattern": "^[a-zA-Z0-9]*$",
-            "description": "Car model name length between 3 to 50 characters."
+            "pattern": "^[a-zA-Z0-9 ]+$",
+            "description": "Car Trim name length between 3 to 50 and special character mot allowed."
             },
     },
-    "required": ["car_id", "year", "model_id", "car_trim_name"],
+    "required": ["car_id", "year_id", "model_id", "car_trim_name"],
     "additionalProperties": True
 }
 
 
 # Compile the schemas
-validate_car_brand = fastjsonschema.compile(car_brand_schema)
-validate_car_year = fastjsonschema.compile(car_year_schema)
-validate_car_model = fastjsonschema.compile(car_model_schema)
-validate_car_trim = fastjsonschema.compile(car_trim_schema)
+validate_car_brand_details = fastjsonschema.compile(car_brand_schema)
+validate_car_year_details = fastjsonschema.compile(car_year_schema)
+validate_car_model_details = fastjsonschema.compile(car_model_schema)
+validate_car_trim_details = fastjsonschema.compile(car_trim_schema)

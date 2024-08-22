@@ -21,10 +21,12 @@ from django.urls import path
 
 
 urlpatterns = [
+    
+    # Admin urls
     path('dashboard/', views.dashboard),
     path('registration/', views.registration),
 
-    #Car Brand urls
+    # Car Brand urls
     path('addbrand/', carviews.add_brand),
     path('showaddbrand/', carviews.show_add_brand),
     path('carbrand/', carviews.car_brand, name='carbrand'),
@@ -38,14 +40,14 @@ urlpatterns = [
     path('showaddyear/', carviews.show_add_year, name='showaddyear'),
     path('deleteyear/<int:id>',carviews.delete_year, name='deleteYear'),
 
-    #Car model urls
+    # Car model urls
     path('carmodel/', carviews.car_model, name='carmodel'),
     path('addmodel/', carviews.add_model, name='addmodel'),
     path('editmodel/<int:id>/', carviews.edit_model, name='editmodel'),
     path('showaddmodel/', carviews.show_add_model, name='showaddmodel'),
     path('deletemodel/<int:id>/', carviews.delete_model, name='deletemodel'),
 
-    #Car Trim url
+    # Car Trim url
     path('cartrim/', carviews.car_trim, name='cartrim'),
     path('addtrim/', carviews.add_trim, name='addtrim'),
     path('edittrim/<int:id>/', carviews.edit_trim, name='edittrim'),

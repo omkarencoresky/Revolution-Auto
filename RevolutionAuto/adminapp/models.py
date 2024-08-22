@@ -18,7 +18,7 @@ class CarBrand(models.Model):
 
 class CarYear(models.Model):
     id = models.AutoField(primary_key=True)
-    year = models.CharField(max_length=4,blank=False)
+    year = models.CharField(max_length=6,blank=False)
     car_id = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
     status = models.SmallIntegerField(blank=False, default=1)
     remember_token = models.CharField(max_length=100,blank=True)
