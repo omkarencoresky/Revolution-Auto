@@ -75,6 +75,16 @@
                             </a>
                         </li>
 
+                        <li class="sidenav-item">
+                            <a href="{% url 'get_all_locations' %}" class="sidenav-link">
+                                <i class="sidenav-icon fa fa-map-marker"></i>
+                                <div>Locations</div>
+                                <!-- <div class="pl-1 ml-auto">
+                                    <div class="badge badge-danger">Hot</div>
+                                </div> -->
+                            </a>
+                        </li>
+
                         <!-- Layouts -->
                         <!-- <li class="sidenav-header small font-weight-semibold">UI Components</li> -->
                         <li class="sidenav-item">
@@ -92,22 +102,22 @@
                             </a>
                             <ul class="sidenav-menu" id="sidenav-dropdown-menus-Car-Management">   
                                 <li class="sidenav-item">
-                                    <a href="{{curl}}carbrand/" class="sidenav-link">
+                                    <a href="{% url 'all_car_brands' %}" class="sidenav-link">
                                         <div>Car Brand</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="{{curl}}caryear/" class="sidenav-link">
+                                    <a href="{% url 'all_car_years' %}" class="sidenav-link">
                                         <div>Car Year</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="{{curl}}carmodel/" class="sidenav-link">
+                                    <a href="{% url 'all_car_models' %}" class="sidenav-link">
                                         <div>Car Model</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="{{curl}}cartrim/" class="sidenav-link">
+                                    <a href="{% url 'all_car_trims' %}" class="sidenav-link">
                                         <div>Cars Trims</div>
                                     </a>
                                 </li>

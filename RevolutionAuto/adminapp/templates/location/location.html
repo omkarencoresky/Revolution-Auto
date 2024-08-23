@@ -1,26 +1,26 @@
 {% extends 'adminmaster.html' %}
 {% load static %}
-{% block title %}Car Brand | Revolution Auto{% endblock %}
+
+
+{% block title %}Locations | Revolution Auto{% endblock %}
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
-    <h4 class="font-weight-bold py-3 mb-0">CAR YEARS</h4>
+    <h4 class="font-weight-bold py-3 mb-0">LOCATIONS</h4>
     <!-- <div class="text-muted small mt-0 mb-4 d-block breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item" >Basic UI</li>
-            <li class="breadcrumb-item active" >Alerts</li> 
+            <li class="breadcrumb-item" >Car Brand</li>
             <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-                hx-get="{{curl}}showaddyear/" hx-swap="beforeend" hx-target="body">Add year</button>
+                hx-get="{{ curl}}showaddbrand/" hx-swap="beforeend" hx-target="body">Add Brand</button>
         </ol>
     </div> -->
-
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{curl}}dashboard/"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{% url 'all_car_years' %}">Car Year</a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'get_all_locations' %}">Locations</a></li>
         </ol>
         <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-            hx-get="{% url 'add_year_page' %}" hx-swap="beforeend" hx-target="body">Add Year</button>
+            hx-get="{% url 'display_location_page' %}" hx-swap="beforeend" hx-target="body">Add Location</button>
     </div>
     <div>
         {% if messages %}
@@ -51,36 +51,43 @@
 
                     <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
                         <marquee behavior="scroll" direction="left">
-                            <caption class="caption-top fs-4 text-dark mb-2">All Available Brand</caption>
+                            <caption class="caption-top fs-4 text-dark mb-2">All Available Locations</caption>
                         </marquee>
                         <thead class="table-light">
                             <tr>
                                 <th scope="col">SR.No</th>
-                                <th scope="col">Brand Name</th>
-                                <th scope="col">Year</th>
-                                <!-- <th scope="col">Image</th> -->
-                                <th scope="col">Status</th>
+                                <th scope="col">locations Name</th>
+                                <th scope="col">Country Code</th>
+                                <th scope="col">Service Availability</th>
+                                <th scope="col">Store Status</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody hx-target="body" hx-swap="outerHTML swap:1s">
-                            {% for data in page_obj %}
+                            {% for location in page_obj %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ data.car_id.brand }}</td>
-                                <td>{{ data.year }}</td>
+                                <td>{{ location.location_name }}</td>
+                                <td>{{ location.country_code }}</td>
 
-                                {% if data.status == 1 %}
-                                <td>Active</td>
+                                {% if location.service_availability %}
+                                    <td>Yes</td>
                                 {% else %}
-                                <td>In-active</td>
+                                    <td>No</td>
                                 {% endif %}
+                                
+                                {% if location.status == 1 %}
+                                    <td>Active</td>
+                                {% else %}
+                                    <td>In-active</td>
+                                {% endif %}
+
                                 <td>
-                                    <button class="btn" hx-delete="{% url 'delete_car_year' data.id %}"
+                                    <button class="btn" hx-delete="{% url 'delete_location' location.id %}"
                                         hx-confirm="Are you sure you want to delete this brand?">
                                         <i class="fa fa-trash"></i>
                                     </button>
-                                    <button class="btn" hx-get="{% url 'update_car_year' data.id %}" hx-swap="beforeend"
+                                    <button class="btn" hx-get="{% url 'update_location' id=location.id %}" hx-swap="beforeend"
                                         hx-target="body" hx-swap="innerHTML">
                                         <i class="fa fa-edit"></i>
                                     </button>
