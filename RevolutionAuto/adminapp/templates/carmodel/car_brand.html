@@ -4,7 +4,7 @@
 {% block title %}Car Brand | Revolution Auto{% endblock %}
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
-    <h4 class="font-weight-bold py-3 mb-0">Car Brands</h4>
+    <h4 class="font-weight-bold py-3 mb-0">CAR BRANDS</h4>
     <!-- <div class="text-muted small mt-0 mb-4 d-block breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#"><i class="feather icon-home"></i></a></li>
@@ -16,10 +16,10 @@
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{curl}}dashboard/"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item"> <a href="{{curl}}carbrand/">Car Brand</a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'all_car_brands' %}">Car Brand</a></li>
         </ol>
         <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-            hx-get="{{ curl}}showaddbrand/" hx-swap="beforeend" hx-target="body">Add Brand</button>
+            hx-get="{{ curl}}add/brand/page/" hx-swap="beforeend" hx-target="body">Add Brand</button>
     </div>
     <div>
         {% if messages %}
@@ -33,10 +33,10 @@
     <div id="myForm" style="display: none;">
         <div class="vw-100 vh-100 position-fixed" style="z-index: 9999; top: 0; left: 0;">
             <div class="vw-100 vh-100 position-absolute" style="background-color: rgb(0,0,0,0.5); z-index: 1;"
-                hx-get="{{curl}}carbrand/" id="test" hx-target="body"></div>
+                hx-get="{% url 'all_car_brands' %}" id="test" hx-target="body"></div>
             <div class="modal-content mx-auto" style="max-width: 500px; z-index: 2;">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" hx-get="{{curl}}carbrand/"
+                    <button type="button" class="close" data-dismiss="modal" hx-get="{% url 'all_car_brands' %}"
                         hx-target="body" style="outline: none;">×</button>
                 </div>
             </div>
@@ -78,11 +78,11 @@
                                 <td>In-active</td>
                                 {% endif %}
                                 <td>
-                                    <button class="btn" hx-delete="{% url 'deleteBrand' brand.id %}"
+                                    <button class="btn" hx-delete="{% url 'delete_car_brand' brand.id %}"
                                         hx-confirm="Are you sure you want to delete this brand?">
                                         <i class="fa fa-trash"></i>
                                     </button>
-                                    <button class="btn" hx-get="{% url 'editbrand' brand.id %}" hx-swap="beforeend"
+                                    <button class="btn" hx-get="{% url 'update_car_brand' brand.id %}" hx-swap="beforeend"
                                         hx-target="body" hx-swap="innerHTML">
                                         <i class="fa fa-edit"></i>
                                     </button>

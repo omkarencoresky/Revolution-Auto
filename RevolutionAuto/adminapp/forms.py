@@ -1,6 +1,6 @@
 from django import forms
 from userapp.models import CustomUser
-from adminapp.models import CarBrand, CarYear, CarModel, CarTrim
+from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Locations
 
 
 
@@ -78,7 +78,7 @@ class AddModelForm(forms.ModelForm):
         fields = ['car_id', 'year_id', 'model_name']
 
 
-class   AddTrimForm(forms.ModelForm):
+class AddTrimForm(forms.ModelForm):
     """
     A form for adding or updating car trims.
 
@@ -94,3 +94,10 @@ class   AddTrimForm(forms.ModelForm):
     class Meta:
         model =  CarTrim
         fields = ['car_trim_name', 'model_id', 'car_id', 'year_id',]
+
+
+class ADDLocationForm(forms.ModelForm):
+
+    class Meta:
+        model = Locations
+        fields =['location_name', 'country_code', 'service_availability']

@@ -1,4 +1,4 @@
-from adminapp.models import CarBrand, CarYear, CarModel, CarTrim
+from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Locations
 from django.core.paginator import Paginator
 
 def brand_pagination(request):
@@ -15,9 +15,9 @@ def year_pagination(request):
     caryear = CarYear.objects.all().order_by('id')
     
     # Pagination setup
-    paginator = Paginator(caryear, 10)  # Show 10 brands per page
-    page_number = request.GET.get('page')  # Get the page number from the request
-    page_obj = paginator.get_page(page_number)  # Get the page object for the requested page
+    paginator = Paginator(caryear, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return page_obj
 
 
@@ -25,9 +25,9 @@ def model_pagination(request):
     caryear = CarModel.objects.all().order_by('id')
     
     # Pagination setup
-    paginator = Paginator(caryear, 10)  # Show 10 brands per page
-    page_number = request.GET.get('page')  # Get the page number from the request
-    page_obj = paginator.get_page(page_number)  # Get the page object for the requested page
+    paginator = Paginator(caryear, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return page_obj
 
 
@@ -35,7 +35,16 @@ def trim_pagination(request):
     caryear = CarTrim.objects.all().order_by('id')
     
     # Pagination setup
-    paginator = Paginator(caryear, 10)  # Show 10 brands per page
-    page_number = request.GET.get('page')  # Get the page number from the request
-    page_obj = paginator.get_page(page_number)  # Get the page object for the requested page
+    paginator = Paginator(caryear, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj
+
+def locations_pagination(request):
+    Location = Locations.objects.all().order_by('id')
+    
+    # Pagination setup
+    paginator = Paginator(Location, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     return page_obj

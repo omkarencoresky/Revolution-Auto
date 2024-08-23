@@ -22,7 +22,7 @@ media_path = f'{settings.MEDIA_URL}'
 
 # Function for the brand model
 
-def car_brand(request):
+def all_car_brands(request):
     """This method is use to render the main page for car brand and show the brand's list
 
     Args:
@@ -38,13 +38,12 @@ def car_brand(request):
             'page_obj': page_obj,
             'curl':admincurl
         }
-
         return render(request, 'carmodel/car_brand.html', context)
     except Exception as e:
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def add_brand(request):
+def add_car_brand(request):
     """This Method is allow to insert the another one brand of car itno the database. 
 
     Args:
@@ -99,7 +98,6 @@ def add_brand(request):
                     form.save()
 
                     page_obj = brand_pagination(request)
-                    count=1
 
                     context = {
                         'count':count,
@@ -111,25 +109,25 @@ def add_brand(request):
                 
                 else:
                     messages.error(request, 'Invalid inputs in this form, Try again')
-                    return redirect ( 'carbrand') 
+                    return redirect ( 'all_car_brands') 
                 
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                 messages.error(request,schemas.car_management_schemas.car_brand_schema.
                 get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect ( 'carbrand')
+                return redirect ( 'all_car_brands')
             
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
-                return redirect ( 'carbrand')
+                return redirect ( 'all_car_brands')
             
             except Exception as e:
                 messages.error(request, f"Invalid input of this field {e}" )
-                return redirect ( 'carbrand')
+                return redirect ( 'all_car_brands')
         
     except Exception as e:
-        return render (request, 'carmodel/car_brand.html', context)
+        return redirect ( 'all_car_brands') 
 
-def show_add_brand(request):
+def display_add_brand(request):
     """This Method is allow to show the add brand page withe help of htmx request. 
 
     Args:
@@ -148,7 +146,7 @@ def show_add_brand(request):
         return render(request, 'admin_dashboard.html')
 
 @csrf_exempt
-def delete_brand(request, id):
+def delete_car_brand(request, id):
     """This method is allow to Delete brand record with the confirmation popup
 
     Args:
@@ -187,7 +185,7 @@ def delete_brand(request, id):
         return render(request, 'carmodel/car_brand.html', context, status=500) 
 
 @csrf_exempt 
-def edit_brand(request, id):
+def update_car_brand(request, id):
     """
     Updates the details of a car brand based on the provided form data.
     
@@ -201,13 +199,12 @@ def edit_brand(request, id):
     """
     try:
         if request.method == 'GET':
-                brand = CarBrand.objects.get(id=id)
-                context = {
-                    'brand': brand,
-                    'curl': admincurl,
-                    'page_obj': brand_pagination(request),
-                }
-                return render(request, 'carmodel/brand_edit.html', context)
+            brand = CarBrand.objects.get(id=id)
+            context = {
+                'brand': brand,
+                'curl': admincurl,
+            }
+            return render(request, 'carmodel/brand_edit.html', context)
 
         if request.method == 'POST':
 
@@ -231,7 +228,6 @@ def edit_brand(request, id):
                     'description':request.POST.get('description'),
                 }
                 car_management_schemas.validate_car_brand_details(data)
-                brand = CarBrand.objects.get(id=id)
 
                 brand.brand = request.POST.get('brand', brand.brand)
                 brand.status = request.POST.get('status', brand.status)
@@ -254,28 +250,28 @@ def edit_brand(request, id):
 
                 brand.save()
                 messages.success(request, 'Updated successfully!')
-                return redirect('carbrand')
+                return redirect('all_car_brands')
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                     messages.error(request,schemas.car_management_schemas.car_brand_schema.
                     get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                    return redirect('carbrand')
+                    return redirect('all_car_brands')
             
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
-                return redirect('carbrand')
+                return redirect('all_car_brands')
             
             except ObjectDoesNotExist:
                 messages.error(request, "Brand not found.")
-                return redirect('carbrand')
+                return redirect('all_car_brands')
             
     except Exception as e:
         # messages.error(request, f"Error: {e}")
-        return redirect('carbrand')
+        return redirect('all_car_brands')
 
 
 
 
-def car_year(request):
+def all_car_years(request):
     """This method is use to render the main page for car year and show the all saved year's list.
 
     Args:
@@ -297,7 +293,7 @@ def car_year(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def show_add_year(request):
+def display_add_year(request):
     """This Method is allow to show the add year page with help of htmx request. 
 
     Args:
@@ -318,7 +314,7 @@ def show_add_year(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def add_year(request):
+def add_car_year(request):
     """This Method is allow to insert the another year of car itno the database. 
 
     Args:
@@ -365,26 +361,26 @@ def add_year(request):
                 
                 else:
                     messages.error(request, 'Invalid request, Try again')
-                    return redirect('caryear')
+                    return redirect('all_car_years')
             
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                 messages.error(request,schemas.car_management_schemas.car_year_schema.
                 get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect('caryear')
+                return redirect('all_car_years')
             
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
-                return redirect('caryear')
+                return redirect('all_car_years')
                 
             except Exception as e:
                 messages.error(request, f"{e}")
-                return redirect('caryear')
+                return redirect('all_car_years')
         
     except Exception as e:
         # messages.error(request, f"{e}")
-        return redirect('caryear')
+        return redirect('all_car_years')
 
-def edit_year(request, id):
+def update_car_year(request, id):
     """
     Updates the details of a car year based on the provided form data. It then attempts to update the brand's details using the data 
     submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car year listing page.
@@ -440,27 +436,27 @@ def edit_year(request, id):
             year.save()
 
             messages.success(request, 'Updated successfully!')
-            return redirect('caryear')
+            return redirect('all_car_years')
         
         else:
             messages.error(request, 'Invalid inputs, try again')
-            return redirect('caryear')
+            return redirect('all_car_years')
 
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.car_management_schemas.car_year_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-        return redirect('caryear')
+        return redirect('all_car_years')
 
     except json.JSONDecodeError:
         messages.error(request, f"{e}")
-        return redirect('caryear')
+        return redirect('all_car_years')
 
     except Exception as e:
         messages.error(request, f"{e}")
-        return redirect('caryear')
+        return redirect('all_car_years')
         
 @csrf_exempt
-def delete_year(request, id):
+def delete_car_year(request, id):
     """This method is allow to Delete year record with the confirmation popup
 
     Args:
@@ -496,7 +492,7 @@ def delete_year(request, id):
 
 # Function for the Car Models model
 
-def car_model(request):
+def all_car_models(request):
     """This method is use to render the main page for car model and show the all saved model's list.
 
     Args:
@@ -517,7 +513,7 @@ def car_model(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def show_add_model(request):
+def display_add_model(request):
     """This Method is allow to show the add model page with help of htmx request. 
 
     Args:
@@ -540,7 +536,7 @@ def show_add_model(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def add_model(request):
+def add_car_model(request):
     """This Method is allow to insert the another model of car itno the database. 
 
     Args:
@@ -594,22 +590,22 @@ def add_model(request):
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                 messages.error(request,schemas.car_management_schemas.car_model_schema.
                 get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect('carmodel')
+                return redirect('all_car_models')
 
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
-                return redirect('carmodel')
+                return redirect('all_car_models')
                 
             except Exception as e:
                 messages.error(request, f"{e}")
-                return redirect('carmodel')
+                return redirect('all_car_models')
         
     except Exception as e:
         messages.error(request, f"{e}")
-        return redirect('carmodel')
+        return redirect('all_car_models')
     
 @csrf_exempt
-def delete_model(request, id):
+def delete_car_model(request, id):
     """This method is allow to Delete model record with the confirmation popup
 
     Args:
@@ -642,7 +638,7 @@ def delete_model(request, id):
         return render(request, 'carmodel/car_model.html', context, status=500)
     
 @csrf_exempt
-def edit_model(request, id):
+def update_car_model(request, id):
     """
     Updates the details of a car model based on the provided form data. It then attempts to update the model's details using the data 
     submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car model listing page.
@@ -709,29 +705,29 @@ def edit_model(request, id):
             model.save()
 
             messages.success(request, 'Updated successfully!')
-            return redirect('carmodel')
+            return redirect('all_car_models')
         
         else:
             messages.error(request, 'Invalid inputs, try again')
-            return redirect('carmodel')
+            return redirect('all_car_models')
         
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.car_management_schemas.car_model_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-        return redirect('carmodel')
+        return redirect('all_car_models')
 
     except json.JSONDecodeError:
         messages.error(request, f"{e}")
-        return redirect('carmodel')
+        return redirect('all_car_models')
 
     except Exception as e:
         messages.error(request, f"{e}")
-        return redirect('carmodel')
+        return redirect('all_car_models')
 
 
 
 # Function for the Car Car model
-def car_trim(request):
+def all_car_trims(request):
     """This method is use to render the main page for car trim and show the all saved trim's list.
 
     Args:
@@ -740,22 +736,22 @@ def car_trim(request):
     Returns:
         Httprequest: This method is use for render the car trim page.
     """
-    try:
-        page_obj = trim_pagination(request)
-        brand_obj = brand_pagination(request)
-        year_obj = year_pagination(request)
-        context ={
-            'curl':admincurl,
-            'page_obj':page_obj,
-            'brand_obj':brand_obj,
-            'year_obj':year_obj
-        }
-        return render(request, 'carmodel/car_trim.html', context)
-    except Exception as e:
-        messages.error(request,f"{e}")
-        return render(request, 'admin_dashboard.html')
+    # try:
+    page_obj = trim_pagination(request)
+    brand_obj = brand_pagination(request)
+    year_obj = year_pagination(request)
+    context ={
+        'curl':admincurl,
+        'page_obj':page_obj,
+        'brand_obj':brand_obj,
+        'year_obj':year_obj
+    }
+    return render(request, 'carmodel/car_trim.html', context)
+    # except Exception as e:
+    #     messages.error(request,f"{e}")
+    #     return render(request, 'admin_dashboard.html')
 
-def show_add_trim(request):
+def display_add_trim(request):
     """This Method is allow to show the add trim page with help of htmx request. 
 
     Args:
@@ -780,7 +776,7 @@ def show_add_trim(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def add_trim(request):
+def add_car_trim(request):
     """This Method is allow to insert the another trim of car itno the database. 
 
     Args:
@@ -836,22 +832,22 @@ def add_trim(request):
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                 messages.error(request,schemas.car_management_schemas.car_trim_schema.
                 get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect('cartrim')
+                return redirect('all_car_trims')
 
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
-                return redirect('cartrim')
+                return redirect('all_car_trims')
                 
             except Exception as e:
                 messages.error(request, f"{e}")
-                return render (request, 'carmodel/car_trim.html', context)
+                return redirect('all_car_trims')
         
     except Exception as e:
         messages.error(request, f"{e}")
-    return render (request, 'carmodel/car_trim.html',context)
+    return redirect('all_car_trims')
 
 @csrf_exempt
-def delete_trim(request, id):
+def delete_car_trim(request, id):
     """This method is allow to Delete trim record with the confirmation popup
 
     Args:
@@ -883,7 +879,7 @@ def delete_trim(request, id):
         return render(request, 'carmodel/car_trim.html', context, status=500)
         
 @csrf_exempt
-def edit_trim(request, id):
+def update_car_trim(request, id):
     """
     Updates the details of a car trim based on the provided form data. It then attempts to update the trim's details using the data 
     submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car trim listing page.
@@ -956,21 +952,21 @@ def edit_trim(request, id):
             trim.save()
 
             messages.success(request, 'Updated successfully!')
-            return redirect('cartrim')
+            return redirect('all_car_trims')
         
         else:
             messages.error(request, 'Invalid inputs, try again')
-            return redirect('cartrim')
+            return redirect('all_car_trims')
         
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.car_management_schemas.car_trim_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-        return redirect('cartrim')
+        return redirect('all_car_trims')
 
     except json.JSONDecodeError:
         messages.error(request, f"{e}")
-        return redirect('cartrim')
+        return redirect('all_car_trims')
 
     except Exception as e:
         messages.error(request, f"{e}")
-        return redirect('cartrim')
+        return redirect('all_car_trims')

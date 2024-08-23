@@ -56,3 +56,18 @@ class CarTrim(models.Model):
 
     class Meta:
         db_table = 'car_trim'
+
+
+class Locations(models.Model):
+    id = models.AutoField(primary_key=True)
+    location_name = models.CharField(max_length=150, blank=False)
+    country_code = models.CharField(max_length=50, blank=False)
+    service_availability = models.BooleanField(default=True, blank=False)
+    status = models.SmallIntegerField(default=1, blank=False)
+    remember_token = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+    class Meta:
+        db_table = 'location'

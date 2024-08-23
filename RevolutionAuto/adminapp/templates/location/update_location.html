@@ -1,0 +1,68 @@
+<div id="myForm">
+    <div class="vw-100 vh-100 position-fixed"  style="z-index: 99999; top: 0; left: 0;" > 
+        <div class="vw-100 vh-100 position-absolute"  style="background-color: rgb(0,0,0,0.5); z-index: 2; " hx-get="{% url 'get_all_locations' %}" hx-target="body"></div> 
+        <div class="modal-content mx-auto" style="max-width: 500px; z-index: 2;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" hx-get="{% url 'get_all_locations' %}" hx-target="body" style="outline: none;">×</button>
+                <h4 class="modal-title">Add Location</h4>   
+            </div>
+            <div class="modal-body">
+                <form  hx-encoding='multipart/form-data' hx-post="{% url 'update_location' %}" hx-target="body">
+                        {% csrf_token %}
+                    <div class="form-group location_name">
+                        <label class="control-label col-sm-3" for="location_name">Location Name:</label>
+                        <div class="col-sm-6 mw-100">
+                            <input type="text" class="form-control" name="location_name" value="{{location.location_name}}"  value="">
+                            <span id="location_name"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group country_code">
+                        <label class="control-label col-sm-3" for="country_code">Country Code :</label>
+                        <div class="col-sm-6 mw-100">
+                            <input class="form-control" name="country_code" value="{{location.country_code}}">
+                            <span id="country_code"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group service_availability">  
+                        <label class="control-label col-sm-3" for="service_availability">Service Availability :</label>
+                        <div class="col-sm-6 mw-100">
+                            <input class="form-control" name="service_availability" value="{{location.service_availability}}">
+                            <span id="service_availability"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group Status">
+                        <label class="control-label col-sm-3" for="status">Status :</label>
+                        <div class="col-sm-6 mw-100">
+                            <select class="form-control" id="exampleSelect" name="status">
+                                <option value="{{ location.status }}">
+                                    {% if location.status == 1 %}
+                                        Active
+                                    {% elif location.status == 2 %}
+                                        In-active
+                                    {% endif %}
+                                </option>
+                                <option value="1">Active</option>
+                                <option value="2">In-active</option>
+                            </select>
+                            <span id="Status"></span>   
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <div class="row w-100">
+                            <div class="w-100 modal_btn d-flex justify-content-around">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal" hx-get="{% url 'get_all_locations' %}" hx-target="body">Close</button> 
+                                <button type="submit" class="btn btn-primary" >Submit</button>
+                            </div>
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner" style="display: none;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
