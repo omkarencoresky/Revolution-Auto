@@ -1,6 +1,7 @@
 from django import forms
 from userapp.models import CustomUser
-from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Locations
+from django_ckeditor_5.widgets import CKEditor5Widget
+from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services
 
 
 
@@ -39,7 +40,6 @@ class AddBrandForm(forms.ModelForm):
     class Meta:
         model =  CarBrand
         fields = ['brand', 'description']
-
 
 
 class AddYearForm(forms.ModelForm):
@@ -96,8 +96,32 @@ class AddTrimForm(forms.ModelForm):
         fields = ['car_trim_name', 'model_id', 'car_id', 'year_id',]
 
 
-class ADDLocationForm(forms.ModelForm):
+class AddLocationForm(forms.ModelForm):
 
     class Meta:
-        model = Locations
+        model = Location
         fields =['location_name', 'country_code', 'service_availability']
+
+
+class AddServiceTypeForm(forms.ModelForm):
+
+    class Meta:
+        model = ServiceType
+        fields =['service_type_name']
+
+
+class AddServiceCategoryForm(forms.ModelForm):
+
+    class Meta:
+        model = ServiceCategory
+        fields =['service_category_name', 'service_type']
+
+
+class AddServicsForm(forms.ModelForm):
+
+    class Meta:
+        model = Services
+        fields =['service_title', 'service_description', 'service_category']
+        widgets = {
+            'content': CKEditor5Widget(config_name='extends'),
+        }

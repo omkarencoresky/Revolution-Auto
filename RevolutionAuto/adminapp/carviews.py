@@ -3,189 +3,123 @@ import json
 import hashlib
 import schemas
 import fastjsonschema
-import schemas.car_management_schemas
-
 from django.conf import settings
 from django.contrib import messages
+import schemas.car_management_schemas
 from schemas import car_management_schemas
 from django.shortcuts import render, redirect
+from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.cache import never_cache
 from .models import CarBrand, CarYear, CarModel, CarTrim
+from django.contrib.auth.decorators import login_required
 from .forms import AddBrandForm, AddYearForm, AddModelForm, AddTrimForm
 from adminapp.utils.utils import brand_pagination, year_pagination, model_pagination, trim_pagination
 
 curl = settings.CURRENT_URL
-admincurl = f"{curl}/adminapp/"
+admincurl = f"{curl}/admin/"
 media_path = f'{settings.MEDIA_URL}'   
 
 
 # Function for the brand model
-
-def all_car_brands(request):
+@never_cache
+@login_required
+def car_brand_data_handler(request: HttpRequest) -> HttpResponse:
     """This method is use to render the main page for car brand and show the brand's list
 
     Args:
-        request
+        request: The incoming HTTP request containing the all car data.
 
     Returns:
         Httprequest: This method is use for render the car brand page.
     """
-    try:
-        page_obj = brand_pagination(request)
+    try:    
+        if request.method == 'GET':
 
-        context = {
-            'page_obj': page_obj,
-            'curl':admincurl
-        }
-        return render(request, 'carmodel/car_brand.html', context)
-    except Exception as e:
-        messages.error(request,f"{e}")
-        return render(request, 'admin_dashboard.html')
-
-def add_car_brand(request):
-    """This Method is allow to insert the another one brand of car itno the database. 
-
-    Args:
-        request
-
-    Returns:
-        Httprequest: Added the recored and if success redirect on the same page and if fail render on same page
-    """
-    try:
-        if request.method == 'POST':
-            form = AddBrandForm(request.POST, request.FILES)
             page_obj = brand_pagination(request)
-            count=1
 
             context = {
                 'page_obj': page_obj,
                 'curl':admincurl,
-                'count':count
             }
-            try:
-                if not request.FILES.get('image_url'):
-                    messages.success(request, "No image file selected. Please upload an image.")
-                    return render(request, 'carmodel/car_brand.html', context)
-                
-                uploaded_file = request.FILES['image_url']
-                image_name = uploaded_file.name 
-                image_format = image_name.split('.')[-1].lower()
-
-                data = {
-                    'image_format':image_format,
-                    'brand':request.POST.get('brand'),
-                    'description':request.POST.get('description'),
-                }
-                car_management_schemas.validate_car_brand_details(data)
-                
-                if form.is_valid():
-
-                    brand = form.save(commit=False)
-                    brand_name = request.POST['brand']
-                    brand.image_url = f"{media_path}{image_name}"   
-                    media_directory = os.path.join(settings.BASE_DIR, 'media')
-                    file_path = os.path.join(media_directory, image_name)
-                    token = hashlib.sha256(brand_name.encode()).hexdigest()
-                    brand.remember_token = token
-
-                    if not os.path.exists(media_directory):
-                        os.makedirs(media_directory)
-
-                    with open(file_path, "wb") as fp:
-                        for chunk in uploaded_file.chunks():
-                            fp.write(chunk)
-                    form.save()
-
-                    page_obj = brand_pagination(request)
-
-                    context = {
-                        'count':count,
-                        'curl':admincurl,
-                        'page_obj': page_obj,
-                    }
-                    messages.success(request, "Added successfully!")
-                    return render(request, 'carmodel/car_brand.html', context)
-                
-                else:
-                    messages.error(request, 'Invalid inputs in this form, Try again')
-                    return redirect ( 'all_car_brands') 
-                
-            except fastjsonschema.exceptions.JsonSchemaValueException as e:
-                messages.error(request,schemas.car_management_schemas.car_brand_schema.
-                get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect ( 'all_car_brands')
-            
-            except json.JSONDecodeError:
-                messages.error(request, f"{e}")
-                return redirect ( 'all_car_brands')
-            
-            except Exception as e:
-                messages.error(request, f"Invalid input of this field {e}" )
-                return redirect ( 'all_car_brands')
+            return render(request, 'carmodel/car_brand.html', context)
         
-    except Exception as e:
-        return redirect ( 'all_car_brands') 
+        elif request.method == 'POST':
 
-def display_add_brand(request):
-    """This Method is allow to show the add brand page withe help of htmx request. 
+            form = AddBrandForm(request.POST, request.FILES)
+            page_obj = brand_pagination(request)
 
-    Args:
-        request
+            context = {
+                'page_obj': page_obj,
+                'curl':admincurl,
+            }
 
-    Returns:
-        Httprequest: If success render the page page for add brands if fail render car brand or main.
-    """
-    try:
-        context = {
-            'curl':admincurl,
-        }
-        return render(request, 'carmodel/show_add_brand.html', context)
+            if not request.FILES.get('image_url'):
+                messages.success(request, "No image file selected. Please upload an image.")
+                return render(request, 'carmodel/car_brand.html', context)
+            
+            uploaded_file = request.FILES['image_url']
+            image_name = uploaded_file.name 
+            image_format = image_name.split('.')[-1].lower()
+
+            data = {
+                'image_format':image_format,
+                'brand':request.POST.get('brand'),
+                'description':request.POST.get('description'),
+            }
+            car_management_schemas.validate_car_brand_details(data)
+            
+            if form.is_valid():
+
+                brand = form.save(commit=False)
+                brand_name = request.POST['brand']
+                brand.image_url = f"{media_path}{image_name}"   
+                media_directory = os.path.join(settings.BASE_DIR, 'media')
+                file_path = os.path.join(media_directory, image_name)
+                token = hashlib.sha256(brand_name.encode()).hexdigest()
+                brand.remember_token = token
+
+                if not os.path.exists(media_directory):
+                    os.makedirs(media_directory)
+
+                with open(file_path, "wb") as fp:
+                    for chunk in uploaded_file.chunks():
+                        fp.write(chunk)
+                form.save()
+
+                page_obj = brand_pagination(request)
+
+                context = {
+                    'curl':admincurl,
+                    'page_obj': page_obj,
+                }
+                messages.success(request, "Added successfully!")
+                return render(request, 'carmodel/car_brand.html', context)
+            
+        else:
+            messages.error(request, 'Invalid request, Try again')
+            return render(request, 'carmodel/car_brand.html', context) 
+            
+            
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        messages.error(request,schemas.car_management_schemas.car_brand_schema.
+        get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
+        return redirect ( 'car_brand_data_handler')
+    
+    except json.JSONDecodeError:
+        messages.error(request, f"{e}")
+        return redirect ( 'car_brand_data_handler')
+        
     except Exception as e:
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
+
+@never_cache
+@login_required
 @csrf_exempt
-def delete_car_brand(request, id):
-    """This method is allow to Delete brand record with the confirmation popup
-
-    Args:
-        request (_type_): _description_
-        id (integer): Thi is brand record id 
-
-    Returns:
-        Httprequest: if the brand id is available the render it on the car_brand page withh success 
-        message and if not than shoe the error on same page.
-    """
-    try:
-        page_obj = brand_pagination(request)
-            
-        context = {
-            'page_obj': page_obj,
-            'curl': request.build_absolute_uri(admincurl)
-        }
-        brand = CarBrand.objects.get(id=id)
-        brand.delete()
-
-        page_obj = brand_pagination(request)
-        context = {
-            'page_obj': page_obj,
-            'curl': request.build_absolute_uri(admincurl)
-        }
-        
-        messages.success(request,f"{brand.brand} Deleted successfully")
-        return render(request, 'carmodel/car_brand.html',context , status=200)
-    
-    except ObjectDoesNotExist:
-        messages.error(request, f"CarBrand with id {id} does not exist.")
-        return render(request, 'carmodel/car_brand.html', context, status=404)
-    
-    except Exception as e:  
-        messages.error(f"Error: {str(e)}")
-        return render(request, 'carmodel/car_brand.html', context, status=500) 
-
-@csrf_exempt 
-def update_car_brand(request, id):
+def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse:
     """
     Updates the details of a car brand based on the provided form data.
     
@@ -198,13 +132,6 @@ def update_car_brand(request, id):
     - HttpResponse: Renders the update form template with the submitted data and validation errors if the update fails.
     """
     try:
-        if request.method == 'GET':
-            brand = CarBrand.objects.get(id=id)
-            context = {
-                'brand': brand,
-                'curl': admincurl,
-            }
-            return render(request, 'carmodel/brand_edit.html', context)
 
         if request.method == 'POST':
 
@@ -214,173 +141,156 @@ def update_car_brand(request, id):
             'curl': admincurl,
             'brand': brand,
             }
-            try:
-                if not request.FILES.get('image_url'):
-                    image_name = str(brand.image_url).split('/')[-1]
-                    image_format = image_name.split('.')[-1].lower()
-                else:
-                    uploaded_file = request.FILES['image_url']
-                    image_name = uploaded_file.name 
-                    image_format = image_name.split('.')[-1].lower()
-                data = {
-                    'image_format':image_format,
-                    'brand':request.POST.get('brand'),
-                    'description':request.POST.get('description'),
-                }
-                car_management_schemas.validate_car_brand_details(data)
-
-                brand.brand = request.POST.get('brand', brand.brand)
-                brand.status = request.POST.get('status', brand.status)
-                brand.description = request.POST.get('description', brand.description)
-
-                uploaded_file = request.FILES.get('image_url')
-                if uploaded_file:
-                    image_name = uploaded_file.name
-                    media_directory = os.path.join(settings.BASE_DIR, 'media')
-                    file_path = os.path.join(media_directory, image_name)
-
-                    if not os.path.exists(media_directory):
-                        os.makedirs(media_directory)
-
-                    with open(file_path, 'wb') as fp:
-                        for chunk in uploaded_file.chunks():
-                            fp.write(chunk)
-
-                    brand.image_url = f"{settings.MEDIA_URL}{image_name}"
-
-                brand.save()
-                messages.success(request, 'Updated successfully!')
-                return redirect('all_car_brands')
-            except fastjsonschema.exceptions.JsonSchemaValueException as e:
-                    messages.error(request,schemas.car_management_schemas.car_brand_schema.
-                    get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                    return redirect('all_car_brands')
             
-            except json.JSONDecodeError:
-                messages.error(request, f"{e}")
-                return redirect('all_car_brands')
+            if not request.FILES.get('image_url'):
+                image_name = str(brand.image_url).split('/')[-1]
+                image_format = image_name.split('.')[-1].lower()
+            else:
+                uploaded_file = request.FILES['image_url']
+                image_name = uploaded_file.name 
+                image_format = image_name.split('.')[-1].lower()
+            data = {
+                'image_format':image_format,
+                'brand':request.POST.get('brand'),
+                'description':request.POST.get('description'),
+            }
+            car_management_schemas.validate_car_brand_details(data)
+
+            brand.brand = request.POST.get('brand', brand.brand)
+            brand.status = request.POST.get('status', brand.status)
+            brand.description = request.POST.get('description', brand.description)
+
+            uploaded_file = request.FILES.get('image_url')
+            if uploaded_file:
+                image_name = uploaded_file.name
+                media_directory = os.path.join(settings.BASE_DIR, 'media')
+                file_path = os.path.join(media_directory, image_name)
+
+                if not os.path.exists(media_directory):
+                    os.makedirs(media_directory)
+
+                with open(file_path, 'wb') as fp:
+                    for chunk in uploaded_file.chunks():
+                        fp.write(chunk)
+
+                brand.image_url = f"{settings.MEDIA_URL}{image_name}"
+
+            brand.save()
+            messages.success(request, 'Updated successfully!')
+            return redirect('car_brand_data_handler')
+        
+        elif request.method == 'DELETE':
+            page_obj = brand_pagination(request)
             
-            except ObjectDoesNotExist:
-                messages.error(request, "Brand not found.")
-                return redirect('all_car_brands')
+            context = {
+                'page_obj': page_obj,
+                'curl': request.build_absolute_uri(admincurl)
+            }
+            brand = CarBrand.objects.get(id=id)
+            brand.delete()
+
+            page_obj = brand_pagination(request)
+            context = {
+                'page_obj': page_obj,
+                'curl': request.build_absolute_uri(admincurl)
+            }
+            
+            messages.success(request,f"Deleted successfully")
+            return render(request, 'carmodel/car_brand.html',context , status=200)
+        else:
+            messages.error(request, 'Invalid request, Try again')
+            return render(request, 'carmodel/car_brand.html') 
+            
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+            messages.error(request,schemas.car_management_schemas.car_brand_schema.
+            get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
+            return redirect('car_brand_data_handler')
+    
+    except json.JSONDecodeError:
+        messages.error(request, f"{e}")
+        return redirect('car_brand_data_handler')
+    
+    except ObjectDoesNotExist:
+        messages.error(request, "Brand not found.")
+        return redirect('car_brand_data_handler')
             
     except Exception as e:
         # messages.error(request, f"Error: {e}")
-        return redirect('all_car_brands')
+        return redirect('car_brand_data_handler')
 
 
 
-
-def all_car_years(request):
+# Function for the Year model
+@never_cache
+@login_required
+def car_year_data_handler(request: HttpRequest) -> HttpResponse:
     """This method is use to render the main page for car year and show the all saved year's list.
 
     Args:
-        request
+        request: The incoming HTTP request containing all the data of the year list.
 
     Returns:
         Httprequest: This method is use for render the car year page.
     """
     try:
-        page_obj = year_pagination(request)
+        if request.method == 'GET':
 
-        context = {
-            'curl':admincurl,
-            'page_obj': page_obj,
-        }
+            page_obj = year_pagination(request)
+            brands = brand_pagination(request)
+            context = {
+                'curl':admincurl,
+                'page_obj': page_obj,
+                'brands':brands
+            }
 
-        return render(request, 'carmodel/car_year.html', context) 
-    except Exception as e:
-        messages.error(request,f"{e}")
-        return render(request, 'admin_dashboard.html')
-
-def display_add_year(request):
-    """This Method is allow to show the add year page with help of htmx request. 
-
-    Args:
-        request
-
-    Returns:
-        Httprequest: If success render the page for add years if fail render on caryear or main page.
-    """
-    try:
-        page_obj = brand_pagination(request)
-
-        context = {
-            'curl':admincurl,
-            'page_obj': page_obj
-        }
-        return render(request, 'carmodel/show_add_year.html',  context)
-    except Exception as e:
-        messages.error(request,f"{e}")
-        return render(request, 'admin_dashboard.html')
-
-def add_car_year(request):
-    """This Method is allow to insert the another year of car itno the database. 
-
-    Args:
-        request
-
-    Returns:
-        Httprequest: Add the record and if success redirect on the caryear page and if fail render on same page.
-    """
-    try:
-        edit_year_obj = year_pagination(request)
-        page_obj = brand_pagination(request)
-
-        context = {
-            'curl':admincurl,
-            'page_obj': page_obj,
-            'edit_year_obj':edit_year_obj,
-        }
-        if request.method == 'POST':
-
-            form = AddYearForm(request.POST)    
-            try:
-                data = {
-                    'car_id':request.POST.get('car_id'),
-                    'year':request.POST.get('year'),
-                }
-                car_management_schemas.validate_car_year_details(data)
-
-                if form.is_valid():
-
-                    year = form.save(commit=False)
-                    year_input = request.POST['year']
-                    token = hashlib.sha256(year_input.encode()).hexdigest()
-                    year.remember_token = token
-                    form.save()
-
-                    page_obj = year_pagination(request)
-
-                    context = {
-                        'curl':admincurl,
-                        'page_obj': page_obj
-                    }
-                    messages.success(request, "Added successfully!")
-                    return render(request, 'carmodel/car_year.html', context)
-                
-                else:
-                    messages.error(request, 'Invalid request, Try again')
-                    return redirect('all_car_years')
-            
-            except fastjsonschema.exceptions.JsonSchemaValueException as e:
-                messages.error(request,schemas.car_management_schemas.car_year_schema.
-                get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect('all_car_years')
-            
-            except json.JSONDecodeError:
-                messages.error(request, f"{e}")
-                return redirect('all_car_years')
-                
-            except Exception as e:
-                messages.error(request, f"{e}")
-                return redirect('all_car_years')
+            return render(request, 'carmodel/car_year.html', context) 
         
-    except Exception as e:
-        # messages.error(request, f"{e}")
-        return redirect('all_car_years')
+        elif request.method == 'POST':
+            form = AddYearForm(request.POST)    
+            data = {
+                'car_id':request.POST.get('car_id'),
+                'year':request.POST.get('year'),
+            }
+            car_management_schemas.validate_car_year_details(data)
 
-def update_car_year(request, id):
+            if form.is_valid():
+
+                year = form.save(commit=False)
+                year_input = request.POST['year']
+                token = hashlib.sha256(year_input.encode()).hexdigest()
+                year.remember_token = token
+                form.save()
+
+                page_obj = year_pagination(request)
+
+                context = {
+                    'curl':admincurl,
+                    'page_obj': page_obj
+                }
+                messages.success(request, "Added successfully!")
+                return redirect('car_year_data_handler')
+            
+        else:
+            messages.error(request, 'Invalid request, Try again')
+            return redirect('car_year_data_handler')
+        
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        messages.error(request,schemas.car_management_schemas.car_year_schema.
+        get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
+        return redirect('car_year_data_handler')
+    
+    except json.JSONDecodeError:
+        messages.error(request, f"{e}")
+        return redirect('car_year_data_handler')
+    
+    except Exception as e:
+        messages.error(request, f"{e}")
+        return redirect('car_year_data_handler')
+
+
+@never_cache
+@login_required
+def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse:
     """
     Updates the details of a car year based on the provided form data. It then attempts to update the brand's details using the data 
     submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car year listing page.
@@ -394,24 +304,9 @@ def update_car_year(request, id):
     - HttpResponse: Renders the update form template with the submitted data and validation errors if the update fails.
 
     """
-    if request.method == 'GET':
-        page_obj = brand_pagination(request)
-        edit_year_obj = CarYear.objects.get(id=id)
-        context = {
-                'page_obj': page_obj,
-                'edit_year_obj':edit_year_obj,
-                'curl':admincurl,
-            }
-        
-        return render(request, 'carmodel/year_edit.html', context)
     
     try:
-        page_obj = year_pagination(request)
-        context = {
-                'page_obj': page_obj,   
-                'curl':admincurl,   
-            }
-        
+            
         if request.method == 'POST':
 
             car_id = request.POST.get('car_id')
@@ -436,67 +331,53 @@ def update_car_year(request, id):
             year.save()
 
             messages.success(request, 'Updated successfully!')
-            return redirect('all_car_years')
+            return redirect('car_year_data_handler')
+        
+        elif request.method == 'DELETE':
+
+            Year = CarYear.objects.get(id=id)
+            Year.delete()
+            page_obj = year_pagination(request)
+            
+            context = {
+                'page_obj': page_obj,
+                'curl': request.build_absolute_uri(admincurl)
+            }
+            
+            messages.success(request,f"{Year.car_id.brand} Deleted successfully")
+            return render(request, 'carmodel/car_year.html',context , status=200)
+        
         
         else:
             messages.error(request, 'Invalid inputs, try again')
-            return redirect('all_car_years')
+            return redirect('car_year_data_handler')
 
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.car_management_schemas.car_year_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-        return redirect('all_car_years')
+        return redirect('car_year_data_handler')
 
     except json.JSONDecodeError:
         messages.error(request, f"{e}")
-        return redirect('all_car_years')
-
-    except Exception as e:
-        messages.error(request, f"{e}")
-        return redirect('all_car_years')
-        
-@csrf_exempt
-def delete_car_year(request, id):
-    """This method is allow to Delete year record with the confirmation popup
-
-    Args:
-        request (_type_): _description_.
-        id (integer): Thi is year record id .
-
-    Returns:
-        Httprequest: if the year id is available the render it on the car_year page withh success 
-        message and if not than show the error on same page.
-    """
-    try:
-        Year = CarYear.objects.get(id=id)
-        Year.delete()
-        page_obj = year_pagination(request)
-        
-        context = {
-            'page_obj': page_obj,
-            'curl': request.build_absolute_uri(admincurl)
-        }
-        
-        messages.success(request,f"{Year.car_id.brand} Deleted successfully")
-        return render(request, 'carmodel/car_year.html',context , status=200)
+        return redirect('car_year_data_handler')
     
     except ObjectDoesNotExist:
         messages.error(f"Car year with id {id} does not exist.")
         return render(request, 'carmodel/car_year.html', context, status=404)
-    
-    except Exception as e:  
-        messages.error(f"Error: {str(e)}")
-        return render(request, 'carmodel/car_year.html', context, status=500)
 
-
+    except Exception as e:
+        messages.error(request, f"{e}")
+        return redirect('car_year_data_handler')
+ 
 
 # Function for the Car Models model
-
-def all_car_models(request):
+@never_cache
+@login_required
+def all_car_models(request: HttpRequest) -> HttpResponse:
     """This method is use to render the main page for car model and show the all saved model's list.
 
     Args:
-        request
+        request: The incoming HTTP request containing all the data of the model list.
 
     Returns:
         Httprequest: This method is use for render the car model page.
@@ -513,11 +394,13 @@ def all_car_models(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def display_add_model(request):
+@never_cache
+@login_required
+def display_add_model(request: HttpRequest) -> HttpResponse:
     """This Method is allow to show the add model page with help of htmx request. 
 
     Args:
-        request
+        request: The incoming HTTP request containing the html for shows the add model form.
 
     Returns:
         Httprequest: If success render the page for add model if fail render on carmodel or main page.
@@ -536,11 +419,13 @@ def display_add_model(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def add_car_model(request):
+@never_cache
+@login_required
+def add_car_model(request: HttpRequest) -> HttpResponse:
     """This Method is allow to insert the another model of car itno the database. 
 
     Args:
-        request
+        request: The incoming HTTP request containing form for add new model.
 
     Returns:
         Httprequest: Add the record and if success redirect on the carmodel page and if fail render on same page.
@@ -603,13 +488,14 @@ def add_car_model(request):
     except Exception as e:
         messages.error(request, f"{e}")
         return redirect('all_car_models')
-    
-@csrf_exempt
-def delete_car_model(request, id):
+
+@never_cache
+@login_required   
+def delete_car_model(request: HttpRequest, id: int) -> HttpResponse:
     """This method is allow to Delete model record with the confirmation popup
 
     Args:
-        request (_type_): _description_.
+        request: The incoming HTTP request containing data for delete a model.
         id (integer): Thi is model record id .
 
     Returns:
@@ -636,9 +522,10 @@ def delete_car_model(request, id):
     except Exception as e:  
         messages.error(f"Error: {str(e)}")
         return render(request, 'carmodel/car_model.html', context, status=500)
-    
-@csrf_exempt
-def update_car_model(request, id):
+
+@never_cache
+@login_required    
+def update_car_model(request: HttpRequest, id: int) -> HttpResponse:
     """
     Updates the details of a car model based on the provided form data. It then attempts to update the model's details using the data 
     submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car model listing page.
@@ -727,11 +614,13 @@ def update_car_model(request, id):
 
 
 # Function for the Car Car model
-def all_car_trims(request):
+@never_cache
+@login_required
+def all_car_trims(request: HttpRequest) -> HttpResponse:
     """This method is use to render the main page for car trim and show the all saved trim's list.
 
     Args:
-        request
+        request: The incoming HTTP request containing all the data of the trims.
 
     Returns:
         Httprequest: This method is use for render the car trim page.
@@ -751,11 +640,13 @@ def all_car_trims(request):
     #     messages.error(request,f"{e}")
     #     return render(request, 'admin_dashboard.html')
 
-def display_add_trim(request):
+@never_cache
+@login_required
+def display_add_trim(request: HttpRequest) -> HttpResponse:
     """This Method is allow to show the add trim page with help of htmx request. 
 
     Args:
-        request
+        request: The incoming HTTP request containing the html for shows the add trims form.
 
     Returns:
         Httprequest: If success render the page for add trim if fail render on carmodel or main page.
@@ -776,7 +667,9 @@ def display_add_trim(request):
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-def add_car_trim(request):
+@never_cache
+@login_required
+def add_car_trim(request: HttpRequest) -> HttpResponse:
     """This Method is allow to insert the another trim of car itno the database. 
 
     Args:
@@ -846,8 +739,9 @@ def add_car_trim(request):
         messages.error(request, f"{e}")
     return redirect('all_car_trims')
 
-@csrf_exempt
-def delete_car_trim(request, id):
+@never_cache
+@login_required
+def delete_car_trim(request: HttpRequest, id: int) -> HttpResponse:
     """This method is allow to Delete trim record with the confirmation popup
 
     Args:
@@ -877,9 +771,10 @@ def delete_car_trim(request, id):
     except Exception as e:  
         messages.error(f"Error: {str(e)}")
         return render(request, 'carmodel/car_trim.html', context, status=500)
-        
-@csrf_exempt
-def update_car_trim(request, id):
+
+@never_cache
+@login_required    
+def update_car_trim(request: HttpRequest, id: int) -> HttpResponse:
     """
     Updates the details of a car trim based on the provided form data. It then attempts to update the trim's details using the data 
     submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car trim listing page.
@@ -937,18 +832,19 @@ def update_car_trim(request, id):
             old_brand = CarBrand.objects.get(id=int(trim.car_id.id))
             old_model = CarModel.objects.get(id=int(trim.model_id.id))
 
+            # Check new deails select than update 
             trim.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else old_brand
             trim.year_id = CarYear.objects.get(id=int(year_id)) if year_id else old_year
             trim.model_id = CarModel.objects.get(id=int(model_id)) if model_id else old_model
+            trim.car_trim_name = request.POST.get('car_trim_name',old_trim)
+            trim.status = request.POST.get('status',trim.status)
+            trim.remember_token = trim.remember_token
             
             # if year_id:
             #     trim.year_id = CarYear.objects.get(id=int(year_id)) 
             # else:
             #     trim.year_id = old_year
 
-            trim.car_trim_name = request.POST.get('car_trim_name',old_trim)
-            trim.status = request.POST.get('status',trim.status)
-            trim.remember_token = trim.remember_token
             trim.save()
 
             messages.success(request, 'Updated successfully!')

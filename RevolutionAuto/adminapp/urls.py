@@ -16,8 +16,8 @@ Including another URLconf
 """
 
 from adminapp import views  
-from adminapp import carviews, location_views
-from django.urls import path
+from django.urls import path, include
+from adminapp import carviews, location_views, serviceviews
 
 
 urlpatterns = [
@@ -27,18 +27,13 @@ urlpatterns = [
     path('registration/', views.registration, name='admin_registration'),
 
     # Car Brand urls
-    path('car/brands/', carviews.all_car_brands, name='all_car_brands'),
-    path('add/car/brand/', carviews.add_car_brand, name='add_car_brand'),
-    path('add/brand/page/', carviews.display_add_brand, name='add_brand_page'),
-    path('update/brand/<int:id>/', carviews.update_car_brand, name='update_car_brand'),
-    path('delete/car/brand/<int:id>/', carviews.delete_car_brand, name='delete_car_brand'),
+    path('car-brand/', carviews.car_brand_data_handler, name='car_brand_data_handler'),
+    path('car-brand/<int:id>/', carviews.car_brand_action_handler, name='car_brand_action_handler'),
     
     # Car Year urls
-    path('car/years/', carviews.all_car_years, name='all_car_years'),
-    path('add/car/year/', carviews.add_car_year, name='add_car_year'),
-    path('add/year/page/', carviews.display_add_year, name='add_year_page'),
-    path('update/car/year/<int:id>/', carviews.update_car_year, name='update_car_year'),
-    path('delete/car/year/<int:id>/', carviews.delete_car_year, name='delete_car_year'),
+    path('car-year/', carviews.car_year_data_handler, name='car_year_data_handler'),
+    path('car-year/<int:id>/', carviews.car_year_action_handler, name='car_year_action_handler'),
+    # path('delete/car/year/<int:id>/', carviews.delete_car_year, name='delete_car_year'),
 
     # Car model urls
     path('car/models/', carviews.all_car_models, name='all_car_models'),
@@ -52,14 +47,27 @@ urlpatterns = [
     path('add/car/trim/', carviews.add_car_trim, name='add_car_trim'),
     path('add/trim/page/', carviews.display_add_trim, name='add_trim_page'),
     path('update/car/trim/<int:id>/', carviews.update_car_trim, name='update_car_trim'),
-    path('delete/car/trim/<int:id>/', carviews.delete_car_trim, name='delete_car_trim'),
+    path('delete/car/trim/<int:id>/', carviews.delete_car_trim, name='delete_car_trim'),    
 
     # location urls
-    path('add/location/', location_views.add_location, name='add_location'),
-    path('get/locations/', location_views.all_location, name='get_all_locations'),
-    path('delete/location/<int:id>/', location_views.delete_location, name='delete_location'),
-    path('update/location/<int:id>/', location_views.update_location, name="update_location"),
-    path('add/location/page/', location_views.display_add_location, name='display_location_page'),
+    path('location/', location_views.location_data_handler, name='location_data_handler'),
+    path('location/<int:id>/', location_views.location_action_handler, name='location_action_handler'),
+    
+    # Serivice Type urls
+    path('service-type/',serviceviews.service_type_data_handler, name='service_type_data_handler'),
+    path('service-type/<int:id>/', serviceviews.service_type_action_handler, name='service_type_action_handler'),
+
+    # Serivice Category urls
+    path('service-category/',serviceviews.service_category_data_handler, name='service_category_data_handler'),
+    path('service-category/<int:id>/', serviceviews.service_category_action_handler, name='service_category_action_handler'),
+
+    # Serivices urls
+    path('service/', serviceviews.service_data_handler, name='service_data_handler'),
+    path('service/<int:id>/', serviceviews.service_action_handler, name='service_action_handler'),
+
+    # Sub-serivices urls
+    path('sub-service/', serviceviews.sub_services_data_handler, name='sub_services_data_handler'),
+       
 ]
 
 

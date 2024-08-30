@@ -5,18 +5,24 @@ import schemas.registration_schema
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import logout
 from .forms import CustomUserCreationForm
+from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from schemas.login_schema import validate_login
-from django.shortcuts import render, redirect, HttpResponse 
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from schemas.registration_schema import validate_registration
 from django.contrib.auth import authenticate, login as auth_login 
 
 curl = settings.CURRENT_URL
 
+context = {
+    'curl':curl
+}
+
 # Create your views here.
 
-def index(request) -> HttpResponse:
+def index(request: HttpRequest) -> HttpResponse:
     """
     This function is used for render the home.html page for.
 
@@ -26,9 +32,9 @@ def index(request) -> HttpResponse:
     Returns:
         HttpResponse: Home page of our apllication.
     """
-    return render(request, 'home.html', {'curl':curl}, status=200) 
+    return render(request, 'home.html', context, status= 200) 
 
-def about(request) -> HttpResponse:
+def about(request: HttpRequest) -> HttpResponse:
     """
     This function is used for render the about.html page for.
 
@@ -38,9 +44,9 @@ def about(request) -> HttpResponse:
     Returns:
         HttpResponse: About page of our apllication.
     """
-    return render(request, 'about.html', {'curl':curl}, status=200)
+    return render(request, 'about.html', context, status=200)
 
-def service(request) -> HttpResponse:
+def service(request: HttpRequest) -> HttpResponse:
     """
     This function is used for render the service.html page for.
 
@@ -50,9 +56,9 @@ def service(request) -> HttpResponse:
     Returns:
         HttpResponse: service page of our apllication.
     """
-    return render(request, 'service.html', {'curl':curl}, status=200)
+    return render(request, 'service.html', context, status=200)
 
-def team(request) -> HttpResponse:
+def team(request: HttpRequest) -> HttpResponse:
     """
     This function is used for render the team.html page for.
 
@@ -62,23 +68,23 @@ def team(request) -> HttpResponse:
     Returns:
         HttpResponse: team list or details of our apllication.
     """
-    return render(request, 'team.html', {'curl':curl}, status=200)
+    return render(request, 'team.html', context, status=200)
 
-def booking(request) -> HttpResponse:
+def booking(request: HttpRequest) -> HttpResponse:
     """
     This function is used for render the booking.html page for.
 
     Args:
-        request 
+        request
 
     Returns:
         HttpResponse: booking page of our apllication.
     """
-    return render(request, 'booking.html', {'curl':curl}, status=200)
+    return render(request, 'booking.html', context, status=200)
 
-def register(request) -> HttpResponse :
+def register(request: HttpRequest) -> HttpResponse:
     """
-    If the request is get than it render the register page or if the request is post it apply the register logic.
+    If the request is get than it render the register page or if the request is post it apply the user register logic.
 
     Args:
         request
@@ -89,7 +95,11 @@ def register(request) -> HttpResponse :
     try:
         if request.method == 'GET':
             form = CustomUserCreationForm()
-            return render(request, 'register.html', {'curl':curl, 'form':form}, status=200)
+            context = {
+                'curl':curl,
+                'form':form
+                }
+            return render(request, 'register.html', context, status=200)
 
         if request.method == 'POST':
             data = {
@@ -102,6 +112,10 @@ def register(request) -> HttpResponse :
 
             try:
                 form = CustomUserCreationForm(request.POST)
+                context = {
+                    'curl':curl,
+                    'form':form
+                    }
                 validate_registration(data)
 
                 if form.is_valid():
@@ -113,7 +127,7 @@ def register(request) -> HttpResponse :
                 
                 else:
                     messages.error(request, f" This form has not a valid input")
-                return render(request, 'register.html', {'curl':curl, 'form':CustomUserCreationForm()}, status=400)
+                return render(request, 'register.html', context, status=400)
             
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                 messages.error(request,schemas.registration_schema.registration_schema.
@@ -123,6 +137,7 @@ def register(request) -> HttpResponse :
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
                 return render(request, 'register.html', {'curl':curl, 'form':CustomUserCreationForm()}, status=400)
+            
             except Exception as e:
                 messages.error(request, "Internal error, Please try again")
                 return render(request, 'register.html', {'curl':curl, 'form':CustomUserCreationForm()}, status=400)
@@ -134,7 +149,7 @@ def register(request) -> HttpResponse :
         messages.error(request, "An unexpected error occurred. Please try again.")
         return render(request, 'register.html', {'curl':curl, 'form':CustomUserCreationForm()},status=500)
   
-def login(request) -> HttpResponse:
+def login(request: HttpRequest) -> HttpResponse:
     """
     This method is used the credential and validate with fastjsonschema and after that login the 
     user and render it according to the user's access like user, admin, superadmin.
@@ -147,32 +162,32 @@ def login(request) -> HttpResponse:
     """
     try:
         if request.method == 'GET':
-            return render(request, 'login.html', {'curl':curl}, status=200)
+            return render(request, 'login.html', context, status=200)
         
         if request.method == 'POST':
             email = request.POST.get('email')
             password = request.POST.get('password')
+            User = get_user_model()
             data = {
                 'email': email,
                 'password': password
-            }
-
-            User = get_user_model()
+            }   
 
             try:
                 validate_login(data)
                 user = User.objects.get(email=email)
 
+                user = authenticate(request, username=email, password=password) 
                 if user is not None:
                     if user.is_active:
-                        user = authenticate(request, username=email, password=password) 
                         auth_login(request, user)
 
                         if user.role == 'user':
                             return HttpResponse('user_dashboard', status=200)
                         
                         elif user.role == 'admin':
-                            return HttpResponse('admin_dashboard', status=200) 
+                            # return HttpResponse('admin_dashboard', status=200) 
+                            return redirect ('admin_dashboard')
                         
                         else:
                             return HttpResponse('superuser_dashboard', status=200)  
@@ -203,5 +218,18 @@ def login(request) -> HttpResponse:
     except Exception as e :
         messages.error(request, "An unexpected error occurred. Please try again.")
         return render(request, 'login.html', status=500)
-        
     
+def logout_view(request: HttpRequest) -> HttpResponseRedirect:
+    """
+    This method is used the logout of user, admin, superadmin with the help of djnago authentication.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for logout the user admin, superadmin.
+    """
+    logout(request)
+    messages.success(request, f"logout successfully")
+    return redirect('Home')
+        

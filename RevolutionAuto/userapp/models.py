@@ -56,16 +56,16 @@ class CustomManager(BaseUserManager):
     
     def get_by_natural_key(self, email):
         """
-            Retrieve a user from the database using their email address.
+        Retrieve a user from the database using their email address.
 
-            This method looks up a user based on the provided email address,
-            which is used as the natural key for identification.
+        This method looks up a user based on the provided email address,
+        which is used as the natural key for identification.
 
-            Args:
-                email (str): The email address of the user to retrieve.
+        Args:
+            email (str): The email address of the user to retrieve.
 
-            Returns:
-                User: The user instance associated with the provided email address.
+        Returns:
+            User: The user instance associated with the provided email address.
         """
         return self.get(email=email)
     
