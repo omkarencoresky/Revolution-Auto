@@ -1,17 +1,18 @@
 {% extends 'adminmaster.html' %}
 {% load static %}
 
-{% block title %}Car Brand | Revolution Auto{% endblock %}
+
+{% block title %}Service Category | Revolution Auto{% endblock %}
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
-    <h4 class="font-weight-bold py-3 mb-0">CAR BRANDS</h4>
+    <h4 class="font-weight-bold py-3 mb-0">SERVICE CATEGORIES</h4>
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{curl}}dashboard/"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item"> <a href="{% url 'car_brand_data_handler' %}">Car Brand</a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'service_category_data_handler' %}">Service Category</a></li>
         </ol>
         <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-            onclick="addopenModal('addForm')">Add Brand</button>
+            onclick="addopenModal('addForm')">Add Service Category</button>
     </div>
     <div>
         {% if messages %}
@@ -29,38 +30,34 @@
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
             <div class="modal-body">
-                <form action="{% url 'car_brand_data_handler' %}" method="post" enctype="multipart/form-data">
+                <form action="{% url 'service_category_data_handler' %}" method="post">
                     {% csrf_token %}
                     <div class="form-group brand">
-                        <label class="control-label col-sm-3" for="brand">Brand Name:</label>
+                        <label class="control-label col-sm-3" for="service_type">Service Type Name:</label>
                         <div class="col-sm-6 mw-100">
-                            <input type="text" class="form-control" name="brand" placeholder="Brand"
-                                value="">
-                            <span id="brand2"></span>
+                            <select name="service_type" class="form-control">
+                                <option value="">Select Service Type</option>
+                                {% for service in service_type %}
+                                <option value="{{service.id}}">{{service.service_type_name}}</option>
+                                {% endfor %}
+                            </select>
+                            <span id="service_type"></span>
                         </div>
                     </div>
 
-                    <div class="form-group description">
-                        <label class="control-label col-sm-3" for="description">Description :</label>
+                    <div class="form-group brand">
+                        <label class="control-label col-sm-3" for="service_type">Service Category Name:</label>
                         <div class="col-sm-6 mw-100">
-                            <textarea class="form-control" name="description" placeholder="Description"></textarea>
-                            <span id="description2"></span>
+                            <input class="form-control" name="service_category_name"
+                                placeholder="Service Category Name">
+                            <span id="service_type"></span>
                         </div>
                     </div>
-
-                    <div class="form-group car_image">
-                        <label class="control-label col-sm-3" for="image_url">Upload Image :</label>
-                        <div class="col-sm-6 mw-100">
-                            <input type="file" class="form-control file" name="image_url">
-                            <span id="car_image"></span>
-                        </div>
-                    </div>
-
                     <div class="modal-footer">
                         <div class="row w-100">
                             <div class="w-100 modal_btn d-flex justify-content-around">
                                 <button type="button" class="btn btn-danger" data-dismiss="modal"
-                                    onclick="closeModal()">Close</button>
+                                    onclick="closeModal('addForm')">Close</button>
                                 <button type="submit" class="btn btn-dark">Submit</button>
                             </div>
                             <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner"
@@ -72,54 +69,49 @@
         </div>
     </div>
 </div>
-
-
 <div class="row">
     <div class="col-md-12">
         <div class="card d-flex w-100 mb-4">
-            <!-- <h6 class="card-header">Alerts</h6> -->
             <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
 
                 <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
                     <marquee behavior="scroll" direction="left">
-                        <caption class="caption-top fs-4 text-dark mb-2">All Available Brand</caption>
+                        <caption class="caption-top fs-4 text-dark mb-2">All Available Service Category</caption>
                     </marquee>
                     <thead class="table-light">
                         <tr>
                             <th scope="col">SR.No</th>
-                            <th scope="col">Make Name</th>
-                            <th scope="col">Description</th>
-                            <th scope="col">Image</th>
+                            <th scope="col">Service Category</th>
+                            <th scope="col">Service Type</th>
                             <th scope="col">Status</th>
                             <th scope="col">Action</th>
                         </tr>
                     </thead>
                     <tbody hx-target="body" hx-swap="outerHTML swap:1s">
-                        {% for brand in page_obj %}
+                        {% for service in page_obj %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ brand.brand }}</td>
-                            <td>{{ brand.description }}</td>
-                            <td>
-                                <img src="http://127.0.0.1:8000{{ brand.image_url }}" alt="Brand Images"
-                                    style="width: 40px; height: 45px;">
-                            </td>
-                            {% if brand.status == 1 %}
+                            <td>{{ service.service_category_name }}</td>
+                            <td>{{ service.service_type.service_type_name }}</td>
+
+                            {% if service.status == 1 %}
                             <td>Active</td>
                             {% else %}
                             <td>In-active</td>
                             {% endif %}
+
                             <td>
-                                <button class="btn" hx-delete="{% url 'car_brand_action_handler' brand.id %}"
+                                <button class="btn" hx-delete="{% url 'service_category_action_handler' service.id %}"
                                     hx-confirm="Are you sure you want to delete this brand?">
                                     <i class="fa fa-trash"></i>
                                 </button>
-                                <button class="btn" onclick="updateCarBrand('updateForm', '{{ brand.id }}', 
-                                '{{ brand.brand }}', '{{ brand.description }}', '{{ brand.image_url }}',
-                                '{{ brand.service_type.id }}')">
+                                <button class="btn" key="{{ service.id }}" onclick="updatecategory('updateForm', '{{ service.id }}', 
+                                '{{ service.service_type.service_type_name }}', '{{ service.service_category_name }}', '{{ service.status }}',
+                                '{{ service.service_type.id }}')">
                                     <i class="fa fa-edit"></i>
                                 </button>
                             </td>
+
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -132,43 +124,48 @@
                             <button type="button" class="close" onclick="closeModal('updateForm')">×</button>
                         </div>
                         <div class="modal-body">
-                            <form class="update-form" method="post" enctype="multipart/form-data">
+                            <form class="update-form" method="post">
                                 {% csrf_token %}
                                 <div class="form-group brand">
-                                    <label class="control-label col-sm-3" for="brand">Brand Name:</label>
+                                    <label class="control-label col-sm-3" for="service_type">Service Type Name:</label>
                                     <div class="col-sm-6 mw-100">
-                                        <input type="text" class="form-control" id="brand" name="brand" placeholder="Brand"
-                                            value="">
-                                        <span id="brand1"></span>
+                                        <select name="service_type" id="service_type" class="form-control">
+                                            <!-- <option value="test"></option> -->
+                                            {% for service in service_type %}
+                                            <option value="{{service.id}}">{{service.service_type_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span id="service_type"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group brand">
+                                    <label class="control-label col-sm-3" for="service_category_name">Service Category
+                                        Name:</label>
+                                    <div class="col-sm-6 mw-100">
+                                        <input class="form-control" id="service_category_name"
+                                            name="service_category_name" value="{{service.service_category_name}}">
+                                        <span id="service_category_name"></span>
                                     </div>
                                 </div>
 
                                 <div class="form-group description">
-                                    <label class="control-label col-sm-3" for="description">Description :</label>
+                                    <label class="control-label col-sm-3" for="Status">Status :</label>
                                     <div class="col-sm-6 mw-100">
-                                        <textarea class="form-control" id="description" name="description"
-                                            placeholder="Description"></textarea>
-                                        <span id="description1"></span>
+                                        <select class="form-control" id="exampleSelect" name="status">
+                                            <option value="" disabled>Select status</option>
+                                            <option value="1" {% if service.status == 1 %}selected{% endif %}>Active
+                                            </option>
+                                            <option value="2" {% if service.status == 2 %}selected{% endif %}>In-active
+                                            </option>
+                                        </select>
+                                        <span id="Status"></span>
                                     </div>
                                 </div>
-
-                                <div>
-                                    <label class="control-label col-sm-3" style="width: 140px;" for="">Previous Image</label>
-                                    <img id="profile_image" alt="profile_image" class="w-25 h-25">
-                                </div>
-
-                                <div class="form-group car_image d-flex align-items-center">
-                                    <label class="control-label col-sm-3 w-100 pr-0" style="height: 14px;"  for="image_url">Upload Image</label>
-                                    <div class="col-sm-6 mw-100">{{brand.image_url}}
-                                        <input type="file" class="form-control file" style="width: 250px;" title="Choose new image" id="image_url" name="image_url">
-                                        <span id="car_image"></span>
-                                    </div>
-                                </div>
-
                                 <div class="modal-footer">
                                     <div class="row w-100">
                                         <div class="w-100 modal_btn d-flex justify-content-around">
-                                            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                            <button type="button" class="btn btn-danger"
                                                 onclick="closeModal('updateForm')">Close</button>
                                             <button type="submit" class="btn btn-dark">Submit</button>
                                         </div>
@@ -181,8 +178,6 @@
                     </div>
                 </div>
             </div>
-
-
 
             <!-- Pagination Controls -->
             <div class="pagination">

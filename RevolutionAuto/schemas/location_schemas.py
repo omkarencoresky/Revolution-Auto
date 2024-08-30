@@ -10,14 +10,14 @@ location_schema = {
             "minLength":3,
             "maxLength":150,
             "pattern": "^[a-zA-Z0-9 ]+$",
-            "description": "Location name length in between 3-150 characters and in a valid format."
+            "description": "Location name length in between 3-150 characters and special character not allowed."
         },
         "country_code":{
             "type":"string",
             "minLength":2,
             "maxLength":50,
             "pattern": "^[a-zA-Z0-9 ]+$",
-            "description": "Country code length in between 2-50 characters and in a valid format."
+            "description": "Country code length in between 2-50 characters and special character not allowed."
         },
         "service_availability":{
             "type":"boolean",

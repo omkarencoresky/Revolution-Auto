@@ -11,7 +11,7 @@
     <meta name="description" content="Revolution Auto admin dashboard template.">
     <meta name="keywords" content="admin template, dashboard, auto service">
     <meta name="author" content="Revolution Auto" />
-    <link rel="icon" type="image/x-icon" href="{% static 'img/favicon.ico' %}">
+    <link rel="shortcut icon" href="{% static 'img/carousel-1.png' %}" type="image/x-icon">
 
     <!-- Google fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
@@ -25,16 +25,18 @@
     <link rel="stylesheet" href="{% static 'fonts/feather.css' %}">
 
     <!-- Core stylesheets -->
+    <link rel="stylesheet" href="{% static 'css/additional.css' %}">
     <link rel="stylesheet" href="{% static 'css/bootstrap-material.css' %}">
     <link rel="stylesheet" href="{% static 'css/shreerang-material.css' %}">
     <link rel="stylesheet" href="{% static 'css/uikit.css' %}">
-    <link rel="stylesheet" href="{% static 'css/additional.css' %}">
 
     <!-- Libs -->
     <link rel="stylesheet" href="{% static 'lib/perfect-scrollbar/perfect-scrollbar.css' %}">
     <link rel="stylesheet" href="{% static 'lib/flot/flot.css' %}">
 
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/ckeditor5-build-classic/ckeditor.js"></script>
+
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -76,7 +78,7 @@
                         </li>
 
                         <li class="sidenav-item">
-                            <a href="{% url 'get_all_locations' %}" class="sidenav-link">
+                            <a href="{% url 'location_data_handler' %}" class="sidenav-link">
                                 <i class="sidenav-icon fa fa-map-marker"></i>
                                 <div>Locations</div>
                                 <!-- <div class="pl-1 ml-auto">
@@ -96,18 +98,18 @@
 
                         <!-- UI elements -->
                         <li class="sidenav-item">
-                            <a href="javascript:" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-Car-Management">
+                            <a href="" class="sidenav-link sidenav-toggle" id="sidenav-dropdown-Car-Management">
                                 <i class="sidenav-icon fa fa-car"></i>
                                 <div>Car Management</div>
                             </a>
                             <ul class="sidenav-menu" id="sidenav-dropdown-menus-Car-Management">   
                                 <li class="sidenav-item">
-                                    <a href="{% url 'all_car_brands' %}" class="sidenav-link">
+                                    <a href="{% url 'car_brand_data_handler' %}" class="sidenav-link">
                                         <div>Car Brand</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="{% url 'all_car_years' %}" class="sidenav-link">
+                                    <a href="{% url 'car_year_data_handler' %}" class="sidenav-link">
                                         <div>Car Year</div>
                                     </a>
                                 </li>
@@ -132,22 +134,22 @@
                             </a>
                             <ul class="sidenav-menu" id="sidenav-dropdown-menu-Services-Management">
                                 <li class="sidenav-item">
-                                    <a href="forms_layouts.html" class="sidenav-link">
+                                    <a href="{% url 'service_type_data_handler' %}" class="sidenav-link">
                                         <div>Service Type</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="forms_input-groups.html" class="sidenav-link">
+                                    <a href="{%url 'service_category_data_handler' %}" class="sidenav-link">
                                         <div>Categories</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="forms_input-groups.html" class="sidenav-link">
+                                    <a href="{% url 'service_data_handler' %}" class="sidenav-link">
                                         <div>Services</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="forms_input-groups.html" class="sidenav-link">
+                                    <a href="{% url 'sub_services_data_handler' %}" class="sidenav-link">
                                         <div>Sub-Services</div>
                                     </a>
                                 </li>
@@ -385,7 +387,7 @@
                                         <a href="javascript:" class="dropdown-item">
                                             <i class="feather icon-settings text-muted"></i> &nbsp; Account settings</a>
                                         <div class="dropdown-divider"></div>
-                                        <a href="javascript:" class="dropdown-item">
+                                        <a href="{% url 'logout' %}" class="dropdown-item">
                                             <i class="feather icon-power text-danger"></i> &nbsp; Log Out</a>
                                     </div>
                                 </div>

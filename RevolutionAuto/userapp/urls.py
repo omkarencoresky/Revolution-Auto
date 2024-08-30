@@ -18,11 +18,12 @@ from userapp import views
 from django.urls import path
 
 urlpatterns = [
+    path('', views.index, name='Home'),
+    path('team/', views.team, name='Team'),
+    path('about/', views.about, name='About'),
+    path('login/', views.login, name="login"),
+    path('service/', views.service, name='Service'),
+    path('booking/', views.booking, name='Booking'),
+    path('logout/', views.logout_view, name="logout"),
     path('register/', views.register, name='register'),
-    path('home/',views.index, name='Home'),
-    path('about/',views.about, name='About'),
-    path('service/',views.service, name='Service'),
-    path('team/',views.team, name='Team'),
-    path('booking/',views.booking, name='Booking'),
-    path('login/', views.login, name="login")
 ]

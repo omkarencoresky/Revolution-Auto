@@ -17,12 +17,4 @@ Including another URLconf
 from django.urls import path, include
 from super_adminapp import views
 
-urlpatterns = [
-    # path('home/',views.index, name='Home'),
-    # path('error/', views.error, name='error'),
-    # path('about/',views.about, name='About'),
-    # path('service/',views.service, name='Service'),
-    # path('team/',views.team, name='Team'),
-    # path('booking/',views.booking, name='Booking'),
-    # path('register/', views.register, name="register")
-]
+urlpatterns = []

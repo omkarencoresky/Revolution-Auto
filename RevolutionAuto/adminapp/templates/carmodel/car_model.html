@@ -25,7 +25,7 @@
     <div id="myForm" style="display: none;">    
         <div class="vw-100 vh-100 position-fixed"  style="z-index: 9999; top: 0; left: 0;" > 
             <div class="vw-100 vh-100 position-absolute" style="background-color: rgb(0,0,0,0.5); z-index: 1;" 
-            hx-get="{% url 'all_car_brands' %}" id="test" hx-target="body"></div>   
+            hx-get="{% url 'car_brand_data_handler' %}" id="test" hx-target="body"></div>   
             <div class="modal-content mx-auto" style="max-width: 500px; z-index: 2;">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" hx-get="{% url 'all_car_models' %}" hx-target="body" 

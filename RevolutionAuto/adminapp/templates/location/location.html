@@ -6,21 +6,13 @@
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
     <h4 class="font-weight-bold py-3 mb-0">LOCATIONS</h4>
-    <!-- <div class="text-muted small mt-0 mb-4 d-block breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item" >Car Brand</li>
-            <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-                hx-get="{{ curl}}showaddbrand/" hx-swap="beforeend" hx-target="body">Add Brand</button>
-        </ol>
-    </div> -->
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{curl}}dashboard/"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item"> <a href="{% url 'get_all_locations' %}">Locations</a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'location_data_handler' %}">Locations</a></li>
         </ol>
         <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-            hx-get="{% url 'display_location_page' %}" hx-swap="beforeend" hx-target="body">Add Location</button>
+            onclick="addopenModal('addForm')">Add Location</button>
     </div>
     <div>
         {% if messages %}
@@ -31,95 +23,220 @@
         </ul>
         {% endif %}
     </div>
-    <div id="myForm" style="display: none;">
-        <div class="vw-100 vh-100 position-fixed" style="z-index: 9999; top: 0; left: 0;">
-            <div class="vw-100 vh-100 position-absolute" style="background-color: rgb(0,0,0,0.5); z-index: 1;"
-                hx-get="{% url 'all_car_brands' %}" id="test" hx-target="body"></div>
-            <div class="modal-content mx-auto" style="max-width: 500px; z-index: 2;">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" hx-get="{% url 'all_car_brands' %}"
-                        hx-target="body" style="outline: none;">×</button>
-                </div>
+    <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Add Services</h4>
+                <button type="button" class="close" onclick="closeModal('addForm')">×</button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'location_data_handler' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group brand">
+                        <label class="control-label col-sm-3" for="Location Name">Location Name:</label>
+                        <div class="col-sm-6 mw-100">
+                            <input class="form-control" name="location_name" placeholder="Location Name">
+                            <span id="location_name1"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group description">
+                        <label class="control-label col-sm-3" for="Country code">Country code :</label>
+                        <div class="col-sm-6 mw-100">
+                            <input class="form-control" name="country_code" placeholder="Country code">
+                            <span id="country_code1"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group description">
+                        <label class="control-label col-sm-3" for="Service Availability">Service Availability :</label>
+                        <div class="col-sm-6 mw-100">
+                            <select name="service_availability" id="service_availability" class="form-control">
+                                service availability
+                                <option value="True" selected>Yes</option>
+                                <option value="False">No</option>
+                            </select>
+                            <span id="service_availability"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <div class="row w-100">
+                            <div class="w-100 modal_btn d-flex justify-content-around">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                    onclick="closeModal()">Close</button>
+                                <button type="submit" class="btn btn-dark">Submit</button>
+                            </div>
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner"
+                                style="display: none;">
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card d-flex w-100 mb-4">
-                <!-- <h6 class="card-header">Alerts</h6> -->
-                <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card d-flex w-100 mb-4">
+            <!-- <h6 class="card-header">Alerts</h6> -->
+            <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
 
-                    <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
-                        <marquee behavior="scroll" direction="left">
-                            <caption class="caption-top fs-4 text-dark mb-2">All Available Locations</caption>
-                        </marquee>
-                        <thead class="table-light">
-                            <tr>
-                                <th scope="col">SR.No</th>
-                                <th scope="col">locations Name</th>
-                                <th scope="col">Country Code</th>
-                                <th scope="col">Service Availability</th>
-                                <th scope="col">Store Status</th>
-                                <th scope="col">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody hx-target="body" hx-swap="outerHTML swap:1s">
-                            {% for location in page_obj %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ location.location_name }}</td>
-                                <td>{{ location.country_code }}</td>
+                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
+                    <marquee behavior="scroll" direction="left">
+                        <caption class="caption-top fs-4 text-dark mb-2">All Available Locations</caption>
+                    </marquee>
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">SR.No</th>
+                            <th scope="col">locations Name</th>
+                            <th scope="col">Country Code</th>
+                            <th scope="col">Service Availability</th>
+                            <th scope="col">Store Status</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody hx-target="body" hx-swap="outerHTML swap:1s">
+                        {% for location in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ location.location_name }}</td>
+                            <td>{{ location.country_code }}</td>
 
-                                {% if location.service_availability %}
-                                    <td>Yes</td>
-                                {% else %}
-                                    <td>No</td>
-                                {% endif %}
-                                
-                                {% if location.status == 1 %}
-                                    <td>Active</td>
-                                {% else %}
-                                    <td>In-active</td>
-                                {% endif %}
-
-                                <td>
-                                    <button class="btn" hx-delete="{% url 'delete_location' location.id %}"
-                                        hx-confirm="Are you sure you want to delete this brand?">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                    <button class="btn" hx-get="{% url 'update_location' id=location.id %}" hx-swap="beforeend"
-                                        hx-target="body" hx-swap="innerHTML">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    <!-- Pagination Controls -->
-                    <div class="pagination">
-                        <span class="step-links">
-                            {% if page_obj.has_previous %}
-                            <a href="?page=1" class="btn bg-dark text-light">&laquo; first</a>
-                            <a href="?page={{ page_obj.previous_page_number }}"
-                                class="btn bg-dark text-light">previous</a>
+                            {% if location.service_availability %}
+                            <td>Yes</td>
+                            {% else %}
+                            <td>No</td>
                             {% endif %}
 
-                            <span class="current font-weight-bold">
-                                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                            </span>
-
-                            {% if page_obj.has_next %}
-                            <a href="?page={{ page_obj.next_page_number }}" class="btn bg-dark text-light">next</a>
-                            <a href="?page={{ page_obj.paginator.num_pages }}" class="btn bg-dark text-light">last
-                                &raquo;</a>
+                            {% if location.status == 1 %}
+                            <td>Active</td>
+                            {% else %}
+                            <td>In-active</td>
                             {% endif %}
-                        </span>
+
+                            <td>
+                                <button class="btn" hx-delete="{% url 'location_action_handler' location.id %}"
+                                    hx-confirm="Are you sure you want to delete this brand?">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                <button class="btn" onclick="updatelocation('updateForm', '{{ location.id }}', 
+                                '{{ location.location_name }}', '{{ location.country_code }}', 
+                                '{{ location.status }}', '{{ location.service_availability }}')">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div id="updateForm" class="modal-form" onclick="closeModalIfOutside(event, 'updateForm')">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Update Service Category</h4>
+                            <button type="button" class="close" onclick="closeModal('updateForm')">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="modal-body">
+                                <form class="update-form" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group location_name">
+                                        <label class="control-label col-sm-3" for="location_name">Location Name:</label>
+                                        <div class="col-sm-6 mw-100">
+                                            <input type="text" class="form-control" id="location_name" name="location_name"
+                                                value="{{location.location_name}}" value="">
+                                            <span id="location_name2"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group country_code">
+                                        <label class="control-label col-sm-3" for="country_code">Country Code :</label>
+                                        <div class="col-sm-6 mw-100">
+                                            <input class="form-control" id="country_code" name="country_code"
+                                                value="{{location.country_code}}">
+                                            <span id="country_code2"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group service_availability">
+                                        <label class="control-label col-sm-3" for="service_availability">Service
+                                            Availability :</label>
+                                        <div class="col-sm-6 mw-100">
+                                            <select class="form-control" id="service_availability" name="service_availability">
+                                                <option value="{{location.service_availability}}">
+                                                    {% if location.service_availability %}
+                                                    Yes
+                                                    {% else %}
+                                                    No
+                                                    {% endif %}
+                                                </option>
+                                                <option value="True">Yes</option>
+                                                <option value="False">No</option>
+                                            </select>
+                                            <span id="service_availability"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group Status">
+                                        <label class="control-label col-sm-3" for="status">Status :</label>
+                                        <div class="col-sm-6 mw-100">
+                                            <select class="form-control" id="exampleSelect" name="status">
+                                                <option value="" disabled>Select status</option>
+                                                    {% if location.status == 1 %}
+                                                    Active
+                                                    {% elif location.status == 2 %}
+                                                    In-active
+                                                    {% endif %}
+                                                </option>
+                                                <option value="1">Active</option>
+                                                <option value="2">In-active</option>
+                                            </select>
+                                            <span id="Status"></span>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <div class="row w-100">
+                                            <div class="w-100 modal_btn d-flex justify-content-around">
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                                    onclick="closeModal('updateForm')">Close</button>
+                                                <button type="submit" class="btn btn-dark">Submit</button>
+                                            </div>
+                                            <img src="http://unclefitter.encoreskydev.com/images/spin.gif"
+                                                class="spinner" style="display: none;">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
                 </div>
+
+
+
+                <!-- Pagination Controls -->
+                <div class="pagination">
+                    <span class="step-links">
+                        {% if page_obj.has_previous %}
+                        <a href="?page=1" class="btn bg-dark text-light">&laquo; first</a>
+                        <a href="?page={{ page_obj.previous_page_number }}" class="btn bg-dark text-light">previous</a>
+                        {% endif %}
+
+                        <span class="current font-weight-bold">
+                            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                        </span>
+
+                        {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="btn bg-dark text-light">next</a>
+                        <a href="?page={{ page_obj.paginator.num_pages }}" class="btn bg-dark text-light">last
+                            &raquo;</a>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}

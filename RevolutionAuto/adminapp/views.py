@@ -9,10 +9,12 @@ from .forms import AdminRegisterForm
 from django.shortcuts import render, redirect
 from adminapp.utils.utils import brand_pagination
 from django.http import HttpRequest, HttpResponse
+from django.views.decorators.cache import never_cache 
+from django.contrib.auth.decorators import login_required
 from schemas.registration_schema import validate_registration
 
 curl = settings.CURRENT_URL
-admincurl = f"{curl}/adminapp/"
+admincurl = f"{curl}/admin/"
 
 def registration(request: HttpRequest) -> HttpResponse:
 
@@ -40,6 +42,7 @@ def registration(request: HttpRequest) -> HttpResponse:
         if request.method == 'GET':
             form = AdminRegisterForm()
             return render(request, 'admin_registration.html', {'form': form, 'curl': curl}, status=200)
+        
         if request.method == 'POST':
             data = {
                 'first_name': request.POST.get('first_name'),
@@ -51,6 +54,7 @@ def registration(request: HttpRequest) -> HttpResponse:
             try:
                 form = AdminRegisterForm(request.POST)
                 validate_registration(data)
+
                 if form.is_valid():
                     user = form.save(commit=False)
                     user.set_password(form.cleaned_data['password'])
@@ -62,22 +66,26 @@ def registration(request: HttpRequest) -> HttpResponse:
                 else:
                     messages.error(request, f" This form has not a valid input")
                 return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=400) 
+            
             except fastjsonschema.exceptions.JsonSchemaValueException as e:
                 messages.error(request,schemas.registration_schema.registration_schema.
                 get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
                 return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=400)
+            
             except json.JSONDecodeError:
                 messages.error(request, f"{e}")
                 return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=400)
-            except:
-                messages.error(request, "Internal error, Please try again")
-        messages.error(request, "Invalid request method")        
-        return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=405)
+            
+            except Exception as e:                
+                messages.error(request, "Invalid request method")        
+                return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=405)
+        
     except:
         messages.error(request, "An unexpected error occurred. Please try again.")
         return render(request, 'admin_registration.html', {'form': AdminRegisterForm()}, status=500)
     
-
+@never_cache
+@login_required
 def dashboard(request):
     """This method is use to render the dashboard page for Admin and show other different options.
 
