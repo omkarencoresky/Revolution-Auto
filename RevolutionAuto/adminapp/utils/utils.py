@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
-from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services
+from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services, SubServices
 
 def brand_pagination(request: HttpRequest) -> HttpResponse:
 
@@ -22,7 +22,7 @@ def brand_pagination(request: HttpRequest) -> HttpResponse:
     return page_obj
 
 
-def year_pagination(request:HttpRequest) -> HttpResponse:
+def year_pagination(request: HttpRequest) -> HttpResponse:
     
     """Paginate a list of all years and return a Page object.
 
@@ -42,7 +42,7 @@ def year_pagination(request:HttpRequest) -> HttpResponse:
     return page_obj
 
 
-def model_pagination(request:HttpRequest) -> HttpResponse:
+def model_pagination(request: HttpRequest) -> HttpResponse:
 
     """Paginate a list of all model and return a Page object.
 
@@ -62,7 +62,7 @@ def model_pagination(request:HttpRequest) -> HttpResponse:
     return page_obj
 
 
-def trim_pagination(request:HttpRequest) -> HttpResponse:
+def trim_pagination(request: HttpRequest) -> HttpResponse:
 
     """Paginate a list of all trims and return a Page object.
 
@@ -82,7 +82,7 @@ def trim_pagination(request:HttpRequest) -> HttpResponse:
     return page_obj
 
 
-def locations_pagination(request:HttpRequest) -> HttpResponse:
+def locations_pagination(request: HttpRequest) -> HttpResponse:
     
     """Paginate a list of all locations and return a Page object.
 
@@ -102,7 +102,7 @@ def locations_pagination(request:HttpRequest) -> HttpResponse:
     return page_obj
 
 
-def service_type_pagination(request:HttpRequest) -> HttpResponse:
+def service_type_pagination(request: HttpRequest) -> HttpResponse:
     
     """Paginate a list of all service_type and return a Page object.
 
@@ -122,7 +122,7 @@ def service_type_pagination(request:HttpRequest) -> HttpResponse:
     return page_obj
 
 
-def service_category_pagination(request:HttpRequest) -> HttpResponse:
+def service_category_pagination(request: HttpRequest) -> HttpResponse:
     
     """Paginate a list of all service_category and return a Page object.
 
@@ -142,7 +142,7 @@ def service_category_pagination(request:HttpRequest) -> HttpResponse:
     return page_obj
 
 
-def services_pagination(request:HttpRequest) -> HttpResponse:
+def services_pagination(request: HttpRequest) -> HttpResponse:
     
     """Paginate a list of all services and return a Page object.
 
@@ -153,6 +153,26 @@ def services_pagination(request:HttpRequest) -> HttpResponse:
     -  page_obj: A Page object containing the paginated services for the services pagination.
     """
     Location_1 = Services.objects.all().order_by('id')
+    
+    # Pagination setup
+    paginator = Paginator(Location_1, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return page_obj
+
+
+def sub_services_pagination(request: HttpRequest) -> HttpResponse:
+    
+    """Paginate a list of all services and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for services pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated services for the services pagination.
+    """
+    Location_1 = SubServices.objects.all().order_by('id')
     
     # Pagination setup
     paginator = Paginator(Location_1, 10)

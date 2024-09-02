@@ -32,18 +32,15 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
     """
     try:
         if request.method == 'GET':
-            print("here")
             page_obj = locations_pagination(request)
 
             context = {
                 'curl' : admincurl,
                 'page_obj': page_obj
             }
-            print("here0")
             return render(request, 'location/location.html', context)
         
         elif request.method == 'POST':
-            print("here1")
 
             location_name = request.POST.get('location_name')
             form = AddLocationForm(request.POST)
@@ -77,7 +74,6 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
                 return render(request, 'location/location.html', context)
             
         else:
-            print("here3")
             messages.error(request, 'Invalid inputs, please try again')
             return redirect ('location_data_handler')
         
@@ -91,7 +87,6 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
         return redirect ( 'location_data_handler')
     
     except Exception as e:
-        print("here5")
         messages.error(request, 'Unexpected error occur, try again')
         return redirect('admin_dashboard')   
 

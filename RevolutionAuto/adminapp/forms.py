@@ -1,7 +1,7 @@
 from django import forms
 from userapp.models import CustomUser
 from django_ckeditor_5.widgets import CKEditor5Widget
-from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services
+from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services, SubServices
 
 
 
@@ -125,3 +125,10 @@ class AddServicsForm(forms.ModelForm):
         widgets = {
             'content': CKEditor5Widget(config_name='extends'),
         }
+
+
+class AddSubServiceForm(forms.ModelForm):
+
+    class Meta:
+        model = SubServices
+        fields = ['service', 'display_text', 'sub_service_title', 'sub_service_description', 'order', 'selection_type', 'optional']

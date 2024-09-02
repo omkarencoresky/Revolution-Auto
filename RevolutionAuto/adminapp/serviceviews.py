@@ -1,19 +1,19 @@
 import json
 import schemas
 import fastjsonschema
+import schemas.service_schema
+
 from django.conf import settings
 from django.contrib import messages
-
-import schemas.service_schema
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
-from django.views.decorators.csrf import csrf_exempt, csrf_protect
-from django.core.exceptions import ObjectDoesNotExist
-from .models import ServiceType, ServiceCategory, Services
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
+from .models import ServiceType, ServiceCategory, Services, SubServices
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from .forms import AddServiceTypeForm, AddServiceCategoryForm, AddServicsForm
-from adminapp.utils.utils import service_type_pagination,service_category_pagination, services_pagination
-from schemas.service_schema import validate_service_type_details, validate_service_category_details, validate_services_details
+from .forms import AddServiceTypeForm, AddServiceCategoryForm, AddServicsForm, AddSubServiceForm
+from adminapp.utils.utils import service_type_pagination,service_category_pagination, services_pagination, sub_services_pagination
+from schemas.service_schema import validate_service_type_details, validate_service_category_details, validate_services_details, validate_sub_service_details
 
 curl = settings.CURRENT_URL
 admincurl = f"{curl}/admin/"
@@ -23,6 +23,7 @@ context = {
 }
 
 # ---------------Service type views---------------
+
 def service_type_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """This Method is used to show the form and add new service type itno the database. 
 
@@ -148,6 +149,7 @@ def service_type_action_handler(request: HttpRequest, id:int) -> HttpResponse | 
 
 
 # ---------------Service category views---------------
+
 def service_category_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """This method is use to render the main page for service category and show the service category list
 
@@ -227,7 +229,6 @@ def service_category_action_handler(request: HttpRequest, id:int) -> HttpRespons
 
             service_type = request.POST.get('service_type')
             service_category_name = request.POST.get('service_category_name')
-            print('service_type',service_type)
             data = {
                 'service_type': service_type,
                 'service_category_name': service_category_name
@@ -284,7 +285,7 @@ def service_category_action_handler(request: HttpRequest, id:int) -> HttpRespons
         return redirect ( 'service_category_data_handler')
         
     except ObjectDoesNotExist:
-        messages.error(f"Service category does not exist.")
+        messages.error(request, f"Service category does not exist.")
         return redirect('service_category_data_handler')
     
     except TemplateDoesNotExist:
@@ -293,6 +294,7 @@ def service_category_action_handler(request: HttpRequest, id:int) -> HttpRespons
  
 
 # ---------------Services views---------------
+
 @csrf_exempt
 def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """This method is use to render the main page for service and show the service list
@@ -305,7 +307,6 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
     """
     try:
         if request.method == 'GET':
-            print('working')
             page_obj = services_pagination(request)
             service_category = service_category_pagination(request)
             context = {
@@ -337,15 +338,8 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
                 messages.success(request,"Added successfully!!!")
                 return redirect('service_data_handler')
         else:
-            page_obj = services_pagination(request)
-            service_category = service_category_pagination(request)
-            context = {
-                'curl':admincurl,
-                'page_obj':page_obj,
-                'service_category':service_category
-            }
-                
-            return render(request, 'service/services.html', context) 
+            messages.error(request,"invalid request, try again")
+            return redirect('service_data_handler') 
             
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.service_schema.services_schema.
@@ -378,7 +372,6 @@ def service_action_handler(request: HttpRequest, id:int) -> HttpResponse:
             service = Services.objects.get(id=id)
 
             service_title = request.POST.get('service_title')
-            print('service_title',service_title)
             service_category = request.POST.get('service_category')
             service_description = request.POST.get('service_description')
 
@@ -436,12 +429,79 @@ def service_action_handler(request: HttpRequest, id:int) -> HttpResponse:
 def sub_services_data_handler(request: HttpRequest):
     try:
         if request.method == 'GET':
-            # page_obj = sub
+            page_obj = sub_services_pagination(request)
+            services = services_pagination(request)
+            context = {
+                'curl':admincurl,
+                'page_obj':page_obj,
+                'services':services
+            }
             return render(request, 'service/sub_service.html',context)
         
         elif request.method == 'POST':
-            pass
-            
-    except Exception as e:
+            form = AddSubServiceForm(request.POST)
 
+            if form.is_valid():
+                service = request.POST.get('service')
+                order = request.POST.get('order')
+                selection_type = request.POST.get('selection_type')
+                optional = request.POST.get('optional')
+                
+                try:
+                    data_validate = SubServices.objects.get(service=service, order=order, selection_type=selection_type, optional=optional)
+
+                except SubServices.DoesNotExist:
+                        form.save()
+                        messages.success(request, 'Added Successful')
+                        return redirect('sub_services_data_handler')
+                
+                except SubServices.MultipleObjectsReturned:
+                        messages.error(request, 'Same record already available, try again')
+                        return redirect('sub_services_data_handler')
+            else:
+                messages.error(request, 'error')
+                return redirect('sub_services_data_handler')
+
+        else:
+            messages.error(request, 'Invalid request, try again')
+            return redirect('sub_services_data_handler')
+            
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return render(request, 'admin_dashboard.html')
+    
+    except Exception as e:
+        messages.error(request, f"{e}")
         return render(request, 'service/sub_service.html')
+    
+
+def sub_services_action_handler(request: HttpRequest, id: int) -> HttpResponse:
+
+    if request.method == 'POST':
+            print('working')
+            service = Services.objects.get(id=id)
+
+            service_title = request.POST.get('service_title')
+            service_category = request.POST.get('service_category')
+            service_description = request.POST.get('service_description')
+
+            data = {
+                'service_title':service_title,
+                'service_category':service_category,
+                'service_description':service_description,
+            }
+            validate_services_details(data)
+
+            # Get existing or old data
+            old_service_category = ServiceCategory.objects.get(id=int(service.service_category.id))
+            old_service_title = service.service_title
+            old_service_description = service.service_description
+
+            # Update new or existing data
+            service.status = request.POST.get('status', 1)
+            service.service_title = request.POST.get('service_title', old_service_title)
+            service.service_description = request.POST.get('service_description', old_service_description)
+            service.service_category = ServiceCategory.objects.get(id=int(service_category)) if service_category else old_service_category
+
+    messages.success(request, 'Update successfully!!')
+    return redirect('service_data_handler')

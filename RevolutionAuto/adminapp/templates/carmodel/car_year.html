@@ -4,15 +4,6 @@
 {% block content %}
 <div class="container-fluid flex-grow-1 container-p-y">
     <h4 class="font-weight-bold py-3 mb-0">CAR YEARS</h4>
-    <!-- <div class="text-muted small mt-0 mb-4 d-block breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item" >Basic UI</li>
-            <li class="breadcrumb-item active" >Alerts</li> 
-            <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-                hx-get="{{curl}}showaddyear/" hx-swap="beforeend" hx-target="body">Add year</button>
-        </ol>
-    </div> -->
 
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
@@ -45,7 +36,7 @@
                         <div class="col-sm-6 mw-100">
                             <select name="car_id" class="form-control">
                                 <option value="">Select Car Brand</option>
-                                {% for brand in brand %}
+                                {% for brand in brands %}
                                 <option value="{{brand.id}}">{{brand.brand}}</option>
                                 {% endfor %}
                             </select>
@@ -161,7 +152,7 @@
                                     <label class="control-label col-sm-3" for="description">Status :</label>
                                     <div class="col-sm-6 mw-100">
                                         <select class="form-control" id="exampleSelect" name="status">
-                                            <option value="{{ edit_year_obj.status }}">
+                                            <!-- <option value="{{ edit_year_obj.status }}"> -->
                                                 {% if edit_year_obj.status == 1 %}
                                                 Active
                                                 {% elif edit_year_obj.status == 2 %}

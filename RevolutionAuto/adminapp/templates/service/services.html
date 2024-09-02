@@ -57,8 +57,7 @@
                     <div class="form-group brand">
                         <label class="control-label col-sm-3" for="service_description">Service Description:</label>
                         <div class="col-sm-6 mw-100">
-                            <textarea class="form-control" name="service_description"
-                                rows="10" cols="40"></textarea>
+                            <textarea class="form-control" name="service_description" rows="10" cols="40"></textarea>
                             <script>
                                 CKEDITOR.replace('service_description')
                             </script>
@@ -143,7 +142,7 @@
                         </div>
                         <div class="modal-body">
                             <form class="update-form" method="post">
-                                {% csrf_token %}    
+                                {% csrf_token %}
 
                                 <div class="form-group brand">
                                     <label class="control-label col-sm-3" for="service_category">Service

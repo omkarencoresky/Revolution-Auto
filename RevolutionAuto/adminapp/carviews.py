@@ -290,6 +290,7 @@ def car_year_data_handler(request: HttpRequest) -> HttpResponse:
 
 @never_cache
 @login_required
+@csrf_exempt
 def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse:
     """
     Updates the details of a car year based on the provided form data. It then attempts to update the brand's details using the data 
@@ -344,7 +345,7 @@ def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse:
                 'curl': request.build_absolute_uri(admincurl)
             }
             
-            messages.success(request,f"{Year.car_id.brand} Deleted successfully")
+            messages.success(request,f"Deleted successfully")
             return render(request, 'carmodel/car_year.html',context , status=200)
         
         
@@ -373,7 +374,8 @@ def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse:
 # Function for the Car Models model
 @never_cache
 @login_required
-def all_car_models(request: HttpRequest) -> HttpResponse:
+@csrf_exempt
+def car_model_data_handler(request: HttpRequest) -> HttpResponse:
     """This method is use to render the main page for car model and show the all saved model's list.
 
     Args:
@@ -383,149 +385,69 @@ def all_car_models(request: HttpRequest) -> HttpResponse:
         Httprequest: This method is use for render the car model page.
     """
     try:
-        page_obj = model_pagination(request)
+        if request.method == 'GET':
 
-        context = {
-            'curl':admincurl,
-            'page_obj': page_obj
-        }
-        return render(request, 'carmodel/car_model.html', context)
-    except Exception as e:
-        messages.error(request,f"{e}")
-        return render(request, 'admin_dashboard.html')
+            page_obj = model_pagination(request)
+            brands = brand_pagination(request)
+            years = year_pagination(request)
 
-@never_cache
-@login_required
-def display_add_model(request: HttpRequest) -> HttpResponse:
-    """This Method is allow to show the add model page with help of htmx request. 
-
-    Args:
-        request: The incoming HTTP request containing the html for shows the add model form.
-
-    Returns:
-        Httprequest: If success render the page for add model if fail render on carmodel or main page.
-    """
-    try:
-        page_obj = brand_pagination(request)
-        year_obj = year_pagination(request)
-
-        context = {
-            'curl':admincurl,
-            'page_obj': page_obj,
-            'year_obj': year_obj
-        }
-        return render(request, 'carmodel/show_add_model.html',  context)
-    except Exception as e:
-        messages.error(request,f"{e}")
-        return render(request, 'admin_dashboard.html')
-
-@never_cache
-@login_required
-def add_car_model(request: HttpRequest) -> HttpResponse:
-    """This Method is allow to insert the another model of car itno the database. 
-
-    Args:
-        request: The incoming HTTP request containing form for add new model.
-
-    Returns:
-        Httprequest: Add the record and if success redirect on the carmodel page and if fail render on same page.
-    """
-    try:
-        page_obj = model_pagination(request)
-        context = {
-            'curl': admincurl,
-            'page_obj': page_obj
-        }
-
-        if request.method == 'POST':
-            form = AddModelForm(request.POST)
             context = {
-                'curl': admincurl,
+                'curl':admincurl,
+                'page_obj': page_obj,
+                'brands':brands,
+                'years':years
             }
+            return render(request, 'carmodel/car_model.html', context)
+        
+        elif request.method == 'POST':
 
-            try:
-                data={
-                    'car_id':request.POST.get('car_id'),
-                    'year_id':request.POST.get('year_id'),
-                    'model_name':request.POST.get('model_name'),
+            form = AddModelForm(request.POST)
+            data={
+                'car_id':request.POST.get('car_id'),
+                'year_id':request.POST.get('year_id'),
+                'model_name':request.POST.get('model_name'),
+            }
+            car_management_schemas.validate_car_model_details(data)
+
+            if form.is_valid():
+
+                model = form.save(commit=False)
+                model_name = request.POST['model_name']
+                token = hashlib.sha256(model_name.encode()).hexdigest()
+                model.remember_token = token
+                model.save()
+                
+                page_obj = model_pagination(request)
+                context = {
+                    'curl': admincurl,
+                    'page_obj': page_obj
                 }
-                car_management_schemas.validate_car_model_details(data)
-
-                if form.is_valid():
-
-                    model = form.save(commit=False)
-                    model_name = request.POST['model_name']
-                    token = hashlib.sha256(model_name.encode()).hexdigest()
-                    model.remember_token = token
-                    model.save()
-                    
-                    page_obj = model_pagination(request)
-                    context = {
-                        'curl': admincurl,
-                        'page_obj': page_obj
-                    }
-                    
-                    messages.success(request, "Added successfully!")
-                    return render(request, 'carmodel/car_model.html', context)
                 
-                else:
-                    messages.error(request, 'Invalid request, Try again')
-                    return render(request, 'carmodel/car_model.html', context) 
+                messages.success(request, "Added successfully!")
+                return redirect('car_model_data_handler')
+            
+        else:
+            messages.error(request, 'Invalid request, Try again')
+            return redirect('car_model_data_handler') 
                     
-            except fastjsonschema.exceptions.JsonSchemaValueException as e:
-                messages.error(request,schemas.car_management_schemas.car_model_schema.
-                get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect('all_car_models')
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        messages.error(request,schemas.car_management_schemas.car_model_schema.
+        get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
+        return redirect('car_model_data_handler')
 
-            except json.JSONDecodeError:
-                messages.error(request, f"{e}")
-                return redirect('all_car_models')
-                
-            except Exception as e:
-                messages.error(request, f"{e}")
-                return redirect('all_car_models')
-        
-    except Exception as e:
+    except json.JSONDecodeError:
         messages.error(request, f"{e}")
-        return redirect('all_car_models')
-
-@never_cache
-@login_required   
-def delete_car_model(request: HttpRequest, id: int) -> HttpResponse:
-    """This method is allow to Delete model record with the confirmation popup
-
-    Args:
-        request: The incoming HTTP request containing data for delete a model.
-        id (integer): Thi is model record id .
-
-    Returns:
-        Httprequest: if the model id is available the render it on the car_model page withh success 
-        message and if not than show the error on same page.
-    """
-    try:
-        model = CarModel.objects.get(id=id)
-        model.delete()
-        page_obj = model_pagination(request)
-        
-        context = {
-            'page_obj': page_obj,
-            'curl': request.build_absolute_uri(admincurl)
-        }
-        messages.success(request,f"{model.model_name} Deleted successfully")
-        return render(request, 'carmodel/car_model.html',context , status=200)
+        return redirect('car_model_data_handler')
     
-    except ObjectDoesNotExist:
-        # Handle case where the object does not exist
-        messages.error(f"Car model with id {id} does not exist.")
-        return render(request, 'carmodel/car_model.html', context, status=404)
-    
-    except Exception as e:  
-        messages.error(f"Error: {str(e)}")
-        return render(request, 'carmodel/car_model.html', context, status=500)
+    except Exception as e:
+        messages.error(request,f"{e}")
+        return render(request, 'admin_dashboard.html')
+
 
 @never_cache
 @login_required    
-def update_car_model(request: HttpRequest, id: int) -> HttpResponse:
+@csrf_exempt
+def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse:
     """
     Updates the details of a car model based on the provided form data. It then attempts to update the model's details using the data 
     submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car model listing page.
@@ -539,38 +461,17 @@ def update_car_model(request: HttpRequest, id: int) -> HttpResponse:
     - HttpResponse: Renders the update form template with the submitted data and validation errors if the update fails.
 
     """
-    if request.method == 'GET':
-
-        page_obj = brand_pagination(request)
-        year_obj = year_pagination(request)
-        edit_model_obj = CarModel.objects.get(id=id)
-
-        context = {
-                'curl':admincurl,
-                'year_obj':year_obj,
-                'page_obj': page_obj,
-                'edit_model_obj':edit_model_obj,
-            }
-        return render(request, 'carmodel/model_edit.html', context)
-    
     try:
-        page_obj = model_pagination(request)
-        context = {
-                'page_obj': page_obj,   
-                'curl':admincurl,   
-            }
-        
-        car_id = request.POST.get('car_id')
-        year_id = request.POST.get('year_id')
-
-        data={
-            'car_id':car_id,
-            'year_id':year_id,
-            'model_name':request.POST.get('model_name'),
-        }
-        car_management_schemas.validate_car_model_details(data)
-                        
         if request.method == 'POST':
+            car_id = request.POST.get('car_id')
+            year_id = request.POST.get('year_id')
+
+            data={
+                'car_id':car_id,
+                'year_id':year_id,
+                'model_name':request.POST.get('model_name'),
+            }
+            car_management_schemas.validate_car_model_details(data)
             model = CarModel.objects.get(id=id)
             old_model = model.model_name
             old_year = CarYear.objects.get(id=int(model.year_id.id))
@@ -592,31 +493,52 @@ def update_car_model(request: HttpRequest, id: int) -> HttpResponse:
             model.save()
 
             messages.success(request, 'Updated successfully!')
-            return redirect('all_car_models')
+            return redirect('car_model_data_handler')
         
+        elif request.method == 'DELETE':
+
+            model = CarModel.objects.get(id=id)
+            model.delete()
+            page_obj = model_pagination(request)
+            brands = brand_pagination(request)
+            years = year_pagination(request)
+
+            context = {
+                'curl':admincurl,
+                'page_obj': page_obj,
+                'brands':brands,
+                'years':years
+            }
+            messages.success(request, f"Deleted successfully")
+            return render(request, 'carmodel/car_model.html', context)
+     
         else:
             messages.error(request, 'Invalid inputs, try again')
-            return redirect('all_car_models')
+            return redirect('car_model_data_handler')
+        
+    except ObjectDoesNotExist:
+        messages.error(f"Car model with id {id} does not exist.")
+        return redirect('car_model_data_handler')
         
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.car_management_schemas.car_model_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-        return redirect('all_car_models')
+        return redirect('car_model_data_handler')
 
     except json.JSONDecodeError:
         messages.error(request, f"{e}")
-        return redirect('all_car_models')
+        return redirect('car_model_data_handler')
 
     except Exception as e:
         messages.error(request, f"{e}")
-        return redirect('all_car_models')
+        return redirect('car_model_data_handler')
 
 
 
-# Function for the Car Car model
+# Function for the Car trim
 @never_cache
 @login_required
-def all_car_trims(request: HttpRequest) -> HttpResponse:
+def car_trim_data_handler(request: HttpRequest) -> HttpResponse:
     """This method is use to render the main page for car trim and show the all saved trim's list.
 
     Args:
@@ -625,123 +547,69 @@ def all_car_trims(request: HttpRequest) -> HttpResponse:
     Returns:
         Httprequest: This method is use for render the car trim page.
     """
-    # try:
-    page_obj = trim_pagination(request)
-    brand_obj = brand_pagination(request)
-    year_obj = year_pagination(request)
-    context ={
-        'curl':admincurl,
-        'page_obj':page_obj,
-        'brand_obj':brand_obj,
-        'year_obj':year_obj
-    }
-    return render(request, 'carmodel/car_trim.html', context)
-    # except Exception as e:
-    #     messages.error(request,f"{e}")
-    #     return render(request, 'admin_dashboard.html')
-
-@never_cache
-@login_required
-def display_add_trim(request: HttpRequest) -> HttpResponse:
-    """This Method is allow to show the add trim page with help of htmx request. 
-
-    Args:
-        request: The incoming HTTP request containing the html for shows the add trims form.
-
-    Returns:
-        Httprequest: If success render the page for add trim if fail render on carmodel or main page.
-    """
     try:
-        page_obj = model_pagination(request)
-        brand_obj = brand_pagination(request)
-        year_obj = year_pagination(request)
-        context ={
-            'curl':admincurl,
-            'page_obj':page_obj,
-            'brand_obj':brand_obj,
-            'year_obj':year_obj
-        }
-        
-        return render(request, 'carmodel/show_add_trim.html',context)
+        if request.method == 'GET':
+
+            page_obj = trim_pagination(request)
+            brands = brand_pagination(request)
+            years = year_pagination(request)
+            models = model_pagination(request)
+            context ={
+                'curl':admincurl,
+                'page_obj':page_obj,
+                'brands':brands,
+                'years':years,
+                'models':models
+            }
+            return render(request, 'carmodel/car_trim.html', context)
+
+        elif request.method == 'POST':
+
+            form = AddTrimForm(request.POST)
+            trim_name = request.POST.get('car_trim_name')
+            data = {
+                'car_id':request.POST.get('car_id'),
+                'year_id':request.POST.get('year_id'),
+                'model_id':request.POST.get('model_id'),
+                'car_trim_name':trim_name   
+                }
+            car_management_schemas.validate_car_trim_details(data)
+
+            if form.is_valid():
+
+                trim = form.save(commit=False)
+                token = hashlib.sha256(trim_name.encode()).hexdigest()
+                trim.remember_token = token
+                form.save()
+                messages.success(request, "Added successfully!")
+                return redirect('car_trim_data_handler')
+            
+            else:
+                messages.error(request, 'Invalid request, Try again')
+                return redirect('car_trim_data_handler') 
+        else:
+                messages.error(request, 'Invalid request, Try again')
+                return redirect('car_trim_data_handler') 
+                
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        messages.error(request,schemas.car_management_schemas.car_trim_schema.
+        get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
+        return redirect('car_trim_data_handler')
+
+    except json.JSONDecodeError:
+        messages.error(request, f"{e}")
+        return redirect('car_trim_data_handler')
+    
     except Exception as e:
         messages.error(request,f"{e}")
         return render(request, 'admin_dashboard.html')
 
-@never_cache
-@login_required
-def add_car_trim(request: HttpRequest) -> HttpResponse:
-    """This Method is allow to insert the another trim of car itno the database. 
 
-    Args:
-        request
-
-    Returns:
-        Httprequest: Add the record and if success redirect on the cartrim page and if fail render on same page.
-    """
-    try:
-        page_obj = model_pagination(request)
-        brand_obj = brand_pagination(request)
-        year_obj = year_pagination(request)
-        context ={
-            'curl':admincurl,
-            'page_obj':page_obj,
-            'brand_obj':brand_obj,
-            'year_obj':year_obj
-        }
-        if request.method == 'POST':
-            form = AddTrimForm(request.POST)
-
-            context = {
-                'page_obj': page_obj,
-                'curl':admincurl,
-            }
-            try:
-                trim_name = request.POST.get('car_trim_name')
-                data = {
-                    'car_id':request.POST.get('car_id'),
-                    'year_id':request.POST.get('year_id'),
-                    'model_id':request.POST.get('model_id'),
-                    'car_trim_name':trim_name   
-                    }
-                car_management_schemas.validate_car_trim_details(data)
-                if form.is_valid():
-                    trim = form.save(commit=False)
-                    token = hashlib.sha256(trim_name.encode()).hexdigest()
-                    trim.remember_token = token
-                    form.save()
-                    page_obj = trim_pagination(request)
-
-                    context = {
-                        'curl':admincurl,
-                        'page_obj': page_obj
-                    }
-                    messages.success(request, "Added successfully!")
-                    return render(request, 'carmodel/car_trim.html', context)
-                
-                else:
-                    messages.error(request, 'Invalid request, Try again')
-                    return render (request, 'carmodel/car_trim.html', context) 
-                
-            except fastjsonschema.exceptions.JsonSchemaValueException as e:
-                messages.error(request,schemas.car_management_schemas.car_trim_schema.
-                get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-                return redirect('all_car_trims')
-
-            except json.JSONDecodeError:
-                messages.error(request, f"{e}")
-                return redirect('all_car_trims')
-                
-            except Exception as e:
-                messages.error(request, f"{e}")
-                return redirect('all_car_trims')
-        
-    except Exception as e:
-        messages.error(request, f"{e}")
-    return redirect('all_car_trims')
 
 @never_cache
 @login_required
-def delete_car_trim(request: HttpRequest, id: int) -> HttpResponse:
+@csrf_exempt
+def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse:
     """This method is allow to Delete trim record with the confirmation popup
 
     Args:
@@ -753,79 +621,19 @@ def delete_car_trim(request: HttpRequest, id: int) -> HttpResponse:
         message and if not than show the error on same page.
     """
     try:
-        trim = CarTrim.objects.get(id=id)
-        trim.delete()
-        page_obj = trim_pagination(request)
-        
-        context = {
-            'page_obj': page_obj,
-            'curl': request.build_absolute_uri(admincurl)
-        }
-        messages.success(request,f"{trim.car_trim_name} Deleted successfully")
-        return render(request, 'carmodel/car_trim.html',context , status=200)
-    
-    except ObjectDoesNotExist:
-        messages.error(f"Car model with id {id} does not exist.")
-        return render(request, 'carmodel/car_trim.html', context, status=404)
-    
-    except Exception as e:  
-        messages.error(f"Error: {str(e)}")
-        return render(request, 'carmodel/car_trim.html', context, status=500)
-
-@never_cache
-@login_required    
-def update_car_trim(request: HttpRequest, id: int) -> HttpResponse:
-    """
-    Updates the details of a car trim based on the provided form data. It then attempts to update the trim's details using the data 
-    submitted through the HTTP request. If the update operation is successful, the user is redirected to the main car trim listing page.
-
-    Args::
-    - request (HttpRequest): The incoming HTTP request containing the form data for updating the trim.
-    - year_id (int): The unique identifier of the car trim to be updated.
-
-    Returns:
-    - HttpResponseRedirect: Redirects to the main car trim listing page if the update is successful.
-    - HttpResponse: Renders the update form template with the submitted data and validation errors if the update fails.
-
-    """
-    if request.method == 'GET':
-
-        year_obj = year_pagination(request)
-        page_obj = brand_pagination(request)
-        model_obj = model_pagination(request)
-        edit_trim_obj = CarTrim.objects.get(id=id)
-
-        context = {
-                'curl':admincurl,
-                'year_obj':year_obj,
-                'page_obj': page_obj,
-                'model_obj':model_obj,
-                'edit_trim_obj':edit_trim_obj,
-            }
-        return render(request, 'carmodel/trim_edit.html', context)
-    
-    try:
-
-        car_id = request.POST.get('car_id')
-        year_id = request.POST.get('year_id')
-        model_id = request.POST.get('model_id')
-        page_obj = trim_pagination(request)
-        
-        context = {
-                'page_obj': page_obj,   
-                'curl':admincurl,   
-            }
-        
-        data = {
-            'car_id':car_id,
-            'year_id':year_id,
-            'model_id':model_id,
-            'car_trim_name':request.POST.get('car_trim_name')    
-            }
-        car_management_schemas.validate_car_trim_details(data)
-                        
         if request.method == 'POST':
-
+            car_id = request.POST.get('car_id')
+            year_id = request.POST.get('year_id')
+            model_id = request.POST.get('model_id')
+            
+            data = {
+                'car_id':car_id,
+                'year_id':year_id,
+                'model_id':model_id,
+                'car_trim_name':request.POST.get('car_trim_name')    
+                }
+            car_management_schemas.validate_car_trim_details(data)
+                        
             trim = CarTrim.objects.get(id=id)
             old_trim = trim.car_trim_name
             old_year = CarYear.objects.get(id=int(trim.year_id.id))
@@ -848,21 +656,38 @@ def update_car_trim(request: HttpRequest, id: int) -> HttpResponse:
             trim.save()
 
             messages.success(request, 'Updated successfully!')
-            return redirect('all_car_trims')
+            return redirect('car_trim_data_handler')
+        
+        elif request.method == 'DELETE': 
+            trim = CarTrim.objects.get(id=id)
+            trim.delete()
+            
+            page_obj = trim_pagination(request)
+            
+            context = {
+                'page_obj': page_obj,
+                'curl': request.build_absolute_uri(admincurl)
+            }
+            messages.success(request,f"Deleted successfully")
+            return render(request, 'carmodel/car_trim.html',context , status=200)
         
         else:
             messages.error(request, 'Invalid inputs, try again')
-            return redirect('all_car_trims')
-        
+            return redirect('car_trim_data_handler')
+
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.car_management_schemas.car_trim_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-        return redirect('all_car_trims')
+        return redirect('car_trim_data_handler')
 
     except json.JSONDecodeError:
         messages.error(request, f"{e}")
-        return redirect('all_car_trims')
-
-    except Exception as e:
-        messages.error(request, f"{e}")
-        return redirect('all_car_trims')
+        return redirect('car_trim_data_handler')
+    
+    except ObjectDoesNotExist:
+        messages.error(f"Car model with id {id} does not exist.")
+        return render(request, 'carmodel/car_trim.html', context, status=404)
+    
+    except Exception as e:  
+        messages.error(f"Error: {str(e)}")
+        return render(request, 'carmodel/car_trim.html', context, status=500)
