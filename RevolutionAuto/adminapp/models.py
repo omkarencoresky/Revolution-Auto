@@ -88,14 +88,13 @@ class ServiceCategory(models.Model):
     service_category_name = models.CharField(max_length=150, blank=False)
     service_type = models.ForeignKey(ServiceType,on_delete=models.CASCADE)
     status = models.SmallIntegerField(default=1, blank=False)
-    # remember_token = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'service_category'
 
-class Services(models.Model): #Add a column for the popularityof services
+class Services(models.Model): #Add a column for the popularity of services
     YES_NO_CHOICES = [
         ('Yes', 'Yes'),
         ('No', 'No'),
@@ -127,9 +126,10 @@ class SubServices(models.Model):
 
     id = models.AutoField(primary_key=True)
     sub_service_title = models.CharField(max_length=150, blank=False)
+    display_text = models.CharField(max_length=200, blank=True)
     sub_service_description = CKEditor5Field('Content', config_name='extends')
     service = models.ForeignKey(Services,on_delete=models.CASCADE)
-    selection_type = models.CharField(max_length=8, choices=SELECTION_TYPE_CHOICES, default='No' ) 
+    selection_type = models.CharField(max_length=8, choices=SELECTION_TYPE_CHOICES, blank=False ) 
     order = models.SmallIntegerField(blank=False)
     optional = models.CharField(max_length=5, choices=YES_NO_CHOICES, default='No' ) 
     status = models.SmallIntegerField(default=1, blank=False)

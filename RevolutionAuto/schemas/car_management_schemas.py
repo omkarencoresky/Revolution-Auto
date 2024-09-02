@@ -9,13 +9,13 @@ car_brand_schema = {
             "minLength": 3,
             "maxLength": 50,
             "pattern": "^[a-zA-Z ]+$",
-            "description": "Car brand must be 3 to 50 characters and allowed only alphabets."
+            "description": "Car brand should be 3 to 50 characters and allowed only alphabets."
             },
         "description": {
             "type": "string",
             "maxLength": 50,
             "pattern": "^[a-zA-Z0-9 ]+$",
-            "description": "Car description must be 3 to 50 characters and in a valid format."
+            "description": "Car description should be 3 to 50 characters and in a valid format."
             },
         "image_format": {
             "type": "string",
