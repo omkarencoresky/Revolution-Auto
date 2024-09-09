@@ -87,8 +87,9 @@
                             {% endif %}
 
                             <td>
-                                <button class="btn" hx-delete="{% url 'service_type_action_handler' service.id %}"
-                                    hx-confirm="Are you sure you want to delete this brand?">
+                                <button class="btn" 
+                                        hx-delete="{% url 'service_type_action_handler' service.id %}"
+                                        hx-confirm="Are you sure you want to delete this brand?">
                                     <i class="fa fa-trash"></i>
                                 </button>
                                 <button class="btn" key="{{ service.id }}"
@@ -114,7 +115,8 @@
                                     <label class="control-label col-sm-3" for="service_type_name">Service Type
                                         Name:</label>
                                     <div class="col-sm-6 mw-100">
-                                        <input class="form-control" id="service_type_name" name="service_type_name" value="">
+                                        <input class="form-control" id="service_type_name" name="service_type_name"
+                                            value="">
                                         <span id="service_type_name"></span>
                                     </div>
                                 </div>
@@ -135,7 +137,7 @@
                                     <div class="row w-100">
                                         <div class="w-100 modal_btn d-flex justify-content-around">
                                             <button type="button" class="btn btn-danger" data-dismiss="modal"
-                                            onclick="closeModal('updateForm')">Close</button>
+                                                onclick="closeModal('updateForm')">Close</button>
                                             <button type="submit" class="btn btn-dark">Submit</button>
                                         </div>
                                         <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner"

@@ -27,7 +27,7 @@
     <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h3 class="modal-title">Add Services</h3>
+                <h3 class="modal-title">Add Sub-Services</h3>
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
             <div class="modal-body">
@@ -38,7 +38,7 @@
                         <div>
                             <select name="service" class="form-control">
                                 <option value="">Select Service</option>
-                                {% for service in subservices %}
+                                {% for service in services %}
                                 <option value="{{service.id}}">{{service.service_title}}</option>
                                 {% endfor %}
                             </select>
@@ -266,8 +266,8 @@
                                 </div>
 
                                 <div class="form-group description">
-                                    <label class="control-label col-sm-3" for="Status">Status :</label>
-                                    <div class="col-sm-6 mw-100">
+                                    <label class="control-label" for="Status">Status :</label>
+                                    <div class="mw-100">
                                         <select class="form-control" id="exampleSelect" name="status">
                                             <option value="1">Active</option>
                                             <option value="2">In-active</option>

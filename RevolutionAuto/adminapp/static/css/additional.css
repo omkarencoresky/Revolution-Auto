@@ -125,3 +125,40 @@ tr.htmx-swapping td {
 	display: flex;
 	justify-content: space-around;
 }
+
+
+
+.body {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.fullscreen-image {
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+label{
+	font-weight: 1000;
+}
+
+#modal-content{
+	max-width: 800px;
+    height: 98%;
+	margin-bottom: 100px;
+}
+
+#modal-body{
+	overflow: scroll;
+    scrollbar-width: none;
+}

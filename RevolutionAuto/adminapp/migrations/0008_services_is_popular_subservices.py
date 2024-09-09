@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
                 ('service', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.services')),
             ],
             options={
-                'db_table': 'sub_services',
+                'db_table': 'sub_service',
             },
         ),
     ]

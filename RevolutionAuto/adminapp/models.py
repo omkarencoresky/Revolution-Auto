@@ -5,6 +5,7 @@ from django_ckeditor_5.fields import CKEditor5Field
 
 # Car management Models
 class CarBrand(models.Model):
+
     id = models.AutoField(primary_key=True)
     brand = models.CharField(max_length=50, blank=False)
     description = models.CharField(max_length=200, blank=True)
@@ -17,7 +18,9 @@ class CarBrand(models.Model):
     class Meta:
         db_table ='car_brand'
 
+
 class CarYear(models.Model):
+
     id = models.AutoField(primary_key=True)
     year = models.CharField(max_length=6,blank=False)
     car_id = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
@@ -29,7 +32,9 @@ class CarYear(models.Model):
     class Meta:
         db_table = 'car_year'
 
+
 class CarModel(models.Model):
+
     id = models.AutoField(primary_key=True)
     car_id = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
     year_id = models.ForeignKey(CarYear, on_delete=models.CASCADE)
@@ -42,7 +47,9 @@ class CarModel(models.Model):
     class Meta:
         db_table = 'car_model'
 
+
 class CarTrim(models.Model):
+
     id = models.AutoField(primary_key=True)
     car_id = models.ForeignKey(CarBrand, on_delete=models.CASCADE)
     year_id = models.ForeignKey(CarYear, on_delete=models.CASCADE)
@@ -59,6 +66,7 @@ class CarTrim(models.Model):
 
 # Location Models
 class Location(models.Model):
+
     id = models.AutoField(primary_key=True)
     location_name = models.CharField(max_length=150, blank=False)
     country_code = models.CharField(max_length=50, blank=False)
@@ -74,6 +82,7 @@ class Location(models.Model):
 
 # Service Models
 class ServiceType(models.Model):
+
     id = models.AutoField(primary_key=True)
     service_type_name = models.CharField(max_length=150, blank=False)
     status = models.SmallIntegerField(default=1, blank=False)
@@ -83,7 +92,9 @@ class ServiceType(models.Model):
     class Meta:
         db_table = 'service_type'
 
+
 class ServiceCategory(models.Model):
+
     id = models.AutoField(primary_key=True)
     service_category_name = models.CharField(max_length=150, blank=False)
     service_type = models.ForeignKey(ServiceType,on_delete=models.CASCADE)
@@ -94,7 +105,9 @@ class ServiceCategory(models.Model):
     class Meta:
         db_table = 'service_category'
 
+
 class Services(models.Model): #Add a column for the popularity of services
+    
     YES_NO_CHOICES = [
         ('Yes', 'Yes'),
         ('No', 'No'),
@@ -110,10 +123,11 @@ class Services(models.Model): #Add a column for the popularity of services
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = 'services'
+        db_table = 'service'
 
 
-class SubServices(models.Model):
+class SubService(models.Model):
+    
     YES_NO_CHOICES = [
         ('Yes', 'Yes'),
         ('No', 'No'),
@@ -125,17 +139,62 @@ class SubServices(models.Model):
     ]
 
     id = models.AutoField(primary_key=True)
-    sub_service_title = models.CharField(max_length=150, blank=False)
-    display_text = models.CharField(max_length=200, blank=True)
-    sub_service_description = CKEditor5Field('Content', config_name='extends')
-    service = models.ForeignKey(Services,on_delete=models.CASCADE)
-    selection_type = models.CharField(max_length=8, choices=SELECTION_TYPE_CHOICES, blank=False ) 
     order = models.SmallIntegerField(blank=False)
-    optional = models.CharField(max_length=5, choices=YES_NO_CHOICES, default='No' ) 
-    status = models.SmallIntegerField(default=1, blank=False)
-    created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    status = models.SmallIntegerField(default=1, blank=False)
+    display_text = models.CharField(max_length=200, blank=True)
+    service = models.ForeignKey(Services,on_delete=models.CASCADE)
+    sub_service_title = models.CharField(max_length=150, blank=False)
+    sub_service_description = CKEditor5Field('Content', config_name='extends')
+    optional = models.CharField(max_length=5, choices=YES_NO_CHOICES, default='No' ) 
+    selection_type = models.CharField(max_length=8, choices=SELECTION_TYPE_CHOICES, blank=False ) 
 
     class Meta:
-        db_table = 'sub_services'
+        db_table = 'sub_service'
+
+    
+class Inspection(models.Model):
+    id = models.AutoField(primary_key=True)
+    inspection_name = models.CharField(max_length=200, blank=False)
+
+    class Meta:
+        db_table = 'inspection'
+
+    def __str__(self):
+        return self.id
+
+
+class SubServiceOption(models.Model):
+    
+    YES_NO_CHOICES = [
+        ('Yes', 'Yes'),
+        ('No', 'No'),
+    ]
+
+    SELECTION_TYPE_CHOICES = [
+        ('Single', 'Single'),
+        ('Multiple', 'Multiple'),
+    ]
+
+    OPTION_TYPE_CHOICES = [
+        ('Text Type', 'Text Type'),
+        ('Image Type', 'Image Type'),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    order = models.SmallIntegerField(blank=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    status = models.SmallIntegerField(default=1, blank=False)
+    option_title = models.CharField(max_length=150, blank=False)
+    option_description = CKEditor5Field('Content', config_name='extends')
+    recommend_inspection_service = models.ManyToManyField(Inspection, blank=True)
+    option_type = models.CharField(max_length=20, choices=OPTION_TYPE_CHOICES, blank=False ) 
+    option_image_url = models.ImageField(upload_to='media/option_images' ,blank=True, null=True)
+    sub_service = models.ForeignKey(SubService, on_delete=models.CASCADE, related_name='sub_service_option')
+    next_sub_service = models.ForeignKey(SubService, on_delete=models.CASCADE, related_name='next_sub_service_options', blank=True, null=True)
+
+    class Meta:
+        db_table = 'sub_service_option'
 

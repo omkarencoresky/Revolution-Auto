@@ -1,7 +1,8 @@
 from django import forms
 from userapp.models import CustomUser
 from django_ckeditor_5.widgets import CKEditor5Widget
-from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services, SubServices
+from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services, SubService,SubServiceOption, Inspection
+    
 
 
 
@@ -130,5 +131,17 @@ class AddServicsForm(forms.ModelForm):
 class AddSubServiceForm(forms.ModelForm):
 
     class Meta:
-        model = SubServices
+        model = SubService
         fields = ['service', 'display_text', 'sub_service_title', 'sub_service_description', 'order', 'selection_type', 'optional']
+
+
+class AddSubServiceOptionForm(forms.ModelForm):
+    recommend_inspection_service = forms.ModelMultipleChoiceField(
+        queryset=Inspection.objects.all(),
+        widget=forms.CheckboxSelectMultiple,
+        required=False
+    )
+
+    class Meta:
+        model = SubServiceOption
+        fields = ['sub_service', 'option_type', 'option_title', 'option_image_url', 'order', "recommend_inspection_service"]

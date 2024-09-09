@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('service_category', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='adminapp.servicecategory')),
             ],
             options={
-                'db_table': 'services',
+                'db_table': 'service',
             },
         ),
     ]

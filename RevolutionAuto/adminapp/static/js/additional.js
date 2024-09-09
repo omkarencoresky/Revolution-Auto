@@ -1,3 +1,14 @@
+document.addEventListener('htmx:configRequest', function(event) {
+    var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('value');
+    console.log('csrfToken',csrfToken);
+    
+    if (csrfToken) {
+        event.detail.headers['X-CSRFToken'] = csrfToken;
+    } else {
+        console.error('CSRF token not found in meta tag.');
+    }
+});
+
 document.getElementById('sidenav-dropdown-Car-Management').addEventListener('click', function (event) {
     event.preventDefault();
 
@@ -62,6 +73,21 @@ function closeModal(formId) {
 function closeModalIfOutside(event, formId) {
     if (event.target.id === formId) {
         closeModal(formId);
+    }
+}
+
+
+// Use for the image upload input of sub-service option 
+function selectionType(id, imageInputId) {
+    var selectionType = document.getElementById(id).value;
+    var imagediv = document.getElementById(imageInputId);
+    console.log('imagediv',imagediv, selectionType);
+    
+
+    if (selectionType === "Image Type") {
+        imagediv.style.display = 'block';
+    } else {
+        imagediv.style.display = 'none';
     }
 }
 
@@ -206,7 +232,7 @@ function updateCarYear(formId, id, brand, year, status, brand_instance) {
 
 
 // Used for the car trims update form data
-function updateCarTrim(formId, id, brand, year, model, trim, status, 
+function updateCarTrim(formId, id, brand, year, model, trim, status,
     brand_instance, year_instance, model_instance) {
 
     const modal = document.getElementById(formId);
@@ -243,16 +269,16 @@ function updateCarTrim(formId, id, brand, year, model, trim, status,
 
 
 // Used for the car trims update form data
-function updateSubServices(formId, id, service_title, display_text, sub_service_title, 
-    sub_service_description, order, selection_type, optional, status, service_instance, 
+function updateSubServices(formId, id, service_title, display_text, sub_service_title,
+    sub_service_description, order, selection_type, optional, status, service_instance,
     selection_type_instance) {
-        
-        
-        const modal = document.getElementById(formId);
-        const updateForm = modal.querySelector('.update-form');
-        var url = '/admin/sub-service/id/'.replace('id', parseInt(id));
+
+
+    const modal = document.getElementById(formId);
+    const updateForm = modal.querySelector('.update-form');
+    var url = '/admin/sub-service/id/'.replace('id', parseInt(id));
     updateForm.setAttribute('action', url);
-        
+
     const servicetitleTypeNameInput = modal.querySelector('#service');
     const servicetitleNameNameOptions = servicetitleTypeNameInput.querySelectorAll('option');
     const sTitleopt = servicetitleNameNameOptions[0];
@@ -261,28 +287,107 @@ function updateSubServices(formId, id, service_title, display_text, sub_service_
 
     const displayTextNameInput = modal.querySelector('#display_text');
     displayTextNameInput.value = display_text;
-    
+
     const subServiceTitleNameInput = modal.querySelector('#sub_service_title');
     subServiceTitleNameInput.value = sub_service_title;
-    
+
     const subService_DescriptionNameInput = modal.querySelector('#sub_service_description');
     subService_DescriptionNameInput.value = sub_service_description;
-    
+
     const orderNameInput = modal.querySelector('#Order');
     orderNameInput.value = order;
-    
+
     const optionalNameInput = modal.querySelector('#optional');
     const optionalNameNameOptions = optionalNameInput.querySelectorAll('option');
     const optionalopt = optionalNameNameOptions[0];
     optionalopt.text = optional;
     optionalopt.value = optional;
-    
+
     const selectionTypeNameInput = modal.querySelector('#selection_type');
-    console.log('optional',selectionTypeNameInput);
     const selectionTypeNameNameOptions = selectionTypeNameInput.querySelectorAll('option');
     const selectionTypeopt = selectionTypeNameNameOptions[0];
     selectionTypeopt.text = selection_type;
-    selectionTypeopt.value = selection_type_instance;
+    selectionTypeopt.value = selection_type;
+
+    const statusElement = modal.querySelector('#exampleSelect');
+    statusElement.value = status;
+
+    console.log('optional', selection_type);
+
+    modal.style.display = 'flex';
+}
+
+
+
+// Used for the car trims update form data
+function updateSubServiceOption(formId, id, sub_service_title, option_type, option_title,
+    recommend_inspection_service, option_description, order, next_sub_service, status,
+    sub_service_instance, next_sub_service_instance) {
+
+    const modal = document.getElementById(formId);
+    const updateForm = modal.querySelector('.update-form');
+    var url = '/admin/sub-service-option/id/'.replace('id', parseInt(id));
+    updateForm.setAttribute('action', url);
+
+    const servicetitleTypeNameInput = modal.querySelector('#sub_service');
+    const servicetitleNameNameOptions = servicetitleTypeNameInput.querySelectorAll('option');
+    const sTitleopt = servicetitleNameNameOptions[0];
+    sTitleopt.text = sub_service_title;
+    sTitleopt.value = sub_service_instance;
+
+    const optionalNameInput = modal.querySelector('#option_type');
+    const optionalNameNameOptions = optionalNameInput.querySelectorAll('option');
+    const optionalopt = optionalNameNameOptions[0];
+    optionalopt.text = option_type;
+    optionalopt.value = option_type;
+    var imagediv = document.getElementById('option_image_update');
+
+    if (option_type === "Image Type"){
+        imagediv.style.display = 'block';
+    }else {
+        imagediv.style.display = 'none';
+    }
+
+    const displayTextNameInput = modal.querySelector('#option_title');
+    displayTextNameInput.value = option_title;
+
+    jsObject = JSON.parse(recommend_inspection_service);
+
+    const selectionTypeNameInput = modal.querySelector('#recommend_inspection_service');
+    const selectionTypeNameNameOptions = selectionTypeNameInput.querySelectorAll('input');
+    console.log('selectionTypeNameNameOptions', Array.from(selectionTypeNameNameOptions).length);
+    jsObject.forEach(item => {
+        inspectionOldId = item.id
+        inspectionOldName = item.name
+        for (let i = 0; i <= Array.from(selectionTypeNameNameOptions).length; i++) {
+            check = Array.from(selectionTypeNameNameOptions)[i];
+            check?.removeAttribute('checked');
+        }
+    });
+
+    jsObject.forEach(item => {
+        inspectionOldId = item.id
+        inspectionOldName = item.name
+        for (let i = 0; i <= Array.from(selectionTypeNameNameOptions).length; i++) {
+            check = Array.from(selectionTypeNameNameOptions)[i];
+            if (check?.value == inspectionOldId) {
+                check?.setAttribute('checked', true)
+            }
+        }
+    });
+
+    const subServiceTitleNameInput = modal.querySelector('#option_description');
+    subServiceTitleNameInput.value = option_description;
+
+    const orderNameInput = modal.querySelector('#order');
+    orderNameInput.value = order;
+    console.log('next_sub_service_instance',next_sub_service_instance);
+    
+    const nextSubServiceTypeNameInput = modal.querySelector('#next_sub_service');
+    const nextSubServiceNameNameOptions = nextSubServiceTypeNameInput.querySelectorAll('option');
+    const nextSubServiceTypeopt = nextSubServiceNameNameOptions[0];
+    nextSubServiceTypeopt.text = next_sub_service;
+    nextSubServiceTypeopt.value = next_sub_service_instance;
 
     const statusElement = modal.querySelector('#exampleSelect');
     statusElement.value = status;
