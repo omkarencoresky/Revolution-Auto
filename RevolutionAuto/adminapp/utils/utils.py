@@ -1,6 +1,6 @@
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse
-from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services, SubServices
+from adminapp.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services, SubService, Inspection, SubServiceOption
 
 def brand_pagination(request: HttpRequest) -> HttpResponse:
 
@@ -172,7 +172,47 @@ def sub_services_pagination(request: HttpRequest) -> HttpResponse:
     Returns:
     -  page_obj: A Page object containing the paginated services for the services pagination.
     """
-    Location_1 = SubServices.objects.all().order_by('id')
+    Location_1 = SubService.objects.all().order_by('id')
+    
+    # Pagination setup
+    paginator = Paginator(Location_1, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return page_obj
+
+
+def inspection_pagination(request: HttpRequest) -> HttpResponse:
+    
+    """Paginate a list of all services and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for services pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated services for the services pagination.
+    """
+    Location_1 = Inspection.objects.all().order_by('id')
+    
+    # Pagination setup
+    paginator = Paginator(Location_1, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return page_obj
+
+
+def sub_service_option_pagination(request: HttpRequest) -> HttpResponse:
+    
+    """Paginate a list of all services and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for services pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated services for the services pagination.
+    """
+    Location_1 = SubServiceOption.objects.all().order_by('id').prefetch_related('recommend_inspection_service')
     
     # Pagination setup
     paginator = Paginator(Location_1, 10)

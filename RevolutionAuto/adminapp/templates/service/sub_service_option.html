@@ -1,0 +1,381 @@
+{% extends 'adminmaster.html' %}
+{% load static %}
+
+
+{% block title %}Sub-Services Options | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="font-weight-bold py-3 mb-0">SUB-SERVICES OPTIONS</h4>
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{curl}}dashboard/"><i class="feather icon-home"></i></a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'sub_services_data_handler' %}">Sub-Services Options</a></li>
+        </ol>
+        <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
+            onclick="addopenModal('addForm')">Add Sub-Service Options</button>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <div id="addForm" style="padding-top: 100px;" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+        <div class="modal-content" id="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Sub-Services Options</h3>
+                <button type="button" class="close" onclick="closeModal('addForm')">×</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <form action="{% url 'sub_service_option_data_handler' %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group brand">
+                        <label class="control-label" for="service">Sub-Service :</label>
+                        <div>
+                            <select name="sub_service" class="form-control">
+                                <option value="">Select Sub-Service</option>
+                                {% for service in sub_service %}
+                                <option value="{{service.id}}">{{service.sub_service_title}}</option>
+                                {% endfor %}
+                            </select>
+                            <span id="service1"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group brand">
+                        <label class="control-label" for="selection_type">Option type :</label>
+                        <div>
+                            <select class="form-control" name="option_type" id="option_type_add" onchange="selectionType('option_type_add', 'option_image')">
+                                <option value="">Select Selection type</option>
+                                <option value="Text Type">Text Type</option>
+                                <option value="Image Type">Image Type</option>
+                            </select>
+                            <span class="control-label" id="selection_type1"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group brand" style="display: none;" id="option_image">
+                        <label class="control-label" for="option_image">Option Image :</label>
+                        <div>
+                            <input type="file" class="form-control" name="option_image_url">
+                            <span id="option_image2"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group brand">
+                        <label class="control-label" for="service_title">Option title :</label>
+                        <div>
+                            <input class="form-control" name="option_title" placeholder="Service title">
+                            <span id="service_title2"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group brand" style="height: 150px; margin-bottom: 30px;">
+                        <label class="control-label" for="recommend_inspection_service1">Recommend Inspection Service
+                            :</label>
+                        <div class="form-control">
+                            <p>Select Inspection Service:</p>
+                            <div style="height: 80px; overflow-y: scroll;" id="zoom">
+                                {% for inspection in inspection %}
+                                <div>
+                                    <input type="checkbox" name="recommend_inspection_service"
+                                        value="{{inspection.id}}">
+                                    {{inspection.inspection_name}}
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <span id="recommend_inspection_service1"></span>
+                    </div>
+
+                    <div class="form-group brand">
+                        <label class="control-label" for="service_description">Sub-Service Option Description :</label>
+                        <div>
+                            <textarea class="form-control" name="option_description" id="id_service_description"
+                                rows="10" cols="40" placeholder="Service Description"></textarea>
+                            <script>
+                                CKEDITOR.replace('service_description')
+                            </script>
+                            <span id="service_description"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group brand">
+                        <label class="control-label" for="Order">Order :</label>
+                        <div>
+                            <input class="form-control" name="order" placeholder="Order">
+                            <span id="Order1"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group brand">
+                        <label class="control-label" for="next_sub_service">Next Sub-Service :</label>
+                        <div>
+                            <select class="form-control" name="next_sub_service">
+                                <option value="">Select Sub-Service</option>
+                                {% for service in sub_service %}
+                                <option value="{{service.id}}">{{service.sub_service_title}}</option>
+                                {% endfor %}
+                            </select>
+                            <span class="control-label" id="next_sub_service1"></span>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer justify-content-center">
+                        <div class="modal_btn" style="gap: 254px;">
+                            <button type="button" class="btn btn-danger" onclick="closeModal('addForm')">Close</button>
+                            <button type="submit" class="btn btn-dark">Submit</button>
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner ms-3"
+                                style="display: none;">
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card d-flex w-100 mb-4">
+            <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+
+                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
+                    <caption class="caption-top fs-4 text-dark mb-2">All Available Sub-Services</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">SR.No</th>
+                            <th scope="col">Option Title</th>
+                            <th scope="col">Sub-Service</th>
+                            <th scope="col">Option type</th>
+                            <th scope="col">Order</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody hx-target="body" hx-swap="outerHTML swap:1s">
+                        {% for subserviceopt in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ subserviceopt.option_title }}</td>
+                            <td>{{ subserviceopt.sub_service.sub_service_title }}</td>
+                            <td>
+                                {% if subserviceopt.option_type == "Image Type" %}
+                                {{ subserviceopt.option_type }}
+                                <a href="" class="fullscreen-link" style="color: #4E5155;">
+                                    <img src="{{subserviceopt.option_image_url}}" alt="profileimage"
+                                        style="height: 30px; width: 40px;">
+                                </a>
+                                {% else %}
+                                {{ subserviceopt.option_type }}
+                                {% endif %}
+
+                            </td>
+                            <td>{{ subserviceopt.order }}</td>
+
+                            {% if subserviceopt.status == 1 %}
+                            <td>Active</td>
+                            {% else %}
+                            <td>In-active</td>
+                            {% endif %}
+
+                            <td>
+                                <button class="btn" hx-delete="{% url 'sub_service_option_action_handler' subserviceopt.id %}"
+                                    hx-confirm="Are you sure you want to delete this brand?">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                <button class="btn" onclick="updateSubServiceOption('updateForm', 
+                                '{{ subserviceopt.id }}', 
+                                '{{ subserviceopt.sub_service.sub_service_title|escapejs }}', 
+                                '{{ subserviceopt.option_type|escapejs }}', 
+                                '{{ subserviceopt.option_title|escapejs }}', 
+                                JSON.stringify([
+                                        {% for item in subserviceopt.recommend_inspection_service.all %}
+                                        {
+                                            id: '{{ item.id|escapejs }}',
+                                            name: '{{ item.inspection_name|escapejs }}'
+                                        }{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    ]), 
+                                '{{ subserviceopt.option_description|escapejs }}', '{{ subserviceopt.order|escapejs }}', 
+                                '{{ subserviceopt.next_sub_service.sub_service_title|escapejs }}', 
+                                '{{ subserviceopt.status|escapejs }}', '{{ subserviceopt.sub_service.id|escapejs }}', 
+                                '{{ subserviceopt.next_sub_service.id|escapejs }}')">
+                                    <i class="fa fa-edit"></i>
+                                </button>
+                                {% if subserviceopt.option_type == "Image Type" %}
+                                <button class="btn "><i class="fas fa-eye"></i></button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div id="updateForm" style="padding-top: 100px;" class="modal-form h-100" onclick="closeModalIfOutside(event, 'updateForm')">
+                    <div class="modal-content" id="modal-content" style="max-width: 800px;">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Update Sub-Service</h4>
+                            <button type="button" class="close" onclick="closeModal('updateForm')">×</button>
+                        </div>
+                        <div class="modal-body" id="modal-body">
+                            <form class="update-form" id="update-form" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+
+                                <div class="form-group brand">
+                                    <label class="control-label" for="service">Sub-Service :</label>
+                                    <div>
+                                        <select name="sub_service" class="form-control" id="sub_service">
+                                            {% for service in sub_service %}
+                                            <option value="{{service.id}}">{{service.sub_service_title}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span id="service1"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group brand">
+                                    <label class="control-label" for="selection_type">Option type :</label>
+                                    <div>
+                                        <select class="form-control" name="option_type" id="option_type"
+                                        onchange="selectionType('option_type', 'option_image_update')">
+                                            <option value=""></option>
+                                            <option value="Image Type">Image Type</option>
+                                            <option value="Text Type">Text Type</option>
+                                        </select>
+                                        <span class="control-label" id="selection_type1"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group brand" style="display: none;" id="option_image_update">
+                                    <label class="control-label" for="option_image_update">Option Image :</label>
+                                    <div>
+                                        <input type="file" class="form-control" name="option_image_url">
+                                        <span id="option_image2"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group brand">
+                                    <label class="control-label" for="service_title">Option title :</label>
+                                    <div>
+                                        <input class="form-control" name="option_title" id="option_title"
+                                            placeholder="Service title">
+                                        <span id="service_title2"></span>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group brand" style="height: 150px; margin-bottom: 30px;">
+                                    <label class="control-label" for="recommend_inspection_service1">Recommend
+                                        Inspection Service
+                                        :</label>
+                                    <div class="form-control">
+                                        <p>Select Inspection Service:</p>
+                                        <div style="height: 80px; overflow-y: scroll;"
+                                            id="recommend_inspection_service">
+                                            {% for inspection in inspection %}
+                                            <div>
+                                                <input type="checkbox" name="recommend_inspection_service"
+                                                    value="{{inspection.id}}">
+                                                {{inspection.inspection_name}}
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <span id="recommend_inspection_service1"></span>
+                                </div>
+
+                                <div class="form-group brand">
+                                    <label class="control-label" for="service_description">Sub-Service Option
+                                        Description :</label>
+                                    <div>
+                                        <textarea class="form-control" name="option_description" id="option_description"
+                                            rows="10" cols="40" placeholder="Service Description"></textarea>
+                                        <script>
+                                            CKEDITOR.replace('service_description')
+                                        </script>
+                                        <span id="service_description"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group brand">
+                                    <label class="control-label" for="Order">Order :</label>
+                                    <div>
+                                        <input class="form-control" name="order" id="order" placeholder="Order">
+                                        <span id="Order1"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group brand">
+                                    <label class="control-label" for="next_sub_service">Next Sub-Service :</label>
+                                    <div>
+                                        <select class="form-control" name="next_sub_service" id="next_sub_service">
+                                            <option value="">
+                                                Select Sub-Service
+                                            </option>
+                                            {% for service in sub_service %}
+                                            <option value="{{service.id}}">{{service.sub_service_title}}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <span class="control-label" id="next_sub_service1"></span>
+                                    </div>
+                                </div>
+
+                                <div class="form-group description">
+                                    <label class="control-label" for="Status">Status :</label>
+                                    <div>
+                                        <select class="form-control" id="exampleSelect" name="status">
+                                            <option value="" disabled>Select status</option>
+                                            <option value="1">Active</option>
+                                            <option value="2">In-active</option>
+                                        </select>
+                                        <span id="Status"></span>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <div class="row w-100">
+                                        <div class="w-100 modal_btn d-flex justify-content-around">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                                onclick="closeModal('updateForm')">Close</button>
+                                            <button type="submit" class="btn btn-dark">Submit</button>
+                                        </div>
+                                        <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner"
+                                            style="display: none;">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn bg-dark text-light">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn bg-dark text-light">previous</a>
+                    {% endif %}
+
+                    <span class="current font-weight-bold">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn bg-dark text-light">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn bg-dark text-light">last
+                        &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+{% endblock %}

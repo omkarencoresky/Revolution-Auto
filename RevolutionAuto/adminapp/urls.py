@@ -70,7 +70,12 @@ urlpatterns = [
     # -------------------------------------Sub-serivices urls--------------------- #
 
     path('sub-service/', serviceviews.sub_services_data_handler, name='sub_services_data_handler'),
-    path('sub-service/<int:id>', serviceviews.sub_services_action_handler, name='sub_services_action_handler'),
+    path('sub-service/<int:id>/', serviceviews.sub_services_action_handler, name='sub_services_action_handler'),
+
+    # -------------------------------------Sub-serivice option urls--------------------- #
+
+    path('sub-service-option/', serviceviews.sub_service_option_data_handler, name='sub_service_option_data_handler'),
+    path('sub-service-option/<int:id>/', serviceviews.sub_service_option_action_handler, name='sub_service_option_action_handler'),
        
 ]
 

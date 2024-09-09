@@ -12,6 +12,7 @@
     <meta name="keywords" content="admin template, dashboard, auto service">
     <meta name="author" content="Revolution Auto" />
     <link rel="shortcut icon" href="{% static 'img/carousel-1.png' %}" type="image/x-icon">
+    <meta name="csrf-token" content="{% csrf_token %}">
 
     <!-- Google fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
@@ -154,7 +155,7 @@
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
-                                    <a href="forms_input-groups.html" class="sidenav-link">
+                                    <a href="{% url 'sub_service_option_data_handler' %}" class="sidenav-link">
                                         <div>Sub-Services Options</div>
                                     </a>
                                 </li>
