@@ -1,0 +1,1 @@
+default_app_config = 'use_rapp.apps.User_appConfig'
