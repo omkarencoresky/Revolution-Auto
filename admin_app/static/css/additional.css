@@ -1,0 +1,165 @@
+.table th, .table td {
+    padding: 12px;
+  }
+
+  
+.table th {
+    font-weight: bold;
+    color:#c4c1c1;
+    background-color: #2c2e3e;
+    
+  }
+
+tr.htmx-swapping td {
+    opacity: 0;
+    transition: opacity 1s ease-out;
+  }
+
+
+ /***** MODAL DIALOG *****/
+ .modal-form {
+	/* Underlay covers entire screen. */
+	position: fixed;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 99999;
+
+	/* Flexbox centers the .modal-content vertically and horizontally */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+
+	/* Hidden by default */
+	display: none;
+
+	/* Animate when opening */
+	animation-name: fadeIn;
+	animation-duration: 150ms;
+	animation-timing-function: ease;
+}
+
+.modal-form .modal-content {
+	/* Sizing for visible dialog */
+	width: 80%;
+	max-width: 500px;
+
+	/* Display properties for visible dialog */
+	border: solid 1px #999;
+	border-radius: 8px;
+	box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
+	background-color: white;
+	padding: 20px;
+
+	/* Animate when opening */
+	animation-name: zoomIn;
+	animation-duration: 150ms;
+	animation-timing-function: ease;
+}
+
+.modal-form.closing {
+	/* Animate when closing */
+	animation-name: fadeOut;
+	animation-duration: 150ms;
+	animation-timing-function: ease;
+}
+
+.modal-form.closing .modal-content {
+	/* Animate when closing */
+	animation-name: zoomOut;
+	animation-duration: 150ms;
+	animation-timing-function: ease;
+}
+
+@keyframes fadeIn {
+	0% { opacity: 0; }
+	100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+	0% { opacity: 1; }
+	100% { opacity: 0; }
+}
+
+@keyframes zoomIn {
+	0% { transform: scale(0.9); }
+	100% { transform: scale(1); }
+}
+
+@keyframes zoomOut {
+	0% { transform: scale(1); }
+	100% { transform: scale(0.9); }
+}
+
+/* Additional styles from your HTML */
+.modal-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.close {
+	background: none;
+	border: none;
+	font-size: 1.5rem;
+	cursor: pointer;
+}
+
+.form-group {
+	margin-bottom: 15px;
+}
+
+.form-control {
+	width: 100%;
+	padding: 5px;
+}
+
+.modal-footer {
+	margin-top: 20px;
+}
+
+.modal_btn {
+	display: flex;
+	justify-content: space-around;
+}
+
+
+
+.body {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+}
+
+.fullscreen-image {
+    max-width: 90%;
+    max-height: 90%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+label{
+	font-weight: 1000;
+}
+
+#modal-content{
+	max-width: 800px;
+    height: 98%;
+	margin-bottom: 100px;
+}
+
+#modal-body{
+	overflow: scroll;
+    scrollbar-width: none;
+}
+
