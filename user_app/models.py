@@ -81,6 +81,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def is_superuser(self):
         return self.role == self.SUPER_ADMIN
 
+
 # class Car(models.Model):
 #     user = models.ForeignKey(UserLogin, on_delete=models.CASCADE)
 #     make_by = models.CharField(max_length=255)

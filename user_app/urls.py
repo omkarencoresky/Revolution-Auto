@@ -14,16 +14,26 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from user_app import views
 from django.urls import path
+from user_app import user_app_views, user_views
+from admin_app import user_management_views
 
 urlpatterns = [
-    path('', views.index, name='Home'),
-    path('team/', views.team, name='Team'),
-    path('about/', views.about, name='About'),
-    path('login/', views.login, name="login"),
-    path('service/', views.service, name='Service'),
-    path('booking/', views.booking, name='Booking'),
-    path('logout/', views.logout_view, name="logout"),
-    path('register/', views.register, name='register'),
+    # --------------Basic and common urls--------------
+    path('', user_app_views.index, name='Home'),
+    path('team/', user_app_views.team, name='Team'),
+    path('about/', user_app_views.about, name='About'),
+    path('login/', user_app_views.login, name='login'),
+    path('service/', user_app_views.service, name='Service'),
+    path('booking/', user_app_views.booking, name='Booking'),
+    path('logout/', user_app_views.logout_view, name='logout'),
+    path('register/', user_app_views.register, name='register'),
+
+
+    # -------------- User based  urls--------------
+    path('user/', user_views.user_dashboard, name='user_dashboard'),
+    path('user/<int:id>/', user_views.user_userapp_action_handler, name='user_userapp_action_handler'),
+
+    # -------------- Referral based urls--------------
+    path('user-referral/', user_views.referral_data_handler, name='referral_data_handler'),
 ]

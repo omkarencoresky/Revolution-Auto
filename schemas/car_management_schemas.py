@@ -20,7 +20,7 @@ car_brand_schema = {
         "image_format": {
             "type": "string",
             "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
-            "description": "Please select atleast a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
+            "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
         },
     },
     "required": ["brand"],

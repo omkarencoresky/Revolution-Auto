@@ -68,9 +68,7 @@ def service_type_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
         elif request.method == 'POST':
             form = AddServiceTypeForm(request.POST)
 
-            data = {
-                'service_type_name': request.POST.get('service_type_name')
-            }
+            data = {'service_type_name': request.POST.get('service_type_name')}
             validate_service_type_details(data)
             
             if not ServiceType.objects.filter(service_type_name=data.get('service_type_name')):
@@ -131,9 +129,7 @@ def service_type_action_handler(request: HttpRequest, id: int) -> HttpResponse |
         if request.method == 'POST':
             service_object = ServiceType.objects.get(id=id)
 
-            data = {
-                'service_type_name': request.POST.get('service_type_name')
-                }
+            data = {'service_type_name': request.POST.get('service_type_name')}
             validate_service_type_details(data)
 
             if not ServiceType.objects.filter(service_type_name=data.get('service_type_name')).exclude(id=id):
@@ -731,10 +727,9 @@ def sub_service_option_data_handler(request: HttpRequest) -> HttpResponse | Http
 
                     if uploaded_file:
 
-                        image_name = uploaded_file.name
-                        image_url = f'{media_path}option_images/{image_name}' 
+                        image_url = f'{media_path}option_images/{uploaded_file.name}' 
                         media_directory = os.path.join(settings.BASE_DIR, 'media/option_images')
-                        file_path = os.path.join(media_directory, image_name)
+                        file_path = os.path.join(media_directory, uploaded_file.name)
                         subServiceInstance.image_url = image_url
                         os.makedirs(media_directory, exist_ok=True)
 
