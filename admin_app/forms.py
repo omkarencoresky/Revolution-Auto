@@ -40,6 +40,9 @@ class AddBrandForm(forms.ModelForm):
     class Meta:
         model =  CarBrand
         fields = ['brand', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'required': False}),
+        }
 
 
 class AddYearForm(forms.ModelForm):

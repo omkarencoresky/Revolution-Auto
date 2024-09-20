@@ -1,0 +1,82 @@
+{% extends 'user_master.html' %}
+{% load static %}
+
+
+{% block title %}Refer | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <!-- <div class="user-img">
+        <div>
+            <img class="user_profile" src="{% static 'img/find_user.png' %}"
+                style="background-color: black; border-radius: 70px;">
+        </div>
+        <div class="welcome-back-text">
+            <h2>Welcome back, <span>{{user.first_name}} {{user.last_name}}</span></h2>
+            <p>Managing your car has never been more convenient</p>
+        </div>
+    </div> -->
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'user_dashboard' %}"><i class="feather icon-home"></i>
+                    Referral</a></li>
+        </ol>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card d-flex w-100 mb-4">
+            <div class="row no-gutters row-bordered row-border-light h-100"
+                style="border: 1px solid rgb(231, 228, 228); padding: 30px;">
+                <div style="margin-bottom: 50px;">
+                    <h3>Refer a Friend</h3>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: space-evenly; width: 100%; ">
+                    <div style="width: 35%; border: 1px solid rgb(231, 228, 228); padding: 10px;">
+                        <form id="update-form" method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="referral_link" class="form-label">Your Referral Link:</label>
+                                <input type="text" class="form-control" id="referral_link"
+                                    placeholder="{{user.referral_link}}" disabled>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email For Refer:</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    placeholder="Email For Referral">
+                            </div>
+                            <p class="small">Separate e-mails with a comma</p>
+                            <div class="d-flex justify-content-around">
+                                <button type="button" class="btn btn-primary" onclick="closeModal('updateForm')">Preview
+                                    of mail</button>
+                                <button type="submit" class="btn btn-dark">Send mail</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-4 custom-border p-4">
+                        <p class="text-center mb-5" style="font-size: larger; padding-bottom: 8px;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Similique
+                            sapiente deleniti necessitatibus! Praesentium similique accusamus, doloremque id, at
+                            voluptate consequatur deserunt iste vitae nemo sit officiis inventore officia et pariatur!
+                        </p>
+                        <div class="d-flex justify-content-around">
+                            <button class="btn btn-primary">Facebook</button>
+                            <button class="btn btn-dark">Twitter</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Pagination Controls remove for now when required copy from the admin templates -->
+        </div>
+    </div>
+</div>
+</div>
+</div>
+{% endblock %}

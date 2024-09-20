@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.staticfiles',
     'admin_app',
+    'mechanic_app',
     'django_htmx',
     
 ]

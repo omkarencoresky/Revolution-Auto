@@ -1,4 +1,4 @@
-{% extends 'adminmaster.html' %}
+{% extends 'admin_master.html' %}
 {% load static %}
 
 {% block title %}Car Brand | Revolution Auto{% endblock %}
@@ -101,7 +101,7 @@
                             <td>{{ brand.brand }}</td>
                             <td>{{ brand.description }}</td>
                             <td>
-                                <img src="http://127.0.0.1:8000{{ brand.image_url }}" alt="Brand Images"
+                                <img src={{ brand.image_url }} alt="Brand Images"
                                     style="width: 40px; height: 45px;">
                             </td>
                             {% if brand.status == 1 %}

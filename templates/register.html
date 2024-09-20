@@ -1,11 +1,12 @@
 {% extends 'master.html' %}
 {% load static %}
 
+<title>{% block title %}Register | Revolution Auto{% endblock %}</title>
 
 {% block Navbar %}
 <!-- Navbar Start -->
 <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-    <a href="{{curl}}/home/" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+    <a href="{{curl}}" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
         <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>Revolution Auto</h2>
     </a>
     <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -51,9 +52,9 @@
 
 {% block Service %}
 <div class="container-fluid bg-secondary booking my-5 wow fadeInUp" data-wow-delay="0.1s">
-    <div class="container">
-        <div class="row gx-5">
-            <div class="col-lg-12">
+    <div class="container" style="padding: 45px;">
+        <div class="row gx-5 d-flex justify-content-center">
+            <div class="col-lg-6">
                 <div class="bg-primary h-100 d-flex flex-column justify-content-center text-center p-5 wow zoomIn"
                     data-wow-delay="0.6s">
                     <h1 class="text-white mb-4">Become a User</h1>
@@ -70,26 +71,36 @@
                         <div class="row g-3">
                             <div class="col-12 col-sm-6">
                                 <input type="text" class="form-control border-0" placeholder="First Name"
-                                    style="height: 55px;" name="first_name">
+                                     name="first_name">
                             </div>
                             <div class="col-12 col-sm-6">
                                 <input type="text" class="form-control border-0" placeholder="Last Name"
-                                    style="height: 55px;" name="last_name">
+                                     name="last_name">
                             </div>
                             <div class="col-12 col-sm-6">
                                 <input type="email" class="form-control border-0" placeholder="Email Address"
-                                    style="height: 55px;" name="email">
+                                     name="email">
                             </div>
                             <div class="col-12 col-sm-6">
                                 <input type="text" class="form-control border-0" placeholder="Contact Number"
-                                    style="height: 55px;" name="phone_no">
+                                     name="phone_no">
                             </div>
                             <div class="col-12 col-sm-6">
                                 <input type="password" class="form-control border-0" placeholder="Password"
-                                    style="height: 55px;" name="password">
+                                     name="password">
                             </div>
-                            <div class="col-12">
-                                <button class="btn btn-secondary w-100 py-3" type="submit">Register</button>
+                            <div class="col-12 col-sm-6">   
+                                <input type="password" class="form-control border-0" placeholder="Confirm Password"
+                                     name="confirm_password">
+                            </div>
+                            <div class="col-12 col-sm-12">
+                                <button class="btn btn-secondary w-100 py-1" type="submit">Register</button>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <a href="{% url 'login' %}" class="btn btn-secondary w-100 py-1">Login</a>
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <a href="{% url 'register_mechanic_application' %}" class="btn btn-secondary w-100 py-1" type="submit">Apply As Mechaninc</a>
                             </div>
                         </div>
                     </form>

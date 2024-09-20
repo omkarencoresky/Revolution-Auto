@@ -35,93 +35,93 @@ def car_brand_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
     Returns:
         Httprequest: This method is use for render the car brand page.
     """
-    # try:    
-    if request.method == 'GET':
-        page_obj = brand_pagination(request)
-
-        context = {
-            'curl': admin_curl,
-            'page_obj': page_obj,
-        }
-        return render(request, 'carmodel/car_brand.html', context)
-    
-    elif request.method == 'POST':
-
-        form = AddBrandForm(request.POST, request.FILES)
-        page_obj = brand_pagination(request)
-
-        if not request.FILES.get('image_url'):
-
+    try:    
+        if request.method == 'GET':
             page_obj = brand_pagination(request)
+
             context = {
                 'curl': admin_curl,
                 'page_obj': page_obj,
             }
-            messages.success(request, "No image file selected. Please upload an image.")
             return render(request, 'carmodel/car_brand.html', context)
         
-        uploaded_file = request.FILES['image_url']
-        image_name = uploaded_file.name 
-        image_format = image_name.split('.')[-1].lower()
+        elif request.method == 'POST':
 
-        data = {
-            'image_format':image_format,
-            'brand':request.POST.get('brand'),
-            'description':request.POST.get('description'),
-        }
-        car_management_schemas.validate_car_brand_details(data)
-        
-        if form.is_valid():
-            brand = form.save(commit=False)
-
-            brand.image_url = f"{media_path}{image_name}"   
-            media_directory = os.path.join(settings.BASE_DIR, 'media')
-            file_path = os.path.join(media_directory, image_name)
-            os.makedirs(media_directory, exist_ok=True)
-
-            brand_name = request.POST['brand']
-            token = hashlib.sha256(brand_name.encode()).hexdigest()
-            brand.remember_token = token
-
-            with open(file_path, "wb") as fp:
-                for chunk in uploaded_file.chunks():
-                    fp.write(chunk)
-            form.save()
-
+            form = AddBrandForm(request.POST, request.FILES)
             page_obj = brand_pagination(request)
-            context = {
-                'curl': admin_curl,
-                'page_obj': page_obj,
-            }
 
-            messages.success(request, "Added successfully!")
-            return render(request, 'carmodel/car_brand.html', context)
-    else:
-        page_obj = brand_pagination(request)
-        context = {
-            'curl': admin_curl,
-            'page_obj': page_obj,
-        }
-        messages.error(request, 'Invalid request, Try again')
-        return render(request, 'carmodel/car_brand.html', context) 
+            if not request.FILES.get('image_url'):
+
+                page_obj = brand_pagination(request)
+                context = {
+                    'curl': admin_curl,
+                    'page_obj': page_obj,
+                }
+                messages.success(request, "No image file selected. Please upload an image.")
+                return render(request, 'carmodel/car_brand.html', context)
             
-    # except fastjsonschema.exceptions.JsonSchemaValueException as e:
-    #     messages.error(request,schemas.car_management_schemas.car_brand_schema.
-    #     get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-    #     return redirect( 'car_brand_data_handler')
+            uploaded_file = request.FILES['image_url']
+            image_name = uploaded_file.name 
+            image_format = image_name.split('.')[-1].lower()
+
+            data = {
+                'image_format':image_format,
+                'brand':request.POST.get('brand'),
+                'description':request.POST.get('description'),
+            }
+            car_management_schemas.validate_car_brand_details(data)
+            
+            if form.is_valid():
+                brand = form.save(commit=False)
+
+                brand.image_url = f"{media_path}brand_images/{image_name}"   
+                media_directory = os.path.join(settings.BASE_DIR, 'media/brand_images/')
+                file_path = os.path.join(media_directory, image_name)
+                os.makedirs(media_directory, exist_ok=True)
+
+                brand_name = request.POST['brand']
+                token = hashlib.sha256(brand_name.encode()).hexdigest()
+                brand.remember_token = token
+
+                with open(file_path, "wb") as fp:
+                    for chunk in uploaded_file.chunks():
+                        fp.write(chunk)
+                form.save()
+
+                page_obj = brand_pagination(request)
+                context = {
+                    'curl': admin_curl,
+                    'page_obj': page_obj,
+                }
+
+                messages.success(request, "Added successfully!")
+                return render(request, 'carmodel/car_brand.html', context)
+        else:
+            page_obj = brand_pagination(request)
+            context = {
+                'curl': admin_curl,
+                'page_obj': page_obj,
+            }
+            messages.error(request, 'Invalid request, Try again')
+            return render(request, 'carmodel/car_brand.html', context) 
+            
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        messages.error(request,schemas.car_management_schemas.car_brand_schema.
+        get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
+        return redirect( 'car_brand_data_handler')
     
-    # except json.JSONDecodeError:
-    #     messages.error(request, f"{e}")
-    #     return redirect( 'car_brand_data_handler')
+    except json.JSONDecodeError:
+        messages.error(request, f"{e}")
+        return redirect( 'car_brand_data_handler')
     
-    # except TemplateDoesNotExist:
-    #     messages.error(request, f"An unexpected error occurred. Please try again later.")
-    #     return render(request, 'admin_dashboard.html')
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return render(request, 'admin_dashboard.html')
         
-    # except Exception as e:
-    #     print('error here')
-    #     messages.error(request,f"{e}")
-    #     return redirect('car_brand_data_handler')
+    except Exception as e:
+        print('error here')
+        messages.error(request,f"{e}")
+        return redirect('car_brand_data_handler')
 
 
 @login_required
@@ -164,7 +164,7 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
 
             if uploaded_file:
                 image_name = uploaded_file.name
-                media_directory = os.path.join(settings.BASE_DIR, 'media')
+                media_directory = os.path.join(settings.BASE_DIR, 'media/brand_images/')
                 file_path = os.path.join(media_directory, image_name)
                 os.makedirs(media_directory, exist_ok=True)
                 
@@ -211,7 +211,7 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return redirect('admin_dashboard')
             
     except Exception as e:
         # messages.error(request, f"Error: {e}")

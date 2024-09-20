@@ -1,4 +1,4 @@
-{% extends 'adminmaster.html' %}
+{% extends 'admin_master.html' %}
 {% load static %}
 
 
@@ -31,7 +31,7 @@
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
             <div class="modal-body" id="modal-body">
-                <form action="{% url 'register' %}" method="post" >
+                <form action="{% url 'sub_services_data_handler' %}" method="post" >
                     {% csrf_token %}
                     <div class="form-group brand">
                         <label class="control-label" for="service">Service :</label>
@@ -263,7 +263,7 @@
                                     <div class="mw-100">
                                         <select class="form-control" id="exampleSelect" name="status">
                                             <option value="1">Active</option>
-                                            <option value="2">In-active</option>
+                                            <option value="0">In-active</option>
                                         </select>
                                         <span id="Status"></span>
                                     </div>

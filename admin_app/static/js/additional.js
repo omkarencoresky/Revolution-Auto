@@ -509,12 +509,13 @@ function updateSubServiceOption(formId, id, sub_service_title, option_type, opti
 
 
 
-// Used for the User detail update
-function updateUser(formId, id, first_name, last_name, email, phone_no, is_active) {
+// Used for the User profile detail update
+function updateForm(formId, id, first_name, last_name, email, phone_no, is_active, role='user') {
 
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
-    var url = '/admin/user/id/'.replace('id', parseInt(id));
+    
+    const url = `/admin/user-management/${id}${role ? '/'+role+'/' : '' }`;
     updateForm.setAttribute('action', url);
     
     const first_nameInput = modal.querySelector('#first_name');
@@ -535,3 +536,62 @@ function updateUser(formId, id, first_name, last_name, email, phone_no, is_activ
 
     modal.style.display = 'flex';
 }
+
+
+
+// Used for the user data update form data
+function updateUserProfile(formId, id, first_name, last_name, email, phone_no) {
+    
+    const modal = document.getElementById(formId);
+    const updateForm = modal.querySelector('.update-form');
+    var url = '/user/id/'.replace('id', parseInt(id));
+    updateForm.setAttribute('action', url);
+
+    const first_nameInput = modal.querySelector('#first_name');
+    first_nameInput.value = first_name;
+
+    const last_nameInput = modal.querySelector('#last_name');
+    last_nameInput.value = last_name;
+
+    const emailInput = modal.querySelector('#email');
+    emailInput.value = email;  
+
+    const phone_noInput = modal.querySelector('#phone_no');
+    phone_noInput.value = phone_no;
+
+    modal.style.display = 'flex';
+}
+
+
+// Used for the mechanic details update form data
+function updateMechanincForm(formId, id, first_name, last_name, email, phone_no, status, approved) {
+    
+    console.log('id', id);
+    const modal = document.getElementById(formId);
+    const updateForm = modal.querySelector('.update-form');
+    var url = `/admin/mechanic/${parseInt(id)}/`;
+    updateForm.setAttribute('action', url);
+
+    
+
+    const first_nameInput = modal.querySelector('#first_name');
+    first_nameInput.value = first_name;
+
+    const last_nameInput = modal.querySelector('#last_name');
+    last_nameInput.value = last_name;
+
+    const emailInput = modal.querySelector('#email');
+    emailInput.value = email;  
+
+    const phone_noInput = modal.querySelector('#phone_no');
+    phone_noInput.value = phone_no;
+
+    const statusInput = modal.querySelector('#status');
+    statusInput.value = status;
+
+    const approvedInput = modal.querySelector('#approved');
+    approvedInput.value = approved;
+
+    modal.style.display = 'flex';
+}
+

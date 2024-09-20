@@ -7,7 +7,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Revolution Auto</title>
+    <title>{% block title %}Admin Dashboard | Revolution Auto{% endblock %}</title>
 
     <!-- Favicon -->    
     <link rel="shortcut icon" href="{% static 'img/carousel-1.png' %}" type="image/x-icon">
@@ -88,7 +88,7 @@
 {% block Navbar %}
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="index.html" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="{{curl}}" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="m-0 text-primary"><i class="fa fa-car me-3"></i>Revolution Auto</h2>
         </a>
         

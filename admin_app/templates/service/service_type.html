@@ -1,4 +1,4 @@
-{% extends 'adminmaster.html' %}
+{% extends 'admin_master.html' %}
 {% load static %}
 
 
@@ -127,7 +127,7 @@
                                             <option value="" disabled>Select status</option>
                                             <option value="1" {% if service.status == 1 %}selected{% endif %}>Active
                                             </option>
-                                            <option value="2" {% if service.status == 2 %}selected{% endif %}>In-active
+                                            <option value="0" {% if service.status == 2 %}selected{% endif %}>In-active
                                             </option>
                                         </select>
                                         <span id="Status"></span>

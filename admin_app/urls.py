@@ -16,9 +16,9 @@ Including another URLconf
 """
 
 from django.urls import path
-from user_app import views
+from user_app import user_app_views
 from admin_app import admin_app_views, user_management_views
-from admin_app import car_views, location_views, service_views
+from admin_app import car_views, location_views, service_views, mechanic_views
 
 
 urlpatterns = [
@@ -79,9 +79,16 @@ urlpatterns = [
     path('sub-service-option/<int:id>/', service_views.sub_service_option_action_handler, name = 'sub_service_option_action_handler'),
        
      # -------------------------------------User management urls--------------------- #
-    path('user-create/', views.register, name = 'user_register'),
-    path('user/', user_management_views.user_data_handler, name = 'user_data_handler'),
-    path('user/<int:id>/', user_management_views.user_action_handler, name = 'user_action_handler'),
+    path('user-management/', user_management_views.user_data_handler, name = 'user_data_handler'),
+    path('user-login-as-admin/<int:id>/', user_management_views.admin_login_as_user, name = 'admin_login_as_user'),
+    path('user-management/<int:id>/<str:role>/', user_management_views.user_action_handler, name = 'user_action_handler'),
+
+    # -------------------------------------Mechanic management urls--------------------- #
+
+    path('mechanic/', mechanic_views.mechanic_data_handler, name = 'mechanic_data_handler'),
+    path('mechanic/<int:id>/', mechanic_views.mechanic_action_handler, name = 'mechanic_action_handler'),
+    
+
 ]
 
 
