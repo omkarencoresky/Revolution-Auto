@@ -16,9 +16,9 @@ Including another URLconf
 """
 from django.urls import path
 from user_app import user_app_views, user_views
-from admin_app import user_management_views
 
 urlpatterns = [
+
     # --------------Basic and common urls--------------
     path('', user_app_views.index, name='Home'),
     path('team/', user_app_views.team, name='Team'),
@@ -30,9 +30,20 @@ urlpatterns = [
     path('register/', user_app_views.register, name='register'),
 
 
-    # -------------- User based  urls--------------
-    path('user/', user_views.user_dashboard, name='user_dashboard'),
+    # -------------- User urls--------------
+    path('user/dashboard', user_views.user_dashboard, name='user_dashboard'),
     path('user/<int:id>/', user_views.user_userapp_action_handler, name='user_userapp_action_handler'),
+
+    
+    path('users-car/', user_views.user_car_data_handler, name='user_car_data_handler'),
+    path('users-car/<int:id>/', user_views.user_car_action_handler, name='user_car_action_handler'),
+
+
+    # -------------- Add Car detail from options urls--------------
+    path('get_caryear_options/', user_views.get_caryear_options, name='get_caryear_options'),
+    path('get_cartrim_options/', user_views.get_cartrim_options, name='get_cartrim_options'),
+    path('get_carmodel_options/', user_views.get_carmodel_options, name='get_carmodel_options'),
+
 
     # -------------- Referral based urls--------------
     path('user-referral/', user_views.referral_data_handler, name='referral_data_handler'),

@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser
+from .models import CustomUser, UserCarRecord
 
 class CustomUserCreationForm(forms.ModelForm):
     """
@@ -33,3 +33,9 @@ class CustomUserCreationForm(forms.ModelForm):
         if CustomUser.objects.filter(email=email).exists():
             raise forms.ValidationError('This email is already in use.')
         return email
+    
+class AddCarRecord(forms.ModelForm):
+
+    class Meta:
+        model = UserCarRecord
+        fields = ['car_brand', 'car_model', 'car_year', 'car_trim', 'vin_number']

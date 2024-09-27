@@ -16,8 +16,7 @@ Including another URLconf
 """
 
 from django.urls import path
-from user_app import user_app_views
-from admin_app import admin_app_views, user_management_views
+from admin_app import admin_views, user_views
 from admin_app import car_views, location_views, service_views, mechanic_views
 
 
@@ -25,8 +24,10 @@ urlpatterns = [
     
     # -------------------------------------Admin urls----------------------------- #
 
-    path('dashboard/', admin_app_views.dashboard, name = 'admin_dashboard'), #name not include 
-    path('registration/', admin_app_views.registration, name = 'admin_registration'),
+    path('dashboard/', admin_views.dashboard, name = 'admin_dashboard'), #name not include 
+    # path('registration/', admin_views.registration, name = 'admin_registration'),
+    path('admin-management/', admin_views.admin_data_handler, name = 'admin_data_handler'),
+    path('admin-management/<int:id>/', admin_views.admin_action_handler, name = 'admin_action_handler'),
 
     # -------------------------------------Car Brand urls------------------------- #
 
@@ -79,14 +80,14 @@ urlpatterns = [
     path('sub-service-option/<int:id>/', service_views.sub_service_option_action_handler, name = 'sub_service_option_action_handler'),
        
      # -------------------------------------User management urls--------------------- #
-    path('user-management/', user_management_views.user_data_handler, name = 'user_data_handler'),
-    path('user-login-as-admin/<int:id>/', user_management_views.admin_login_as_user, name = 'admin_login_as_user'),
-    path('user-management/<int:id>/<str:role>/', user_management_views.user_action_handler, name = 'user_action_handler'),
+    path('user-management/', user_views.user_data_handler, name = 'user_data_handler'),
+    path('user-login-as-admin/<int:id>/', user_views.admin_login_as_user, name = 'admin_login_as_user'),
+    path('user-management/<int:id>/<str:role>/', user_views.user_action_handler, name = 'user_action_handler'),
 
     # -------------------------------------Mechanic management urls--------------------- #
 
-    path('mechanic/', mechanic_views.mechanic_data_handler, name = 'mechanic_data_handler'),
-    path('mechanic/<int:id>/', mechanic_views.mechanic_action_handler, name = 'mechanic_action_handler'),
+    path('mechanic-management/', mechanic_views.mechanic_data_handler, name = 'mechanic_data_handler'),
+    path('mechanic-management/<int:id>/', mechanic_views.mechanic_action_handler, name = 'mechanic_action_handler'),
     
 
 ]

@@ -566,12 +566,11 @@ function updateUserProfile(formId, id, first_name, last_name, email, phone_no) {
 // Used for the mechanic details update form data
 function updateMechanincForm(formId, id, first_name, last_name, email, phone_no, status, approved) {
     
-    console.log('id', id);
+    console.log('id', status);
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
-    var url = `/admin/mechanic/${parseInt(id)}/`;
+    var url = `/admin/mechanic-management/${parseInt(id)}/`;
     updateForm.setAttribute('action', url);
-
     
 
     const first_nameInput = modal.querySelector('#first_name');
@@ -586,7 +585,7 @@ function updateMechanincForm(formId, id, first_name, last_name, email, phone_no,
     const phone_noInput = modal.querySelector('#phone_no');
     phone_noInput.value = phone_no;
 
-    const statusInput = modal.querySelector('#status');
+    const statusInput = modal.querySelector("#status");    
     statusInput.value = status;
 
     const approvedInput = modal.querySelector('#approved');
@@ -595,3 +594,224 @@ function updateMechanincForm(formId, id, first_name, last_name, email, phone_no,
     modal.style.display = 'flex';
 }
 
+function updateMechanicProfile(formId, id, first_name, last_name, email, phone_no) {
+    
+    const modal = document.getElementById(formId);
+    const updateForm = modal.querySelector('.update-form');
+    var url = '/mechanic/mechanic_dashboard/id/'.replace('id', parseInt(id));
+    updateForm.setAttribute('action', url);
+
+    const first_nameInput = modal.querySelector('#first_name');
+    first_nameInput.value = first_name;
+
+    const last_nameInput = modal.querySelector('#last_name');
+    last_nameInput.value = last_name;
+
+    const emailInput = modal.querySelector('#email');
+    emailInput.value = email;  
+
+    const phone_noInput = modal.querySelector('#phone_no');
+    phone_noInput.value = phone_no;
+
+    modal.style.display = 'flex';
+}
+
+
+function updateAdminProfile(formId, id, first_name, last_name, email, phone_no, status) {
+    
+    const modal = document.getElementById(formId);
+    const updateForm = modal.querySelector('.update-form');
+    var url = '/admin/admin-management/id/'.replace('id', parseInt(id));
+    updateForm.setAttribute('action', url);
+
+    const first_nameInput = modal.querySelector('#first_name');
+    first_nameInput.value = first_name;
+
+    const last_nameInput = modal.querySelector('#last_name');
+    last_nameInput.value = last_name;
+
+    const emailInput = modal.querySelector('#email');
+    emailInput.value = email;  
+
+    const phone_noInput = modal.querySelector('#phone_no');
+    phone_noInput.value = phone_no;
+
+    if (status){
+        const statusInput = modal.querySelector("#status");    
+        statusInput.value = status;
+    }
+
+    modal.style.display = 'flex';
+}
+
+
+$(document).ready(function () {
+    $('#car_brand').change(function () {
+        var model1Id = $(this).val();
+        console.log('model1Id', model1Id);
+
+        if (model1Id) {
+            $.get('/get_caryear_options/', { car_id: model1Id }, function (data) {
+                $('#car_year').prop('disabled', false).html('<option value="">Select Year</option>');
+                $.each(data, function (index, item) {
+                    $('#car_year').append($('<option></option>').attr('value', item.id).text(item.year));
+                });
+                $('#car_model, #car_trim, ').prop('disabled', true).html('<option value="">Select</option>');
+            });
+        } else {
+            $('#car_year, #car_model, #car_trim, ').prop('disabled', true).html('<option value="">Select</option>');
+        }
+    });
+
+    $('#car_year').change(function () {
+        var model1Id = $('#car_brand').val();
+        var model2Id = $(this).val();
+        if (model2Id) {
+            $.get('/get_carmodel_options/', { car_id: model1Id, year_id: model2Id }, function (data) {
+                $('#car_model').prop('disabled', false).html('<option value="">Select Model</option>');
+                $.each(data, function (index, item) {
+                    $('#car_model').append($('<option></option>').attr('value', item.id).text(item.model_name));
+                });
+                $('#car_trim, ').prop('disabled', true).html('<option value="">Select</option>');
+            });
+        } else {
+            $('#car_model, #car_trim, ').prop('disabled', true).html('<option value="">Select</option>');
+        }
+    });
+
+    $('#car_model').change(function () {
+        var model1Id = $('#car_brand').val();
+        var model2Id = $('#car_year').val();
+        var model3Id = $(this).val();
+        if (model3Id) {
+            $.get('/get_cartrim_options/', {car_id: model1Id, year_id: model2Id, model_id: model3Id }, function (data) {
+                $('#car_trim').prop('disabled', false).html('<option value="">Select Trim</option>');
+                $.each(data, function (index, item) {
+                    $('#car_trim').append($('<option></option>').attr('value', item.id).text(item.car_trim_name));
+                });
+            });
+        } else {
+            $('#car_trim, ').prop('disabled', true).html('<option value="">Select</option>');
+        }
+    });
+
+});
+
+
+
+function userCarDetails(formId, image_url, car_brand_detail, car_year_detail, car_model_detail, car_trim_detail, vin_number) {
+    
+    const modal = document.getElementById(formId);
+
+    const image_urlInput = modal.querySelector('#image_url');
+    image_urlInput.setAttribute('src', image_url)
+    
+    const car_brand_detailInput = modal.querySelector('#car_brand_name');
+    car_brand_detailInput.value = car_brand_detail;  
+
+    const car_year_detailInput = modal.querySelector('#car_year_detail');
+    car_year_detailInput.value = car_year_detail;
+    
+    const car_model_detailInput = modal.querySelector('#car_model_name');
+    car_model_detailInput.value = car_model_detail;
+
+    const car_trim_detailInput = modal.querySelector('#car_trim_name');
+    car_trim_detailInput.value = car_trim_detail;
+
+    const vin_numberInput = modal.querySelector('#vin_number');
+    vin_numberInput.value = vin_number;
+    
+    modal.style.display = 'flex';
+}
+
+
+
+function userCarDetailsUpdate(formId, id, brand, brand_instance, year, year_instance, model, model_instance, trim, trim_instance, vin) {
+    
+    const modal = document.getElementById(formId);
+    const updateForm = modal.querySelector('.update-form');
+    var url = '/users-car/id/'.replace('id', parseInt(id));
+    updateForm.setAttribute('action', url);
+    
+    const brandInput = modal.querySelector('#brand');
+    const brandptions = brandInput.querySelectorAll('option');
+    const brandopt = brandptions[0];
+    brandopt.text = brand;
+    brandopt.value = brand_instance;
+    
+    const yearInput = modal.querySelector('#year');
+    const yearOptions = yearInput.querySelectorAll('option');
+    const yearopt = yearOptions[0];
+    yearopt.text = year;
+    yearopt.value = year_instance;
+
+    const modelInput = modal.querySelector('#model');
+    const modelOptions = modelInput.querySelectorAll('option');
+    const modelopt = modelOptions[0];
+    modelopt.text = model;
+    modelopt.value = model_instance;
+
+    const trimInput = modal.querySelector('#trim');
+    const trimOptions = trimInput.querySelectorAll('option');
+    const trimopt = trimOptions[0];
+    trimopt.text = trim;
+    trimopt.value = trim_instance;
+
+    const vinInput = modal.querySelector('#vin');
+    vinInput.value = vin;
+    
+    modal.style.display = 'flex';
+}
+
+
+$(document).ready(function () {
+    $('#brand').change(function () {
+        var model1Id = $(this).val();
+        console.log('model1Id', model1Id);
+
+        if (model1Id) {
+            $.get('/get_caryear_options/', { car_id: model1Id }, function (data) {
+                $('#year').prop('disabled', false).html('<option value="">Select Year</option>');
+                $.each(data, function (index, item) {
+                    $('#year').append($('<option></option>').attr('value', item.id).text(item.year));
+                });
+                $('#model, #trim, ').prop('disabled', true).html('<option value="">Select</option>');
+            });
+        } else {
+            $('#year, #model, #trim, ').prop('disabled', true).html('<option value="">Select</option>');
+        }
+    });
+
+    $('#year').change(function () {
+        var model1Id = $('#brand').val();
+        var model2Id = $(this).val();
+        if (model2Id) {
+            $.get('/get_carmodel_options/', { car_id: model1Id, year_id: model2Id }, function (data) {
+                $('#model').prop('disabled', false).html('<option value="">Select Model</option>');
+                $.each(data, function (index, item) {
+                    $('#model').append($('<option></option>').attr('value', item.id).text(item.model_name));
+                });
+                $('#trim, ').prop('disabled', true).html('<option value="">Select</option>');
+            });
+        } else {
+            $('#model, #trim, ').prop('disabled', true).html('<option value="">Select</option>');
+        }
+    });
+
+    $('#model').change(function () {
+        var model1Id = $('#brand').val();
+        var model2Id = $('#year').val();
+        var model3Id = $(this).val();
+        if (model3Id) {
+            $.get('/get_cartrim_options/', {car_id: model1Id, year_id: model2Id, model_id: model3Id }, function (data) {
+                $('#trim').prop('disabled', false).html('<option value="">Select Trim</option>');
+                $.each(data, function (index, item) {
+                    $('#trim').append($('<option></option>').attr('value', item.id).text(item.car_trim_name));
+                });
+            });
+        } else {
+            $('#trim, ').prop('disabled', true).html('<option value="">Select</option>');
+        }
+    });
+
+});

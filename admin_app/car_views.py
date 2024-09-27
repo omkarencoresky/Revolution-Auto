@@ -3,10 +3,10 @@ import json
 import hashlib
 import schemas
 import fastjsonschema
+import schemas.car_schema
 from django.conf import settings
 from django.contrib import messages
-import schemas.car_management_schemas
-from schemas import car_management_schemas
+from schemas import car_schema
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
 from django.views.decorators.csrf import csrf_exempt
@@ -50,52 +50,42 @@ def car_brand_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
             form = AddBrandForm(request.POST, request.FILES)
             page_obj = brand_pagination(request)
 
-            if not request.FILES.get('image_url'):
+            uploaded_file = request.FILES.get('image_url')
 
-                page_obj = brand_pagination(request)
-                context = {
-                    'curl': admin_curl,
-                    'page_obj': page_obj,
-                }
-                messages.success(request, "No image file selected. Please upload an image.")
-                return render(request, 'carmodel/car_brand.html', context)
-            
-            uploaded_file = request.FILES['image_url']
-            image_name = uploaded_file.name 
-            image_format = image_name.split('.')[-1].lower()
+            if uploaded_file:
+                image_name = uploaded_file.name 
+                image_format = image_name.split('.')[-1].lower()
+            else:
+                image_format = ""            
 
             data = {
                 'image_format':image_format,
                 'brand':request.POST.get('brand'),
                 'description':request.POST.get('description'),
             }
-            car_management_schemas.validate_car_brand_details(data)
+            car_schema.validate_car_brand_details(data)
             
             if form.is_valid():
                 brand = form.save(commit=False)
 
-                brand.image_url = f"{media_path}brand_images/{image_name}"   
-                media_directory = os.path.join(settings.BASE_DIR, 'media/brand_images/')
-                file_path = os.path.join(media_directory, image_name)
-                os.makedirs(media_directory, exist_ok=True)
+                if image_format:
+                    brand.image_url = f"{media_path}brand_images/{image_name}"   
 
-                brand_name = request.POST['brand']
+                    media_directory = os.path.join(settings.BASE_DIR, 'media/brand_images/')
+                    file_path = os.path.join(media_directory, image_name)
+                    os.makedirs(media_directory, exist_ok=True)
+
+                    with open(file_path, "wb") as fp:
+                        for chunk in uploaded_file.chunks():
+                            fp.write(chunk)
+
+                brand_name = data.get('brand')
                 token = hashlib.sha256(brand_name.encode()).hexdigest()
                 brand.remember_token = token
-
-                with open(file_path, "wb") as fp:
-                    for chunk in uploaded_file.chunks():
-                        fp.write(chunk)
                 form.save()
 
-                page_obj = brand_pagination(request)
-                context = {
-                    'curl': admin_curl,
-                    'page_obj': page_obj,
-                }
-
                 messages.success(request, "Added successfully!")
-                return render(request, 'carmodel/car_brand.html', context)
+                return redirect('car_brand_data_handler')
         else:
             page_obj = brand_pagination(request)
             context = {
@@ -106,7 +96,7 @@ def car_brand_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
             return render(request, 'carmodel/car_brand.html', context) 
             
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.car_management_schemas.car_brand_schema.
+        messages.error(request,schemas.car_schema.car_brand_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect( 'car_brand_data_handler')
     
@@ -119,8 +109,6 @@ def car_brand_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
         return render(request, 'admin_dashboard.html')
         
     except Exception as e:
-        print('error here')
-        messages.error(request,f"{e}")
         return redirect('car_brand_data_handler')
 
 
@@ -140,12 +128,14 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
     try:
 
         if request.method == 'POST':
-            brand = CarBrand.objects.get(id=id)
 
+            brand = CarBrand.objects.get(id=id)
             uploaded_file = request.FILES.get('image_url')
+            
             if not uploaded_file:
                 image_name = str(brand.image_url).split('/')[-1]
                 image_format = image_name.split('.')[-1].lower()
+
             else:
                 uploaded_file = uploaded_file
                 image_name = uploaded_file.name 
@@ -156,14 +146,15 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                 'brand': request.POST.get('brand'),
                 'description': request.POST.get('description'),
             }
-            car_management_schemas.validate_car_brand_details(data)
+            car_schema.validate_car_brand_details(data)
 
-            brand.brand = request.POST.get('brand', brand.brand)
-            brand.status = request.POST.get('status', brand.status)
-            brand.description = request.POST.get('description', brand.description)
+            brand.brand = data.get('brand', brand.brand)
+            brand.status = data.get('status', brand.status)
+            brand.description = data.get('description', brand.description)
 
             if uploaded_file:
                 image_name = uploaded_file.name
+
                 media_directory = os.path.join(settings.BASE_DIR, 'media/brand_images/')
                 file_path = os.path.join(media_directory, image_name)
                 os.makedirs(media_directory, exist_ok=True)
@@ -172,7 +163,7 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                     for chunk in uploaded_file.chunks():
                         fp.write(chunk)
 
-                brand.image_url = f"{settings.MEDIA_URL}{image_name}"
+                brand.image_url = f"{settings.MEDIA_URL}brand_images/{image_name}"
             brand.save()
 
             messages.success(request, 'Updated successfully!')
@@ -197,7 +188,7 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
             return render(request, 'carmodel/car_brand.html') 
             
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-            messages.error(request,schemas.car_management_schemas.car_brand_schema.
+            messages.error(request,schemas.car_schema.car_brand_schema.
             get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
             return redirect('car_brand_data_handler')
     
@@ -251,29 +242,34 @@ def car_year_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
                 'year': request.POST.get('year'),
                 'car_id': request.POST.get('car_id'),
             }
-            car_management_schemas.validate_car_year_details(data)
+            car_schema.validate_car_year_details(data)
+            unique_year = CarYear.objects.filter(year=data.get('year'), car_id = data.get('car_id')).exists()
 
-            if form.is_valid():
+            if not unique_year:
+                if form.is_valid():
 
-                year = form.save(commit=False)
-                year_input = request.POST['year']
-                token = hashlib.sha256(year_input.encode()).hexdigest()
-                year.remember_token = token
-                form.save()
+                    year = form.save(commit=False)
+                    year_input = request.POST['year']
+                    token = hashlib.sha256(year_input.encode()).hexdigest()
+                    year.remember_token = token
+                    form.save()
 
-                page_obj = year_pagination(request)
-                context = {
-                    'curl': admin_curl,
-                    'page_obj': page_obj,
-                }
-                messages.success(request, "Added successfully!")
-                return redirect('car_year_data_handler')
+                    page_obj = year_pagination(request)
+                    context = {
+                        'curl': admin_curl,
+                        'page_obj': page_obj,
+                    }
+                    messages.success(request, "Added successfully!")
+                    return redirect('car_year_data_handler')
+            else:
+                messages.error(request, "Similar details is already available")
+            return redirect('car_year_data_handler')
         else:
             messages.error(request, 'Invalid request, Try again')
             return redirect('car_year_data_handler')
         
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.car_management_schemas.car_year_schema.
+        messages.error(request,schemas.car_schema.car_year_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect('car_year_data_handler')
     
@@ -310,26 +306,30 @@ def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
     try:
             
         if request.method == 'POST':
-
             car_id = request.POST.get('car_id')
+
             data = {
                     'car_id': car_id,
                     'year': request.POST.get('year'),
                 }
-            car_management_schemas.validate_car_year_details(data)
+            car_schema.validate_car_year_details(data)
 
             year = CarYear.objects.get(id=id)
-            old_brand = year.car_id
-            old_year = year.year
+            unique_year = CarYear.objects.filter(year=data.get('year'), car_id = data.get('car_id')).exists()
 
-            year.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else old_brand
+            if not unique_year:
+                year.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else year.car_id
+                
+                year.year = data.get('year', year.year)
+                year.remember_token = year.remember_token
+                year.status = request.POST.get('status', 1)
+                
+                year.save()
+                messages.success(request, 'Updated successfully!')
+                return redirect('car_year_data_handler')
             
-            year.remember_token = year.remember_token
-            year.status = request.POST.get('status', 1)
-            year.year = request.POST.get('year', old_year)
-            year.save()
-
-            messages.success(request, 'Updated successfully!')
+            else:
+                messages.error(request, "Similar details is already available")
             return redirect('car_year_data_handler')
         
         elif request.method == 'DELETE':
@@ -352,7 +352,7 @@ def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
             return redirect('car_year_data_handler')
 
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.car_management_schemas.car_year_schema.
+        messages.error(request,schemas.car_schema.car_year_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect('car_year_data_handler')
 
@@ -408,30 +408,30 @@ def car_model_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
                 'year_id':request.POST.get('year_id'),
                 'model_name':request.POST.get('model_name'),
             }
-            car_management_schemas.validate_car_model_details(data)
+            car_schema.validate_car_model_details(data)
+            unique_model = CarModel.objects.filter(car_id=data.get('car_id'), year_id=data.get('year_id'), model_name=data.get('model_name'))
 
-            if form.is_valid():
+            if not unique_model:
+                if form.is_valid():
 
-                model = form.save(commit=False)
-                model_name = request.POST['model_name']
-                token = hashlib.sha256(model_name.encode()).hexdigest()
-                model.remember_token = token
-                model.save()
-                
-                page_obj = model_pagination(request)
-                context = {
-                    'curl': admin_curl,
-                    'page_obj': page_obj,
-                }
-                
-                messages.success(request, "Added successfully!")
-                return redirect('car_model_data_handler')
+                    model = form.save(commit=False)
+                    model_name = request.POST['model_name']
+                    token = hashlib.sha256(model_name.encode()).hexdigest()
+                    model.remember_token = token
+
+                    model.save()
+                    messages.success(request, "Added successfully!")
+                    # return redirect('car_model_data_handler')
+            else:
+                messages.error(request, "Similar details is already available")
+            return redirect('car_model_data_handler')
+        
         else:
             messages.error(request, 'Invalid request, Try again')
             return redirect('car_model_data_handler') 
                     
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.car_management_schemas.car_model_schema.
+        messages.error(request,schemas.car_schema.car_model_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect('car_model_data_handler')
 
@@ -477,20 +477,27 @@ def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                 'year_id': year_id,
                 'model_name': request.POST.get('model_name'),
             }
-            car_management_schemas.validate_car_model_details(data)
+            car_schema.validate_car_model_details(data)
 
-            old_model = model.model_name
-            old_year = CarYear.objects.get(id=int(model.year_id.id))
-            old_brand = CarBrand.objects.get(id=int(model.car_id.id))
+            unique_model = CarModel.objects.filter(car_id=data.get('car_id'), year_id=data.get('year_id'), model_name=data.get('model_name'))
 
-            model.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else old_brand
-            model.year_id = CarYear.objects.get(id=int(year_id)) if year_id else old_year
-            model.status = request.POST.get('status', 1)
-            model.remember_token = model.remember_token
-            model.model_name = request.POST.get('model_name', old_model)
-            model.save()
+            if not unique_model:
+                old_model = model.model_name
 
-            messages.success(request, 'Updated successfully!')
+                old_year = CarYear.objects.get(id=int(model.year_id.id))
+                old_brand = CarBrand.objects.get(id=int(model.car_id.id))
+                model.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else old_brand
+                model.year_id = CarYear.objects.get(id=int(year_id)) if year_id else old_year
+
+                model.status = request.POST.get('status', 1)
+                model.remember_token = model.remember_token
+                model.model_name = request.POST.get('model_name', old_model)
+
+                model.save()
+                messages.success(request, 'Updated successfully!')
+            
+            else:
+                messages.error(request, "Similar details is already available")
             return redirect('car_model_data_handler')
         
         elif request.method == 'DELETE':
@@ -521,7 +528,7 @@ def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
         return redirect('car_model_data_handler')
         
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.car_management_schemas.car_model_schema.
+        messages.error(request,schemas.car_schema.car_model_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect('car_model_data_handler')
 
@@ -577,27 +584,34 @@ def car_trim_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
                 'model_id': request.POST.get('model_id'),
                 'car_trim_name': trim_name   
                 }
-            car_management_schemas.validate_car_trim_details(data)
+            car_schema.validate_car_trim_details(data)
 
-            if form.is_valid():
+            unique_trim = CarTrim.objects.filter(car_id=data.get('car_id'), year_id=data.get('year_id'), model_id=data.get('model_id'), car_trim_name=data.get('car_trim_name'),)
 
-                trim = form.save(commit=False)
-                token = hashlib.sha256(trim_name.encode()).hexdigest()
-                trim.remember_token = token
-                form.save()
+            if not unique_trim:
+                if form.is_valid():
 
-                messages.success(request, "Added successfully!")
-                return redirect('car_trim_data_handler')
-            
-            else:
-                messages.error(request, 'Invalid request, Try again')
-                return redirect('car_trim_data_handler') 
-        else:
-                messages.error(request, 'Invalid request, Try again')
-                return redirect('car_trim_data_handler') 
+                    trim = form.save(commit=False)
+                    token = hashlib.sha256(trim_name.encode()).hexdigest()
+                    trim.remember_token = token
+
+                    form.save()
+                    messages.success(request, "Added successfully!")
+                    return redirect('car_trim_data_handler')
                 
+                else:
+                    messages.error(request, 'Invalid request, Try again')
+
+            else:
+                messages.error(request, "Similar details is already available")
+            return redirect('car_trim_data_handler') 
+        
+        else:
+            messages.error(request, 'Invalid request, Try again')
+            return redirect('car_trim_data_handler') 
+            
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.car_management_schemas.car_trim_schema.
+        messages.error(request,schemas.car_schema.car_trim_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect('car_trim_data_handler')
 
@@ -642,24 +656,31 @@ def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                 'model_id': model_id,
                 'car_trim_name': request.POST.get('car_trim_name')    
                 }
-            car_management_schemas.validate_car_trim_details(data)
+            car_schema.validate_car_trim_details(data)
+            unique_trim = CarTrim.objects.filter(car_id=data.get('car_id'), year_id=data.get('year_id'), model_id=data.get('model_id'), car_trim_name=data.get('car_trim_name'),)
+
+            if not unique_trim:
                         
-            old_trim = trim.car_trim_name
-            old_year = CarYear.objects.get(id=int(trim.year_id.id))
-            old_brand = CarBrand.objects.get(id=int(trim.car_id.id))
-            old_model = CarModel.objects.get(id=int(trim.model_id.id))
+                old_trim = trim.car_trim_name
+                old_year = CarYear.objects.get(id=int(trim.year_id.id))
+                old_brand = CarBrand.objects.get(id=int(trim.car_id.id))
+                old_model = CarModel.objects.get(id=int(trim.model_id.id))
 
-            # Check new deails select than update 
-            trim.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else old_brand
-            trim.year_id = CarYear.objects.get(id=int(year_id)) if year_id else old_year
-            trim.model_id = CarModel.objects.get(id=int(model_id)) if model_id else old_model
-            trim.car_trim_name = request.POST.get('car_trim_name',old_trim)
-            trim.status = request.POST.get('status',trim.status)
-            trim.remember_token = trim.remember_token
-            trim.save()
+                # Check new deails select than update 
+                trim.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else old_brand
+                trim.year_id = CarYear.objects.get(id=int(year_id)) if year_id else old_year
+                trim.model_id = CarModel.objects.get(id=int(model_id)) if model_id else old_model
+                trim.car_trim_name = request.POST.get('car_trim_name',old_trim)
+                trim.status = request.POST.get('status',trim.status)
+                trim.remember_token = trim.remember_token
+                trim.save()
 
-            messages.success(request, 'Updated successfully!')
-            return redirect('car_trim_data_handler')
+                messages.success(request, 'Updated successfully!')
+                return redirect('car_trim_data_handler')
+            
+            else:
+                messages.error(request, "Similar details is already available")
+            return redirect('car_trim_data_handler') 
         
         elif request.method == 'DELETE': 
             trim = CarTrim.objects.get(id=id)
@@ -680,7 +701,7 @@ def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
             return redirect('car_trim_data_handler')
 
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.car_management_schemas.car_trim_schema.
+        messages.error(request,schemas.car_schema.car_trim_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect('car_trim_data_handler')
 

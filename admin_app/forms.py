@@ -1,6 +1,6 @@
 from django import forms
+from admin_app.models import *
 from user_app.models import CustomUser
-from admin_app.models import CarBrand, CarYear, CarModel, CarTrim, Location, ServiceType, ServiceCategory, Services, SubService,SubServiceOption, Inspection
     
 
 
@@ -22,7 +22,7 @@ class AdminRegisterForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'phone_no', 'password']
+        fields = ['first_name', 'last_name', 'email', 'phone_no', 'password', 'profile_image']
 
 
 class AddBrandForm(forms.ModelForm):
@@ -100,7 +100,16 @@ class AddTrimForm(forms.ModelForm):
 
 
 class AddLocationForm(forms.ModelForm):
-    
+    """
+    A form for adding or updating a Location.
+
+    Associated with the Location model, this form enables users to specify details about a Location, including its name, the country code it belongs to, and service availability. It is useful in contexts where detailed information about locations needs to be collected, such as in inventory management systems or service platforms.
+
+    Attributes:
+        location_name (CharField): A text input field for entering the name of the location.
+        country_code (CharField): A text input field for entering the country code associated with the location.
+        service_availability (BooleanField): A checkbox for indicating the availability of services at this location.
+    """
 
     class Meta:
         model = Location
@@ -108,6 +117,14 @@ class AddLocationForm(forms.ModelForm):
 
 
 class AddServiceTypeForm(forms.ModelForm):
+    """
+    A form for adding or updating a Service Type.
+
+    Associated with the ServiceType model, this form allows users to specify the name of a service type. It is useful for categorizing different types of services offered by the system.
+
+    Attributes:
+        service_type_name (CharField): A text input field for entering the name of the service type.
+    """
 
     class Meta:
         model = ServiceType
@@ -115,13 +132,34 @@ class AddServiceTypeForm(forms.ModelForm):
 
 
 class AddServiceCategoryForm(forms.ModelForm):
+    """
+    A form for adding or updating a Service Category.
+
+    Associated with the ServiceCategory model, this form enables users to specify the name of a service category and associate it with a service type. This is useful for organizing service offerings in an inventory management system.
+
+    Attributes:
+        service_category_name (CharField): A text input field for entering the name of the service category.
+        service_type (ModelChoiceField): A dropdown selection field for choosing the service type associated with the category.
+    """
+
 
     class Meta:
         model = ServiceCategory
         fields =['service_category_name', 'service_type']
 
 
-class AddServicsForm(forms.ModelForm):
+class AddServiceForm(forms.ModelForm):
+    """
+    A form for adding or updating a Service.
+
+    Associated with the Services model, this form allows users to specify details about a service, including its title, description, and associated service category. It is useful for managing service offerings in various contexts.
+
+    Attributes:
+        service_title (CharField): A text input field for entering the title of the service.
+        description (Textarea): A multi-line text input field for providing a detailed description of the service.
+        service_category (ModelChoiceField): A dropdown selection field for choosing the service category associated with the service.
+    """
+
 
     class Meta:
         model = Services
@@ -132,6 +170,21 @@ class AddServicsForm(forms.ModelForm):
 
 
 class AddSubServiceForm(forms.ModelForm):
+    """
+    A form for adding or updating a Sub-Service.
+
+    Associated with the SubService model, this form enables users to specify details about a sub-service, including its title, description, order, and selection type. It is useful in contexts where additional details about services are needed, such as in service catalogs.
+
+    Attributes:
+        service (ModelChoiceField): A dropdown selection field for choosing the main service associated with the sub-service.
+        display_text (CharField): A text input field for entering the display text of the sub-service.
+        title (CharField): A text input field for entering the title of the sub-service.
+        description (Textarea): A multi-line text input field for providing a detailed description of the sub-service.
+        order (IntegerField): A numeric input field for specifying the order of the sub-service in a list.
+        selection_type (CharField): A text input field for specifying the selection type of the sub-service.
+        optional (BooleanField): A checkbox for indicating whether the sub-service is optional.
+    """
+
 
     class Meta:
         model = SubService
@@ -142,6 +195,22 @@ class AddSubServiceForm(forms.ModelForm):
 
 
 class AddSubServiceOptionForm(forms.ModelForm):
+    """
+    A form for adding or updating a Sub-Service Option.
+
+    Associated with the SubServiceOption model, this form allows users to specify details about options for a sub-service, including its title, description, order, and associated inspection services. It is useful for providing additional choices related to sub-services in service management systems.
+
+    Attributes:
+        sub_service (ModelChoiceField): A dropdown selection field for choosing the sub-service associated with the option.
+        option_type (CharField): A text input field for specifying the type of the option.
+        title (CharField): A text input field for entering the title of the option.
+        image_url (URLField): A text input field for providing a URL to an image representing the option.
+        order (IntegerField): A numeric input field for specifying the order of the option in a list.
+        recommend_inspection_service (ModelMultipleChoiceField): A checkbox selection field for recommending inspection services associated with the option.
+        next_sub_service (ModelChoiceField): A dropdown selection field for choosing the next sub-service in a sequence.
+        description (Textarea): A multi-line text input field for providing a detailed description of the option.
+    """
+
     recommend_inspection_service = forms.ModelMultipleChoiceField(
         queryset=Inspection.objects.all(),
         widget=forms.CheckboxSelectMultiple,

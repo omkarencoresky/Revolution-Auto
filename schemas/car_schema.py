@@ -19,7 +19,7 @@ car_brand_schema = {
         #     },
         "image_format": {
             "type": "string",
-            "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
+            "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)*$",
             "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
         },
     },
@@ -102,7 +102,7 @@ car_trim_schema = {
             "type": "string",
             "minLength": 3,
             "maxLength": 50,
-            "pattern": "^[a-zA-Z0-9 ]+$",
+            "pattern": "^[a-zA-Z0-9. ]+$",
             "description": "Car Trim name length between 3 to 50 and special character not allowed."
             },
     },
@@ -111,8 +111,43 @@ car_trim_schema = {
 }
 
 
+# Define the schema for add car details for user
+users_car_detail_schema = {
+    "type": "object",
+    "properties": {
+        "car_brand": {
+            "type": "string",
+            "pattern": "^\d+$",
+            "description": "Please select a car Brand."
+            },
+        "car_year": {
+            "type": "string",
+            "pattern": "^\d+$",
+            "description": "Please select a car Year."
+            },
+        "car_model": {
+            "type": "string",
+            "pattern": "^\d+$",
+            "description": "Please select a car Model."
+            },
+        "car_trim": {
+            "type": "string",
+            "pattern": "^\d+$",
+            "description": "Please select a car Trim."
+            },
+        "vin_number": {
+            "type": "string",
+            "pattern": "^($|[a-zA-Z0-9 ]{16})$",
+            "description": "VIN number length must have 16 digits and it allows only alphanumeric."
+            },
+    },
+    "required": ["car_brand", "car_year", "car_model", "car_trim"],
+    "additionalProperties": True
+}
+
 # Compile the schemas
-validate_car_brand_details = fastjsonschema.compile(car_brand_schema)
 validate_car_year_details = fastjsonschema.compile(car_year_schema)
-validate_car_model_details = fastjsonschema.compile(car_model_schema)
 validate_car_trim_details = fastjsonschema.compile(car_trim_schema)
+validate_car_brand_details = fastjsonschema.compile(car_brand_schema)
+validate_car_model_details = fastjsonschema.compile(car_model_schema)
+validate_users_car_details = fastjsonschema.compile(users_car_detail_schema)

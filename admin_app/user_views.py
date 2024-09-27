@@ -2,6 +2,7 @@ import json
 import schemas
 import fastjsonschema
 import schemas.registration_schema
+
 from django.conf import settings
 from django.contrib import messages
 from user_app.models import CustomUser

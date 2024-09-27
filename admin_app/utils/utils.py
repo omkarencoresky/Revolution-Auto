@@ -1,7 +1,7 @@
 from admin_app.models import *
 from django.http import HttpRequest
 from user_app.models import CustomUser
-from mechanic_app.models import Mechanic
+# from mechanic_app.models import Mechanic
 from django.core.paginator import Page
 from django.core.paginator import Paginator
 
@@ -265,10 +265,10 @@ def user_pagination(request: HttpRequest) -> Page:
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj
+    
 
 
-
-def mechanic_pagination(request: HttpRequest) -> Page:
+def admin_pagination(request: HttpRequest) -> Page:
     
     """Paginate a list of all mechanics and return a Page object.
 
@@ -278,10 +278,10 @@ def mechanic_pagination(request: HttpRequest) -> Page:
     Returns:
     -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
     """
-    all_mechanic = Mechanic.objects.all().order_by('id')
+    all_admin = CustomUser.objects.all().order_by('user_id').filter(role='admin')
     
     # Pagination setup
-    paginator = Paginator(all_mechanic, 10)
+    paginator = Paginator(all_admin, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj

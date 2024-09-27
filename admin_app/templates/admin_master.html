@@ -71,7 +71,7 @@
 
                         <!-- Dashboards -->
                         <li class="sidenav-item active">
-                            <a href="{{curl}}dashboard/" class="sidenav-link">
+                            <a href="{% url 'admin_dashboard' %}" class="sidenav-link">
                                 <i class="sidenav-icon feather icon-home"></i>
                                 <div>Dashboards</div>
                                 <!-- <div class="pl-1 ml-auto">
@@ -108,22 +108,22 @@
                             <ul class="sidenav-menu" id="sidenav-dropdown-menus-Car-Management">   
                                 <li class="sidenav-item">
                                     <a href="{% url 'car_brand_data_handler' %}" class="sidenav-link">
-                                        <div>Car Brand</div>
+                                        <div class="sidenav-item-padding">Car Brand</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{% url 'car_year_data_handler' %}" class="sidenav-link">
-                                        <div>Car Year</div>
+                                        <div class="sidenav-item-padding">Car Year</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{% url 'car_model_data_handler' %}" class="sidenav-link">
-                                        <div>Car Model</div>
+                                        <div class="sidenav-item-padding">Car Model</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{% url 'car_trim_data_handler' %}" class="sidenav-link">
-                                        <div>Cars Trims</div>
+                                        <div class="sidenav-item-padding">Cars Trims</div>
                                     </a>
                                 </li>
                             </ul>
@@ -138,27 +138,27 @@
                             <ul class="sidenav-menu" id="sidenav-dropdown-menu-Services-Management">
                                 <li class="sidenav-item">
                                     <a href="{% url 'service_type_data_handler' %}" class="sidenav-link">
-                                        <div>Service Type</div>
+                                        <div class="sidenav-item-padding">Service Type</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{%url 'service_category_data_handler' %}" class="sidenav-link">
-                                        <div>Categories</div>
+                                        <div class="sidenav-item-padding">Categories</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{% url 'service_data_handler' %}" class="sidenav-link">
-                                        <div>Services</div>
+                                        <div class="sidenav-item-padding">Services</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{% url 'sub_services_data_handler' %}" class="sidenav-link">
-                                        <div>Sub-Services</div>
+                                        <div class="sidenav-item-padding">Sub-Services</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{% url 'sub_service_option_data_handler' %}" class="sidenav-link">
-                                        <div>Sub-Services Options</div>
+                                        <div class="sidenav-item-padding">Sub-Services Options</div>
                                     </a>
                                 </li>
                             </ul>
@@ -171,19 +171,21 @@
                             <ul class="sidenav-menu" id="sidenav-dropdown-menu-User-Management">
                                 <li class="sidenav-item">
                                     <a href="{% url 'mechanic_data_handler' %}" class="sidenav-link">
-                                        <div>Mechanics</div>
+                                        <div class="sidenav-item-padding">Mechanics</div>
                                     </a>
                                 </li>
                                 <li class="sidenav-item">
                                     <a href="{% url 'user_data_handler' %}" class="sidenav-link">
-                                        <div>Users</div>
+                                        <div class="sidenav-item-padding">Users</div>
                                     </a>
                                 </li>
+                                {% if user.role == 'superadmin' %}
                                 <li class="sidenav-item">
-                                    <a href="icons_linearicons.html" class="sidenav-link">
-                                        <div>Admins</div>
+                                    <a href="{% url 'admin_data_handler' %}" class="sidenav-link">
+                                        <div class="sidenav-item-padding">Admins</div>
                                     </a>
                                 </li>
+                                {% endif %}
                             </ul>
                         </li>
                         <li class="sidenav-item">
@@ -220,6 +222,7 @@
             <div class="layout-container">
 
                 {% block Layoutnavbar %}
+                
                     <!-- [ Layout navbar ( Header ) ] Start -->
                     <nav class="layout-navbar navbar navbar-expand-lg align-items-lg-center bg-white container-p-x" id="layout-navbar">
 
@@ -378,13 +381,16 @@
                                 <div class="demo-navbar-user nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
                                         <span class="d-inline-flex flex-lg-row-reverse align-items-center align-middle">
-                                            <img src="{% static 'img/avatars/1.png' %}" alt class="d-block ui-w-30 rounded-circle">
-                                            <span class="px-1 mr-lg-2 ml-2 ml-lg-0">Cindy Deitch</span>
+                                            <img src="{{user.profile_image}}" alt class="d-block ui-w-30 rounded-circle">
+                                            <span class="px-1 mr-lg-2 ml-2 ml-lg-0">{{user.first_name}}</span>
                                         </span>
                                     </a>
                                     <div class="dropdown-menu dropdown-menu-right">
-                                        <a href="javascript:" class="dropdown-item">
-                                            <i class="feather icon-user text-muted"></i> &nbsp; My profile</a>
+                                        <button class="btn" onclick="updateAdminProfile('profileupdateForm', '{{ user.user_id }}', 
+                                        '{{ user.first_name }}', '{{ user.last_name }}', '{{ user.email }}', 
+                                        '{{ user.phone_no}}')">
+                                        <i class="feather icon-user text-muted"></i> &nbsp; My profile
+                                    </button>
                                         <a href="javascript:" class="dropdown-item">
                                             <i class="feather icon-mail text-muted"></i> &nbsp; Messages</a>
                                         <a href="javascript:" class="dropdown-item">
@@ -402,8 +408,86 @@
 
                 <!-- [ Layout content ] Start -->
                 <div class="layout-content">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card d-flex w-100 mb-4">
+                                <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+                                    <div id="profileupdateForm" style="padding-top: 100px;" class="modal-form h-100"
+                                        onclick="closeModalIfOutside(event, 'profileupdateForm')">
+                                        <div class="modal-content" id="modal-content" style="max-width: 800px; height: 55%;">
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">Update Admin Credentials</h4>
+                                                <button type="button" class="close" onclick="closeModal('profileupdateForm')">×</button>
+                                            </div>
+                                            <div class="modal-body" id="modal-body">
+                                                <form class="update-form" id="update-form" method="post" enctype="multipart/form-data">
+                                                    {% csrf_token %}
+                    
+                                                    <div class="form-group brand">
+                                                        <label class="control-label" for="first_name">First Name :</label>
+                                                        <div>
+                                                            <input class="form-control" name="first_name" id="first_name"
+                                                                placeholder="First Name">
+                                                            <span id="first_name1"></span>
+                                                        </div>
+                                                    </div>
+                    
+                                                    <div class="form-group brand">
+                                                        <label class="control-label" for="first_name">Last Name :</label>
+                                                        <div>
+                                                            <input class="form-control" name="last_name" id="last_name"
+                                                                placeholder="Last Name">
+                                                            <span id="last_name"></span>
+                                                        </div>
+                                                    </div>
+                    
+                                                    <div class="form-group brand">
+                                                        <label class="control-label" for="email">Email :</label>
+                                                        <div>
+                                                            <input class="form-control" name="email" placeholder="Email" id="email">
+                                                            <span id="email1"></span>
+                                                        </div>
+                                                    </div>
+                    
+                                                    <div class="form-group brand">
+                                                        <label class="control-label" for="phone_no">Phone Number :</label>
+                                                        <div>
+                                                            <input class="form-control" name="phone_no" id="phone_no"
+                                                                placeholder="Last Name">
+                                                            <span id="phone_no"></span>
+                                                        </div>
+                                                    </div>
+                    
+                                                    <div class="form-group brand"></div>
+                                                        <label class="control-label" for="profile_image">Profile Image :</label>
+                                                        <div>
+                                                            <input type="file" class="form-control" name="profile_image" id="profile_image"
+                                                                >
+                                                            <span id="profile_image"></span>
+                                                        </div>
+                                                    </div>
+                    
+                                                    <div class="modal-footer">
+                                                        <div class="row w-100">
+                                                            <div class="w-100 modal_btn d-flex justify-content-around">
+                                                                <button type="button" class="btn btn-danger" data-dismiss="modal"   
+                                                                    onclick="closeModal('profileupdateForm')">Close</button>
+                                                                <button type="submit" class="btn btn-dark">Submit</button>
+                                                            </div>
+                                                            <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner"
+                                                                style="display: none;">
+                                                        </div>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <!-- [ content ] Start -->
-                    <div class="container-fluid flex-grow-1 container-p-y">
+                    <div class="container-fluid container-p-y">
                         {% block content %}{% endblock %}
                     </div>
                     <!-- [ content ] End -->
