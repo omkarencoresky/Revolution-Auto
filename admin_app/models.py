@@ -114,7 +114,7 @@ class Services(models.Model): #Add a column for the popularity of services
 
     id = models.AutoField(primary_key=True)
     service_title = models.CharField(max_length=150, blank=False)
-    description = models.TextField(max_length=2000, blank=True)
+    description = models.TextField(max_length=5000, blank=True)
     service_category = models.ForeignKey(ServiceCategory,on_delete=models.CASCADE)
     status = models.SmallIntegerField(default=1, blank=False)
     is_popular = models.CharField(max_length=5, choices=YES_NO_CHOICES, default='No' ) 
@@ -145,7 +145,7 @@ class SubService(models.Model):
     display_text = models.CharField(max_length=200, blank=True)
     service = models.ForeignKey(Services,on_delete=models.CASCADE)
     title = models.CharField(max_length=150, blank=False)
-    description = models.TextField(max_length=2000, blank=True)
+    description = models.TextField(max_length=5000, blank=True)
     optional = models.CharField(max_length=5, choices=YES_NO_CHOICES, default='No' ) 
     selection_type = models.CharField(max_length=8, choices=SELECTION_TYPE_CHOICES, blank=False ) 
 
@@ -185,7 +185,7 @@ class SubServiceOption(models.Model):
     title = models.CharField(max_length=150, blank=False)
     created_at = models.DateTimeField(default=timezone.now)
     status = models.SmallIntegerField(default=1, blank=False)
-    description = models.TextField(max_length=2000, blank=True)
+    description = models.TextField(max_length=5000, blank=True)
     recommend_inspection_service = models.ManyToManyField(Inspection, blank=True)
     image_url = models.ImageField(upload_to='media/option_images' ,blank=True, null=True)
     option_type = models.CharField(max_length=20, choices=OPTION_TYPE_CHOICES, blank=False ) 

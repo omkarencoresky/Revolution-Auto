@@ -12,7 +12,6 @@ def create_superuser(sender, **kwargs):
         User = get_user_model()
         user = User.objects.get(email=settings.SUPER_USER_EMAIL,role='superuser')
         if not user:
-            print("Creating superuser...")
             try:
                 superAdmin = User.objects.create_superuser(
                     email=settings.SUPER_USER_EMAIL,
@@ -24,7 +23,6 @@ def create_superuser(sender, **kwargs):
                     is_staff=True,
                     is_superuser=True
                 )
-                print("Superuser created successfully.")
             except Exception as e:
                 print(f"Failed to create superuser: {str(e)}")
         else:

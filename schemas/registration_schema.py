@@ -38,9 +38,14 @@ registration_schema = {
             "maxLength": 20,
             "pattern":  "[A-Za-z\d!@#%^&*()_+\-=\[\]{};':\\|,.<>/?]",
             "description": "Password should be 8 to 20 characters long, with at least 1 uppercase letter and 1 special character."
+        },
+        "profile_image_extention":{
+            "type":"string",
+            "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
+            "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
         }
     },
-    "required": ["first_name", "last_name", "email", "phone_no", "password"],
+    "required": ["first_name", "last_name", "email", "phone_no", "password", "profile_image_extention"],
     "additionalProperties": True
 }
 
@@ -77,6 +82,11 @@ update_detail_schema = {
             "maxLength": 10,
             "pattern": "^[0-9]+$" , # Only numbers
             "description": "Contact number contains 10 digits, allow only number's."
+        },
+        "profile_image_extention":{
+            "type":"string",
+            "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
+            "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
         }
     },
     "required": ["first_name", "last_name", "email", "phone_no"],

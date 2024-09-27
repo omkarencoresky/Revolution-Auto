@@ -3,24 +3,21 @@ import schemas
 import hashlib
 import fastjsonschema
 from .models import Location
-import schemas.location_schemas
+import schemas.location_schema
 from django.conf import settings
 from .forms import AddLocationForm
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
 from django.http import HttpResponse, HttpRequest
-from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ObjectDoesNotExist
-from django.views.decorators.cache import never_cache
 from admin_app.utils.utils import locations_pagination
 from django.contrib.auth.decorators import login_required
-from schemas.location_schemas import validate_location_schema
+from schemas.location_schema import validate_location_schema
 
 curl = settings.CURRENT_URL
 admin_curl = f"{curl}/admin/"
 
-# @never_cache
 @login_required
 def location_data_handler(request: HttpRequest) -> HttpResponse:
     print('run location')
@@ -81,7 +78,7 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
             return redirect('location_data_handler')
         
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-                messages.error(request,schemas.location_schemas.location_schema.
+                messages.error(request,schemas.location_schema.location_schema.
                 get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
                 return redirect( 'location_data_handler')
             
@@ -99,9 +96,7 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
         return redirect('location_data_handler')   
 
 
-# @never_cache
 @login_required
-# @csrf_exempt
 def location_action_handler(request: HttpRequest, id: int) -> HttpResponse:
     """
     Updates the details of a location based on the provided form data.
@@ -151,7 +146,7 @@ def location_action_handler(request: HttpRequest, id: int) -> HttpResponse:
                 return render(request, 'location/location.html', context, status=200)
 
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
-        messages.error(request,schemas.location_schemas.location_schema.
+        messages.error(request,schemas.location_schema.location_schema.
         get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
         return redirect( 'location_data_handler')
     

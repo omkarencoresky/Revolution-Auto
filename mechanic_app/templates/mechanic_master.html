@@ -4,7 +4,7 @@
 <html lang="en" class="material-style layout-fixed">
 
 <head>
-    <title>{% block title %}User Dashboard | Revolution Auto{% endblock %}</title>
+    <title>{% block title %}Mechanic Dashboard | Revolution Auto{% endblock %}</title>
 
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -75,7 +75,7 @@
 
                     <!-- Dashboards -->
                     <li class="sidenav-item active">
-                        <a href="{{curl}}user/" class="sidenav-link">
+                        <a href="{% url 'mechanic_dashboard' %}" class="sidenav-link">
                             <i class="sidenav-icon feather icon-home"></i>
                             <div>Dashboards</div>
                             <div class="pl-1 ml-auto">
@@ -85,20 +85,20 @@
                     </li>
 
                     <li class="sidenav-item">
-                        <a href="{% url 'user_car_data_handler' %}" class="sidenav-link">
-                            <i class="sidenav-icon fa fa-car"></i>
-                            <div>My Cars</div>
+                        <a href="pages_authentication_register-v1.html" class="sidenav-link">
+                            <i class="sidenav-icon fa fa-check  "></i>
+                            <div>Completed Bookings</div>
                         </a>
                     </li>
 
                     <li class="sidenav-item">
                         <a href="pages_faq.html" class="sidenav-link">
                             <i class="sidenav-icon fa fa-clipboard"></i>
-                            <div>My Bookings</div>
+                            <div>New Bookings</div>
                         </a>
                     </li>
 
-                    <li class="sidenav-item">
+                    <!-- <li class="sidenav-item">
                         <a href="tables_bootstrap.html" class="sidenav-link">
                             <i class="sidenav-icon fa fa-credit-card"></i>
                             <div>Billings and Payments</div>
@@ -110,7 +110,7 @@
                             <i class="sidenav-icon fa fa-user-friends"></i>
                             <div>Referrals</div>
                         </a>
-                    </li>
+                    </li> -->
 
                 </ul>
             </div>
@@ -311,23 +311,22 @@
                             <div class="demo-navbar-user nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown">
                                     <span class="d-inline-flex flex-lg-row-reverse align-items-center align-middle">
-                                        <img src="{{user.profile_image}}" alt class="d-block ui-w-30 rounded-circle">
+                                        <img src="{{user.profile_image}}" alt="profile_images"
+                                            class="d-block ui-w-30 rounded-circle">
                                         <span class="px-1 mr-lg-2 ml-2 ml-lg-0">{{user.first_name}}</span>
                                     </span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
-                                    <button class="btn" onclick="updateUserProfile('updateForm', '{{ user.user_id }}', 
+                                    <button class="btn" onclick="updateMechanicProfile('updateForm', '{{ user.user_id }}', 
                                         '{{ user.first_name }}', '{{ user.last_name }}', '{{ user.email }}', 
                                         '{{ user.phone_no}}')">
                                         <i class="feather icon-user text-muted"></i> &nbsp; My profile
                                     </button>
-                                    <!-- <a href="javascript:" class="dropdown-item">
-                                        <i class="feather icon-user text-muted"></i> &nbsp; My profile</a> -->
                                     <a href="javascript:" class="dropdown-item">
                                         <i class="feather icon-mail text-muted"></i> &nbsp; Messages</a>
                                     <a href="javascript:" class="dropdown-item">
                                         <i class="feather icon-settings text-muted"></i> &nbsp; Account settings</a>
-                                    <!-- <a hx-delete="{ url 'user_userapp_action_handler' user_id=user.user_id }" class="dropdown-item" style="cursor: pointer;"
+                                    <!-- <a hx-delete="{ url 'user_userapp_action_handler' id=user.user_id }" class="dropdown-item" style="cursor: pointer;"
                                         hx-confirm="Are you sure you want to delete this user?" >
                                         <i class="feather icon-trash"></i> &nbsp; Delete My Account</a> -->
                                     <a href="{% url 'logout' %}" class="dropdown-item">
@@ -343,7 +342,7 @@
                 <!-- [ Layout content ] Start -->
                 <div class="layout-content">
                     <!-- [ content ] Start -->
-                    <div class="container-fluid container-p-y">
+                    <div class="container-fluid flex-grow-1 container-p-y">
                         {% block content %}{% endblock %}
                     </div>
                     <!-- [ content ] End -->
@@ -385,7 +384,6 @@
     <script src="{% static 'js/pages/dashboards_index.js' %}"></script>
     <script src="{% static 'js/additional.js' %}"></script>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     {% block extra_js %}{% endblock %}
 </body>
 

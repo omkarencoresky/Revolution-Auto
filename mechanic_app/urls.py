@@ -19,5 +19,6 @@ from mechanic_app import views
 urlpatterns = [
     # --------------Basic and common urls--------------
     path('', views.register_mechanic_application, name='register_mechanic_application'),
-    path('mechanic_login/', views.mechanic_login, name='mechanic_login'),
+    path('dashboard/', views.mechanic_dashboard, name='mechanic_dashboard'),
+    path('mechanic_dashboard/<int:id>/', views.mechanic_mechanicapp_data_controller, name='mechanic_mechanicapp_data_controller'),
 ]

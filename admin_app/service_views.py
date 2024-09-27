@@ -24,7 +24,7 @@ from admin_app.models import (Services,
                               ServiceCategory,
                               SubServiceOption)
 
-from admin_app.forms import (AddServicsForm,
+from admin_app.forms import (AddServiceForm,
                              AddSubServiceForm,
                              AddServiceTypeForm, 
                              AddServiceCategoryForm, 
@@ -364,7 +364,7 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
             return render(request, 'service/services.html', context) 
         
         elif request.method == 'POST':
-            form = AddServicsForm(request.POST)
+            form = AddServiceForm(request.POST)
 
             data = {
                 'description': request.POST.get('description'),
@@ -384,6 +384,9 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
                         'page_obj': services_pagination_data
                     }
                     messages.success(request,"Added successfully!!!")
+                    return redirect('service_data_handler')
+                else:
+                    print(form.errors)
                     return redirect('service_data_handler')
             
             else:
@@ -415,7 +418,7 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
         return render(request, 'admin_dashboard.html')
     
     except Exception as e:
-        # messages.error(request, f"{e}")
+        messages.error(request, f"{e}")
         return redirect('service_data_handler')
 
 @login_required
@@ -530,7 +533,7 @@ def sub_services_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
                 'description': request.POST.get('description'),
                 'display_text': request.POST.get('display_text'),
                 'selection_type': request.POST.get('selection_type'),
-            }
+            }   
             validate_sub_service_details(data)
 
             if form.is_valid():

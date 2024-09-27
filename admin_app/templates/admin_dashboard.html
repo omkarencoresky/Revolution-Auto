@@ -1,3 +1,83 @@
 {% extends 'admin_master.html' %}
 
-{% load static %}   
+{% load static %}
+
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <div class="user-img">
+        <div>
+            <img class="user_profile" src="{{user.profile_image}}"
+                style="background-color: black; border-radius: 70px;">
+        </div>
+        <div class="welcome-back-text">
+            <h2>Welcome back, <span>{{user.first_name}} {{user.last_name}}</span></h2>
+            <p><i class="fa fa-envelope"></i>  &nbsp;{{user.email}}</p>
+            <p><i class="fa fa-phone" style="transform: rotate(90deg);"></i>  &nbsp;{{user.phone_no}}</p>
+        </div>
+    </div>
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="feather icon-home"></i>
+                    Dashboard</a></li>
+        </ol>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="row dashboard-div-content div-margin">
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="panel panel-bd dashboard-div" style="background-color: #7777774d;">
+                <div class="panel-body pending-bookings-card">  
+                    <div class="statistic-box">
+                        <div class="header-title">
+                            <h4>All User's</h4>
+                        </div>
+                        <h2>
+                            <span class="count-number">{{all_users}}</span>
+                            <!--<span class="slight"><i class="fa fa-play fa-rotate-270 text-warning"></i>&#43;</span>-->
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="panel panel-bd dashboard-div" style="background-color: #7777774d;">
+                <div class="panel-body pending-bookings-card">
+                    <div class="statistic-box">
+                        <div class="header-title">
+                            <h4>Active User's</h4>
+                        </div>
+                        <h2>
+                            <span class="count-number">{{active_users}}</span>
+                            <!--<span class="slight"><i class="fa fa-play fa-rotate-270 text-warning"></i>&#43;</span>-->
+                        </h2>
+                    </div>
+                </div>
+            </div>  
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-6 col-lg-3">
+            <div class="panel panel-bd dashboard-div" style="background-color: #7777774d;">
+                <div class="panel-body pending-bookings-card">
+                    <div class="statistic-box">
+                        <div class="header-title">
+                            <h4>Available Mechanic's</h4>
+                        </div>
+                        <h2>
+                            <span class="count-number">{{approved_mechanics}}</span>
+                            <!--<span class="slight"><i class="fa fa-play fa-rotate-270 text-warning"></i>&#43;</span>-->
+                        </h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

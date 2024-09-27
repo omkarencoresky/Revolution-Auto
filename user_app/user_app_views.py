@@ -11,8 +11,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from schemas.login_schema import validate_login
 from django.template import TemplateDoesNotExist 
-from django.core.exceptions import ObjectDoesNotExist
 from user_app.forms import CustomUserCreationForm
+from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import never_cache 
 from schemas.registration_schema import validate_registration
 from django.contrib.auth import authenticate, login as auth_login 
@@ -197,12 +197,13 @@ def login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
             user = authenticate(request, username=data.get('email'), password=data.get('password')) 
 
             if user is not None:
-                if user.status == 1:
+                if user.status == 1 and user.approved == 1:
                     auth_login(request, user)
-
                     if user.role == 'user':
                         return redirect('user_dashboard')
-                        # return render(request, 'user/user_dashboard.html', context)
+                    
+                    elif user.role == 'mechanic':
+                        return redirect('mechanic_dashboard')
                     
                     else:
                         return redirect('admin_dashboard')
@@ -235,7 +236,7 @@ def login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         return redirect('Home')
     
     except Exception as e :
-        # messages.error(request, f"{e}")
+        messages.error(request, f"{e}")
         return redirect('login')
     
 @never_cache

@@ -5,12 +5,12 @@ import fastjsonschema
 from django.conf import settings
 import schemas.registration_schema
 from django.contrib import messages
-from mechanic_app.models import Mechanic
-from mechanic_app.forms import AddMechanicForm
-from .utils.utils import mechanic_pagination
+from user_app.models import CustomUser
 from django.shortcuts import render, redirect
+from mechanic_app.forms import AddMechanicForm
 from django.template import TemplateDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
+from mechanic_app.utils.utils import mechanic_pagination
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_mechanic_register_detail_schema, validate_mechanic_update_detail_schema
 
@@ -20,13 +20,27 @@ media_path = f'{settings.MEDIA_URL}'
 
 
 def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+
+    """
+    This method handles displaying mechanic list when the request type is GET and adding a new mechanic when the request type is POST.
+
+        Args:
+            request: The incoming HTTP request. If GET, it shows the mechanic list. If POST, it processes the logic for adding a new mechanic.
+
+        Returns:
+            HttpResponse: For GET requests, it returns a response with the mechanic list. For POST requests, if the user input is valid, it adds the 
+            mechanic and redirects to the main page. If the input is invalid, it renders the form with an error message and redirects to the main page.
+    """
+
     try:
         if request.method == 'GET':
             page_obj = mechanic_pagination(request)
+
             context = {
                 'curl' : admincurl,
                 'page_obj' : page_obj,
             }
+
             return render(request, 'mechanic/mechanic_management.html', context)
         
         elif request.method == 'POST':
@@ -55,13 +69,14 @@ def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
                             fp.write(chunk)
 
                     mechanic.set_password(form.cleaned_data['password'])
+                    mechanic.role = 'mechanic'
                     mechanic.save()
                     
                     messages.success(request, "Your Details recorded, wait until confirmation.")
-                    return redirect('mechanic_data_handler')
                 
                 else:
                     messages.error(request, "Invalid input field, try again")
+                return redirect('mechanic_data_handler')
                     
             else:
                 messages.error(request, "Password field not matched, try again later.")
@@ -94,16 +109,23 @@ def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     
 
 def mechanic_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
-    # try:
+    
+    """
+    This method handles updating mechanic when the request type is POST with an ID, and deleting mechanic when the request type is DELETE with an ID.
+
+        Args:
+            request: The incoming HTTP request. For POST requests, it updates the mechanic specified by the ID in the request. For DELETE requests, it deletes the item specified by the ID.
+
+        Returns:
+            HttpResponse: For POST requests, if the update is successful, it redirects to the main page. If the update fails, it shows an error message and redirects to the main page. 
+            For DELETE requests, if the deletion is successful, it redirects to the main page. If the deletion fails, it shows an error message and redirects to the main page.
+    """
+
+    try:
         if request.method == 'POST':
-            mechanic_object = Mechanic.objects.get(id=id)
-            
-            data = {
-                "first_name" : request.POST.get('first_name', mechanic_object.first_name),
-                "last_name" : request.POST.get('last_name', mechanic_object.last_name),
-                "phone_no" : request.POST.get('phone_no', mechanic_object.phone_no),
-                "email" : request.POST.get('email', mechanic_object.email),
-            }
+            mechanic_object = CustomUser.objects.get(user_id=id)
+
+            data = {key: request.POST.get(key) for key in ['email', 'phone_no', 'last_name', 'first_name']}
             file = request.FILES.get('profile_image')
 
             if file:
@@ -119,8 +141,7 @@ def mechanic_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
             mechanic_object.status = int(request.POST.get('status', mechanic_object.status))
             mechanic_object.approved = int(request.POST.get('approved', mechanic_object.approved))
 
-            if data.get('profile_image_extention'):
-                print('here')
+            if file:
                 media_directory = os.path.join(settings.BASE_DIR, 'media/mechanic_images/')
                 file_path = os.path.join(media_directory, file.name)
                 os.makedirs(media_directory, exist_ok=True)
@@ -136,7 +157,7 @@ def mechanic_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
             return redirect('mechanic_data_handler')
         
         elif request.method == 'DELETE':
-            mechanic_object = Mechanic.objects.get(id=id)
+            mechanic_object = CustomUser.objects.get(user_id=id)
 
             if mechanic_object:
                 mechanic_object.delete()
@@ -146,22 +167,22 @@ def mechanic_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
         else:
             return redirect('mechanic_data_handler')
     
-    # except fastjsonschema.exceptions.JsonSchemaValueException as e:
-    #     messages.error(request,schemas.registration_schema.mechanic_update_schema.
-    #     get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
-    #     return redirect('mechanic_data_handler')
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        messages.error(request,schemas.registration_schema.mechanic_update_schema.
+        get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data'))
+        return redirect('mechanic_data_handler')
     
-    # except json.JSONDecodeError:
-    #     messages.error(request, f"{e}")
-    #     return redirect('mechanic_data_handler')
+    except json.JSONDecodeError:
+        messages.error(request, f"{e}")
+        return redirect('mechanic_data_handler')
     
-    # except ObjectDoesNotExist:
-    #     messages.error(request, "Mechanic not found.")
-    #     return redirect('mechanic_data_handler')
+    except ObjectDoesNotExist:
+        messages.error(request, "Mechanic not found.")
+        return redirect('mechanic_data_handler')
     
-    # except TemplateDoesNotExist:
-    #     messages.error(request, f"An unexpected error occurred. Please try again later.")
-    #     return redirect('admin_dashboard')
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('admin_dashboard')
     
-    # except Exception as e:
-    #     return redirect('mechanic_data_handler')
+    except Exception as e:
+        return redirect('mechanic_data_handler')
