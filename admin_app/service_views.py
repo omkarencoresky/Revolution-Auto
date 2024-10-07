@@ -107,7 +107,7 @@ def service_type_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
 
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -176,7 +176,7 @@ def service_type_action_handler(request: HttpRequest, id: int) -> HttpResponse |
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -257,7 +257,7 @@ def service_category_data_handler(request: HttpRequest) -> HttpResponse | HttpRe
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -329,7 +329,7 @@ def service_category_action_handler(request: HttpRequest, id: int) -> HttpRespon
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -415,7 +415,7 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         messages.error(request, f"{e}")
@@ -489,7 +489,7 @@ def service_action_handler(request: HttpRequest, id: int) -> HttpResponse | Http
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -579,7 +579,7 @@ def sub_services_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
             
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -670,7 +670,7 @@ def sub_services_action_handler(request: HttpRequest, id: int) -> HttpResponse |
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -781,7 +781,7 @@ def sub_service_option_data_handler(request: HttpRequest) -> HttpResponse | Http
 
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         messages.error(request, f"{e}")
@@ -874,7 +874,7 @@ def sub_service_option_action_handler(request: HttpRequest, id: int) -> HttpResp
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         # messages.error(request, f"{e}")

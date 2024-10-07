@@ -1,18 +1,22 @@
 import os 
 import json
+import hashlib
 import fastjsonschema
-import schemas.registration_schema
 import schemas.login_schema
+import schemas.registration_schema
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import JsonResponse
 from user_app.models import CustomUser
+from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from mechanic_app.forms import AddMechanicForm
 from django.template import TemplateDoesNotExist 
 from django.views.decorators.cache import never_cache 
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from admin_app.utils.utils import specific_account_notification
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from schemas.registration_schema import validate_mechanic_register_detail_schema,validate_mechanic_update_detail_schema
 
@@ -123,10 +127,14 @@ def mechanic_dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedir
     """
     try:
         if request.method == 'GET':
-            mechanic = request.user
+            
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+
             context = {
                 'curl':curl,
-                # 'mechanic':mechanic
+                'notifications': notifications,
+                'unread_notification': unread_notification,
             }
             return render(request, 'mechanic_dashboard.html', context)
         
@@ -157,12 +165,14 @@ def mechanic_mechanicapp_data_controller(request: HttpRequest, id: int) -> HttpR
     try:
         if request.method == 'POST':
             mechanic_object = CustomUser.objects.get(user_id=id)
+
             uploaded_file = request.FILES.get('profile_image')
             data = {key: request.POST.get(key) for key in ['email', 'phone_no', 'last_name', 'first_name']}
 
             if uploaded_file:
                 image_extention = uploaded_file.name.split('.')[-1].lower()
                 data['profile_image_extention'] = image_extention
+                
             validate_mechanic_update_detail_schema(data)
 
             mechanic_object.first_name = data.get('first_name', mechanic_object.first_name)
@@ -180,8 +190,10 @@ def mechanic_mechanicapp_data_controller(request: HttpRequest, id: int) -> HttpR
                 with open (file_path,'wb') as data:
                     for chunks in uploaded_file.chunks():
                         data.write(chunks)
-
+                        
+            mechanic_object.remember_token = hashlib.sha256(data.get('first_name').encode()).hexdigest()
             mechanic_object.save()
+
             messages.success(request, "Updated successfully !!")
             return redirect('mechanic_dashboard')
         
@@ -217,3 +229,110 @@ def mechanic_mechanicapp_data_controller(request: HttpRequest, id: int) -> HttpR
 
     except Exception as e:
         return redirect('mechanic_dashboard')
+    
+
+
+def mechanic_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method handles show the messages list when the request type is GET.
+
+        Args:
+            request: The incoming HTTP request. For POST requests, it show the readed or unread messages list.
+
+        Returns:
+            HttpResponse: For GET requests it shows the messages list for the specific user based. If the request type is accept the GET it render it on the same page.
+    """
+    try:
+        if request.method == "GET":
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+
+            context = {
+                'curl': curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
+            }
+            return render(request, 'mechanic_notification.html', context)
+        
+        else:
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+
+            context = {
+                'curl': curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
+            }
+            return render(request, 'mechanic_notification.html', context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, f"User does not exist.")
+        return redirect("mechanic_notification_data_handler")
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('mechanic_dashboard')
+
+    except Exception as e:
+        return redirect('mechanic_notification_data_handler')
+    
+
+def mechanic_notification_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method handles update messages status like read or not when user the request type is GET with an ID, and deleting message when the request type is DELETE with an ID.
+
+        Args:
+            request: The incoming HTTP request. For GET requests, it updates the message status specified by the ID in the request.
+            For DELETE requests, it deletes the message specified by the ID.
+
+        Returns:
+            HttpResponse: For GET requests, if the message status is update as read is successful, it redirects to the main page. If the update fails, 
+            it shows an error message and redirects to the main page.For DELETE requests, if the deletion is successful, it redirects to the main page. 
+            If the deletion fails, it shows an error message and redirects to the main page.
+    """
+    try:
+        if request.method == 'GET':
+            notification_object = Notification.objects.get(id=id)
+            
+            notification_object.is_read = True
+            notification_object.save()
+            
+            notification_read_status= {
+                'is_read': notification_object.is_read
+            }
+
+            messages.success(request, "This message mark as read")
+            return JsonResponse(notification_read_status)
+
+        elif request.method == 'DELETE':
+            notification_object = Notification.objects.get(id=id)
+
+            if notification_object:
+                notification_object.delete()
+
+                messages.success(request, "Deleted successfully !")
+                return redirect('mechanic_notification_data_handler')
+            
+        else:
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            print("Else")
+
+            context = {
+                'curl': curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
+            }
+            return render(request, 'mechanic_notification.html', context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, f"User does not exist.")
+        return redirect("mechanic_notification_data_handler")
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('mechanic_dashboard')
+
+    except Exception as e:
+        print(e)
+        return redirect('mechanic_notification_data_handler')

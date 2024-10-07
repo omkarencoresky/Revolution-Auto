@@ -44,6 +44,18 @@ AUTHENTICATION_BACKENDS = [
 
 SUPER_USER_EMAIL = os.environ.get('SUPER_USER_EMAIL')
 SUPER_USER_PASSWORD = os.environ.get('SUPER_USER_PASSWORD') 
+SUPER_USER_FIRST_NAME = os.environ.get('SUPER_USER_FIRST_NAME') 
+SUPER_USER_LAST_NAME = os.environ.get('SUPER_USER_LAST_NAME') 
+SUPER_USER_PHONE_NO = os.environ.get('SUPER_USER_PHONE_NO')
+
+
+# Email configurations
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 
 
 # Application definition

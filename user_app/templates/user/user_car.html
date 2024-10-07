@@ -31,7 +31,7 @@
                 <h3 class="modal-title">Add User</h3>
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
-            <div class="modal-body" id="modal-body" s>
+            <div class="modal-body" id="modal-body">
                 <form action="{% url 'user_car_data_handler' %}" method="post">
                     {% csrf_token %}
 

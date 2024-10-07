@@ -106,7 +106,7 @@ def car_brand_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
         
     except Exception as e:
         return redirect('car_brand_data_handler')
@@ -279,7 +279,7 @@ def car_year_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         messages.error(request, f"{e}")
@@ -366,7 +366,7 @@ def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         messages.error(request, f"{e}")
@@ -441,11 +441,11 @@ def car_model_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         messages.error(request,f"{e}")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
 
 
@@ -538,7 +538,7 @@ def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         messages.error(request, f"{e}")
@@ -621,7 +621,7 @@ def car_trim_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         messages.error(request,f"{e}")
@@ -715,7 +715,7 @@ def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
 
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:  
         messages.error(f"Error: {str(e)}")

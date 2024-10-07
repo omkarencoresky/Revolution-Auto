@@ -1,5 +1,6 @@
 import os
 import json
+import hashlib
 import fastjsonschema
 import schemas.login_schema
 import schemas.registration_schema
@@ -102,7 +103,7 @@ def booking(request: HttpRequest) -> HttpResponse:
     }
     return render(request, 'booking.html', context, status=200)
 
-def register(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+def register(request: HttpRequest,  referral_token: str =None) -> HttpResponse | HttpResponseRedirect:
     """
     If the request is get than it render the register page or if the request is post it apply the user register logic.
 
@@ -113,33 +114,49 @@ def register(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         HttpResponse: if get request render to the register page if request is post than register the user.
     """
     try:
-
         if request.method == 'GET':
             form = CustomUserCreationForm()
+            print(referral_token)
 
             context = {
                 'curl': curl,
-                'form': form
+                'form': form,
+                'referral_token': referral_token,
                 }
             
             return render(request, 'register.html', context, status=200)
 
         elif request.method == 'POST':
-            form = CustomUserCreationForm(request.POST)
+            form = CustomUserCreationForm(request.POST, request.FILES)
+
+            file = request.FILES.get('profile_image')
+            file_extention = file.name.split('.')[-1].lower()
 
             data = {key: request.POST.get(key) for key in ['email', 'password', 'phone_no', 'last_name', 'first_name']}
+            data['profile_image_extention'] = file_extention
             validate_registration(data)
             
             if data.get('password') == request.POST.get('confirm_password'):
                 if form.is_valid():
+
                     user = form.save(commit=False)
+                    image_url = f'{media_path}profile_images/{file.name}' 
+                    media_directory = os.path.join(settings.BASE_DIR, 'media/profile_images')
+                    user.profile_image = image_url
+                    os.makedirs(media_directory, exist_ok=True)
+
+                    file_path = os.path.join(media_directory, file.name)
+                    with open(file_path, "wb") as fp:
+                        for chunk in file.chunks():
+                            fp.write(chunk)
 
                     user.set_password(form.cleaned_data['password'])
+                    user.remember_token = hashlib.sha256(data.get('first_name').encode()).hexdigest()
                     user.save()
                     messages.success(request, "User register successfully!")
                 
                 else:
-                    email_errors = form.errors.get('email', [])
+                    email_errors = form.errors
                     messages.error(request, f"{email_errors}")
             else:
                 messages.error(request, "Password fields do not match.")

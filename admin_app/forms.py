@@ -1,6 +1,7 @@
 from django import forms
 from admin_app.models import *
 from user_app.models import CustomUser
+from admin_app.models import Notification
     
 
 
@@ -223,3 +224,20 @@ class AddSubServiceOptionForm(forms.ModelForm):
         widgets = {
             'description': forms.Textarea(attrs={'required': False}),
         }
+
+    
+
+class AddNotification(forms.ModelForm):
+    # recipient = forms.ModelMultipleChoiceField(queryset=CustomUser.objects.all(), to_field_name='email', required=False)
+
+    class Meta:
+        model = Notification
+        fields = ['sender_id', 'recipient_id', 'message', 'title', 'recipient_type']
+        widgets = {
+            'recipient': forms.Select({'required': False}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['recipient'].label_from_instance = lambda obj: f"{obj.email}"
+    

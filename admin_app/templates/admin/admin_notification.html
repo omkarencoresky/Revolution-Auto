@@ -1,0 +1,223 @@
+{% extends 'admin_master.html' %}
+{% load static %}
+
+{% block title %}Admin Notification | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid container-p-y">
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{curl}}dashboard/"><i class="feather icon-home"></i></a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'location_data_handler' %}">Admin Notification</a></li>
+        </ol>
+        <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
+        onclick="addopenModal('addForm')">Send Notifications</button>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+ 
+    <div id="addForm" style="display: none;" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+        <div class="modal-content" id="modal-content" style="max-width: 65%; height: 55%;">
+            <div class="modal-header">
+                <h2 class="font-weight-bold" style="padding: 0px 10px 0px 26px;">Send Notifications to User or Mechanic</h2>
+                <button type="button" class="close" onclick="closeModal('addForm')">×</button>
+            </div>
+            <div  id="modal-body" class="modal-body" style="padding: 0px 40px 0px 40px;">
+                <form action="{% url 'admin_notification_data_handler' %}" method="post">
+                    {% csrf_token %}
+
+                    <div class="d-flex flex-lg-row ">
+                        <div class="form-group brand col-md-4 py-3">
+                                <label class="control-label" for="user_type">Recipient Type :</label><span class="text-danger" style="font-weight:bolder; font-size: 16px;"> * </span>
+                                <div>
+                                    <select class="form-control" id="user_type" name="recipient_type" onchange="handleUserTypeChange()">
+                                        <option value="">Select all</option>
+                                        <option value="user">User</option>
+                                        <option value="admin">Admin</option>
+                                        <option value="mechanic">Mechanic</option>
+                                    </select>
+                                    <span id="user_type1"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group brand col-md-4 py-3">
+                                <label class="control-label" for="sent_to">Sent To :</label>
+                                <div>
+                                    <select class="form-control" id="sent_to" name="sent_to" onchange="handleSentToChange()">
+                                        <option value="all">All</option>
+                                        <option value="specific">Specific</option>
+                                    </select>
+                                    <span id="sent_to1"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group brand col-md-4 py-3">
+                                <label type="email" class="control-label" for="email">Email Address :</label>
+                                <div>
+                                    <input id="addemail" class="form-control" name="recipient_email" placeholder="Email Address">
+                                </div>
+                            </div>
+                        </div>
+                    
+                        <div class="form-group brand col-md-12 py-3">
+                            <label class="control-label" for="title">Title / Subject :</label><span class="text-danger" style="font-weight:bolder; font-size: 16px;"> * </span>
+                            <div>
+                                <input type="text" class="form-control" name="title" placeholder="Title/Subject">
+                                <span id="title"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group brand col-md-12 py-3">
+                            <label class="control-label" for="message">Message :</label><span class="text-danger" style="font-weight:bolder; font-size: 16px;"> * </span>
+                            <textarea type="text" class="form-control" name="message"
+                            placeholder="Type your message" rows="8"></textarea>
+                            <span id="message1"></span>
+                        </div>
+                        <div class="modal-footer w-100" style="padding-bottom:30px; justify-content: space-evenly;">
+                            <button  type="submit" class="btn btn-dark" style="width: 10%;">Send</button>
+                            <button  type="reset" class="btn btn-danger" style="width: 10%;">Reset</button>
+                            <button  type="button" onclick="closeModal('addForm')" class="btn btn-dark" style="width: 10%;">Close</button>
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner ms-3"
+                            style="display: none;">
+                        </div>      
+                        <input type="text" hidden name="sender" value="{{user.user_id}}"> 
+                    </div>  
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row"></div>
+    <div class="col-md-12">
+        <div class="card d-flex w-100 mb-4">
+            <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100"
+                    style="text-align: center;">
+                    <caption class="caption-top fs-4 text-dark mb-2">All Available Notifications</caption>
+
+                    <thead class="table-light" >
+                        <tr>
+                            <th scope="col">SR.No</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Message</th>
+                            <th scope="col">Sender</th>
+                            <th scope="col">Read status</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody hx-target="body" hx-swap="outerHTML swap:1s" style="text-align: center;">
+                        {% for notification in notifications %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td> {{notification.title}} </td>
+                            <td>{{ notification.message|slice:50 }}</td>
+                            <td>{{ notification.sender.email }}</td>
+
+                            {% if notification.is_read %}
+                                <td>Read</td>
+                            {% else %}
+                                <td>Not Read</td>
+                            {% endif %}
+
+                            <td>
+                                <button class="btn btn-dark car-detail-button" style="color: #c4c1c1;"
+                                    hx-delete="{% url 'admin_notification_action_handler' id=notification.id %}"
+                                    hx-confirm="Are you sure you want to delete this user?">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                                
+                                {% if notification.is_read %}
+                                    <button  class="btn btn-dark" style="font-size: 15px; color: #c4c1c1;" 
+                                    onclick="userNotifications('viewForm', '{{ notification.id|escapejs }}', '{{ notification.title|escapejs }}', '{{ notification.message|escapejs  }}', 
+                                    '{{ notification.sender.email|escapejs  }}')">
+                                        <i class="fa fa-info"></i>
+                                    </button>
+                                {% else %}
+                                    <button  class="btn btn-dark" style="font-size: 15px; color: #c4c1c1;" 
+                                    hx-get="{% url 'admin_notification_action_handler' id=notification.id %}" hx-target="#response" hx-swap="innerHTML"
+                                    onclick="userNotifications('viewForm', '{{ notification.id|escapejs }}', '{{ notification.title|escapejs }}', '{{ notification.message|escapejs  }}', 
+                                    '{{ notification.sender.email|escapejs  }}')">
+                                        <i class="fa fa-info"></i>
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="display: none;" id="response"></div>
+            </div>
+            <div id="viewForm" class="modal-form" onclick="redirectToNotification('http://127.0.0.1:8000/admin/admin-notification/')">
+                <div class="modal-content" style="max-width: 800px; height: 51%; width: 30%;">
+                    <div class="modal-header">
+                        <h4 class="modal-title w-100" style="text-align: center; font-size: 30px; font-weight: bold;">
+                            Message View</h4>
+                        <button type="button" class="close" onclick="redirectToNotification('http://127.0.0.1:8000/admin/admin-notification/')"
+                            style="font-size: 30px; font-weight: bolder;">×</button>
+                    </div>
+                    <div class="modal-body" id="modal-body">
+                        <div class="update-form ">
+                            <div>
+                                <label for="email" style="font-size: larger; margin: 10px 0px 0px 0px;">Sender Email :
+                                </label>
+                                <div style="font-size: larger; font-weight: 600; border: none;">
+                                    <input id="email" class="border-0" disabled></input>
+                                </div>
+                                <hr style="border-color: rgb(211 205 205); margin: 5px 5px 5px 5px;">
+                                <label for="title" style="font-size: larger; margin: 10px 0px 0px 0px;">Title : </label>
+                                <div style="font-size: larger; font-weight: 600; border: none;">
+                                    <input id="title" class="border-0" disabled></input>
+                                </div>
+                                <hr style="border-color: rgb(211 205 205); margin: 0;">
+
+                                <label for="message" style="font-size: larger; margin: 10px 0px 0px 0px;">Message :
+                                </label>
+                                <div style="font-size: larger; font-weight: 600; border: none;">
+                                    <textarea type="text" style="padding-top: 10px;" id="message" class="border-0"
+                                        disabled cols="60" rows="8"></textarea>
+                                </div>
+                                <hr style="border-color: rgb(211 205 205); margin: 0;">
+                            </div>
+                        </div>
+                        <div class="row w-100">
+                            <div class="w-100 modal_btn d-flex justify-content-around mt-3">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                onclick="redirectToNotification('http://127.0.0.1:8000/admin/admin-notification/')">Close</button>
+                            </div>
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.gif" class="spinner"
+                                style="display: none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn bg-dark text-light">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn bg-dark text-light">previous</a>
+                    {% endif %}
+
+                    <span class="current font-weight-bold">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn bg-dark text-light">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn bg-dark text-light">last
+                        &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

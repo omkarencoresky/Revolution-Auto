@@ -21,4 +21,9 @@ urlpatterns = [
     path('', views.register_mechanic_application, name='register_mechanic_application'),
     path('dashboard/', views.mechanic_dashboard, name='mechanic_dashboard'),
     path('mechanic_dashboard/<int:id>/', views.mechanic_mechanicapp_data_controller, name='mechanic_mechanicapp_data_controller'),
+
+
+    # --------------Notification based urls--------------
+    path('mechanic-notification/', views.mechanic_notification_data_handler, name='mechanic_notification_data_handler'),
+    path('mechanic-notification/<int:id>/', views.mechanic_notification_action_handler, name='mechanic_notification_action_handler'),
 ]

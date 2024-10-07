@@ -4,7 +4,6 @@ document.body.addEventListener('htmx:configRequest', (event) => {
 
 document.addEventListener('htmx:configRequest', function (event) {
     var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('value');
-    console.log('csrfToken', csrfToken);
 
     if (csrfToken) {
         event.detail.headers['X-CSRFToken'] = csrfToken;
@@ -13,42 +12,10 @@ document.addEventListener('htmx:configRequest', function (event) {
     }
 });
 
-// document.getElementById('sidenav-dropdown-Car-Management').addEventListener('click', function (event) {
-//     event.preventDefault();
 
-//     var element = document.getElementById('sidenav-dropdown-menus-Car-Management');
-
-//     if (element.classList.contains('sidenav-menu')) {
-//         element.classList.remove('sidenav-menu');
-//         element.classList.add('sidenav-menu-show');
-//     } else {
-//         element.classList.remove('sidenav-menu-show');
-//         element.classList.add('sidenav-menu');
-//     }
-// });
-
-
-// document.getElementById('sidenav-dropdown-Services-Management').addEventListener('click', function (event) {
-//     event.preventDefault();
-
-//     var element = document.getElementById('sidenav-dropdown-menu-Services-Management');
-//     console.log('here')
-
-//     if (element.classList.contains('sidenav-menu')) {
-//         element.classList.remove('sidenav-menu');
-//         element.classList.add('sidenav-menu-show');
-//     } else {
-//         element.classList.remove('sidenav-menu-show');
-//         element.classList.add('sidenav-menu');
-//     }
-// });
 
 function toggleMenu(menuId) {
-    console.log('menuId', menuId);
-
     var element = document.getElementById(menuId);
-    console.log('element', element);
-
 
     if (element.classList.contains('sidenav-menu')) {
         element.classList.remove('sidenav-menu');
@@ -58,19 +25,6 @@ function toggleMenu(menuId) {
         element.classList.add('sidenav-menu');
     }
 }
-
-// document.getElementById('sidenav-dropdown-User-Management').addEventListener('click', function (event) {
-//     event.preventDefault();
-//     var element = document.getElementById('sidenav-dropdown-menu-User-Management');
-
-//     if (element.classList.contains('sidenav-menu')) {
-//         element.classList.remove('sidenav-menu');
-//         element.classList.add('sidenav-menu-show');
-//     } else {
-//         element.classList.remove('sidenav-menu-show');
-//         element.classList.add('sidenav-menu');
-//     }
-// });
 
 
 // For show the add form
@@ -102,7 +56,7 @@ function closeModalIfOutside(event, formId) {
 function selectionType(id, imageInputId) {
     var selectionType = document.getElementById(id).value;
     var imagediv = document.getElementById(imageInputId);
-    console.log('imagediv', imagediv, selectionType);
+
 
 
     if (selectionType === "Image Type") {
@@ -115,26 +69,31 @@ function selectionType(id, imageInputId) {
 
 // Used for the Service type update form data
 function updateopenModal(formId, id, service_type, status) {
+
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
     const serviceTypeNameInput = modal.querySelector('#service_type_name');
     const selectElement = modal.querySelector('#exampleSelect');
+
     selectElement.value = status
     serviceTypeNameInput.value = service_type;
+
     var url = '/admin/service-type/id/'.replace('id', parseInt(id));
     updateForm.setAttribute('action', url);
+
     modal.style.display = 'flex';
 }
 
 
 // Used for the Service category update form data
 function updatecategory(formId, id, service_type, service_category_name, status, service_type_instance) {
+
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
-
     const serviceTypeNameInput = modal.querySelector('#service_type');
     const serviceTypeNameNameOptions = serviceTypeNameInput.querySelectorAll('option');
     const opt = serviceTypeNameNameOptions[0];
+
     opt.text = service_type;
     opt.value = service_type_instance;
 
@@ -309,7 +268,6 @@ function updateCarYear(formId, id, brand, year, status, brand_instance) {
 // Used for the car models update form data
 function updateCarModel(formId, id, brand, year, model_name, status, brand_instance, year_instance) {
 
-    console.log((formId));
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
     var url = '/admin/car-model/id/'.replace('id', parseInt(id));
@@ -486,7 +444,6 @@ function updateSubServiceOption(formId, id, sub_service_title, option_type, opti
 
     const orderNameInput = modal.querySelector('#order');
     orderNameInput.value = order;
-    console.log('next_sub_service_instance', next_sub_service_instance);
 
     const nextSubServiceTypeNameInput = modal.querySelector('#next_sub_service');
     const nextSubServiceNameNameOptions = nextSubServiceTypeNameInput.querySelectorAll('option');
@@ -510,29 +467,28 @@ function updateSubServiceOption(formId, id, sub_service_title, option_type, opti
 
 
 // Used for the User profile detail update
-function updateForm(formId, id, first_name, last_name, email, phone_no, is_active, role='user') {
+function updateForm(formId, id, first_name, last_name, email, phone_no, is_active, role = 'user') {
 
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
-    
-    const url = `/admin/user-management/${id}${role ? '/'+role+'/' : '' }`;
+
+    const url = `/admin/user-management/${id}${role ? '/' + role + '/' : ''}`;
     updateForm.setAttribute('action', url);
-    
+
     const first_nameInput = modal.querySelector('#first_name');
     first_nameInput.value = first_name;
 
     const last_nameInput = modal.querySelector('#last_name');
     last_nameInput.value = last_name;
-    
+
     const emailInput = modal.querySelector('#email');
     emailInput.value = email;
-    
+
     const phone_noInput = modal.querySelector('#phone_no');
     phone_noInput.value = phone_no;
-    
+
     const is_activeInput = modal.querySelector('#status');
     is_activeInput.value = is_active;
-    console.log((formId));
 
     modal.style.display = 'flex';
 }
@@ -541,7 +497,7 @@ function updateForm(formId, id, first_name, last_name, email, phone_no, is_activ
 
 // Used for the user data update form data
 function updateUserProfile(formId, id, first_name, last_name, email, phone_no) {
-    
+
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
     var url = '/user/id/'.replace('id', parseInt(id));
@@ -554,7 +510,7 @@ function updateUserProfile(formId, id, first_name, last_name, email, phone_no) {
     last_nameInput.value = last_name;
 
     const emailInput = modal.querySelector('#email');
-    emailInput.value = email;  
+    emailInput.value = email;
 
     const phone_noInput = modal.querySelector('#phone_no');
     phone_noInput.value = phone_no;
@@ -565,13 +521,12 @@ function updateUserProfile(formId, id, first_name, last_name, email, phone_no) {
 
 // Used for the mechanic details update form data
 function updateMechanincForm(formId, id, first_name, last_name, email, phone_no, status, approved) {
-    
-    console.log('id', status);
+
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
     var url = `/admin/mechanic-management/${parseInt(id)}/`;
     updateForm.setAttribute('action', url);
-    
+
 
     const first_nameInput = modal.querySelector('#first_name');
     first_nameInput.value = first_name;
@@ -580,12 +535,12 @@ function updateMechanincForm(formId, id, first_name, last_name, email, phone_no,
     last_nameInput.value = last_name;
 
     const emailInput = modal.querySelector('#email');
-    emailInput.value = email;  
+    emailInput.value = email;
 
     const phone_noInput = modal.querySelector('#phone_no');
     phone_noInput.value = phone_no;
 
-    const statusInput = modal.querySelector("#status");    
+    const statusInput = modal.querySelector("#status");
     statusInput.value = status;
 
     const approvedInput = modal.querySelector('#approved');
@@ -595,7 +550,7 @@ function updateMechanincForm(formId, id, first_name, last_name, email, phone_no,
 }
 
 function updateMechanicProfile(formId, id, first_name, last_name, email, phone_no) {
-    
+
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
     var url = '/mechanic/mechanic_dashboard/id/'.replace('id', parseInt(id));
@@ -608,7 +563,7 @@ function updateMechanicProfile(formId, id, first_name, last_name, email, phone_n
     last_nameInput.value = last_name;
 
     const emailInput = modal.querySelector('#email');
-    emailInput.value = email;  
+    emailInput.value = email;
 
     const phone_noInput = modal.querySelector('#phone_no');
     phone_noInput.value = phone_no;
@@ -618,7 +573,7 @@ function updateMechanicProfile(formId, id, first_name, last_name, email, phone_n
 
 
 function updateAdminProfile(formId, id, first_name, last_name, email, phone_no, status) {
-    
+
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
     var url = '/admin/admin-management/id/'.replace('id', parseInt(id));
@@ -631,13 +586,13 @@ function updateAdminProfile(formId, id, first_name, last_name, email, phone_no, 
     last_nameInput.value = last_name;
 
     const emailInput = modal.querySelector('#email');
-    emailInput.value = email;  
+    emailInput.value = email;
 
     const phone_noInput = modal.querySelector('#phone_no');
     phone_noInput.value = phone_no;
 
-    if (status){
-        const statusInput = modal.querySelector("#status");    
+    if (status) {
+        const statusInput = modal.querySelector("#status");
         statusInput.value = status;
     }
 
@@ -648,7 +603,6 @@ function updateAdminProfile(formId, id, first_name, last_name, email, phone_no, 
 $(document).ready(function () {
     $('#car_brand').change(function () {
         var model1Id = $(this).val();
-        console.log('model1Id', model1Id);
 
         if (model1Id) {
             $.get('/get_caryear_options/', { car_id: model1Id }, function (data) {
@@ -684,7 +638,7 @@ $(document).ready(function () {
         var model2Id = $('#car_year').val();
         var model3Id = $(this).val();
         if (model3Id) {
-            $.get('/get_cartrim_options/', {car_id: model1Id, year_id: model2Id, model_id: model3Id }, function (data) {
+            $.get('/get_cartrim_options/', { car_id: model1Id, year_id: model2Id, model_id: model3Id }, function (data) {
                 $('#car_trim').prop('disabled', false).html('<option value="">Select Trim</option>');
                 $.each(data, function (index, item) {
                     $('#car_trim').append($('<option></option>').attr('value', item.id).text(item.car_trim_name));
@@ -700,18 +654,18 @@ $(document).ready(function () {
 
 
 function userCarDetails(formId, image_url, car_brand_detail, car_year_detail, car_model_detail, car_trim_detail, vin_number) {
-    
+
     const modal = document.getElementById(formId);
 
     const image_urlInput = modal.querySelector('#image_url');
     image_urlInput.setAttribute('src', image_url)
-    
+
     const car_brand_detailInput = modal.querySelector('#car_brand_name');
-    car_brand_detailInput.value = car_brand_detail;  
+    car_brand_detailInput.value = car_brand_detail;
 
     const car_year_detailInput = modal.querySelector('#car_year_detail');
     car_year_detailInput.value = car_year_detail;
-    
+
     const car_model_detailInput = modal.querySelector('#car_model_name');
     car_model_detailInput.value = car_model_detail;
 
@@ -720,25 +674,44 @@ function userCarDetails(formId, image_url, car_brand_detail, car_year_detail, ca
 
     const vin_numberInput = modal.querySelector('#vin_number');
     vin_numberInput.value = vin_number;
-    
+
+    modal.style.display = 'flex';
+}
+
+
+
+function userNotifications(formId, id, title, message, email, is_read) {
+
+    const modal = document.getElementById(formId);
+
+    const titleInput = modal.querySelector('#title');
+    titleInput.value = title;
+
+    const messageInput = modal.querySelector('#message');
+    messageInput.value = message;
+
+
+    const emailInput = modal.querySelector('#email');
+    emailInput.value = email;
+
     modal.style.display = 'flex';
 }
 
 
 
 function userCarDetailsUpdate(formId, id, brand, brand_instance, year, year_instance, model, model_instance, trim, trim_instance, vin) {
-    
+
     const modal = document.getElementById(formId);
     const updateForm = modal.querySelector('.update-form');
     var url = '/users-car/id/'.replace('id', parseInt(id));
     updateForm.setAttribute('action', url);
-    
+
     const brandInput = modal.querySelector('#brand');
     const brandptions = brandInput.querySelectorAll('option');
     const brandopt = brandptions[0];
     brandopt.text = brand;
     brandopt.value = brand_instance;
-    
+
     const yearInput = modal.querySelector('#year');
     const yearOptions = yearInput.querySelectorAll('option');
     const yearopt = yearOptions[0];
@@ -759,7 +732,7 @@ function userCarDetailsUpdate(formId, id, brand, brand_instance, year, year_inst
 
     const vinInput = modal.querySelector('#vin');
     vinInput.value = vin;
-    
+
     modal.style.display = 'flex';
 }
 
@@ -767,7 +740,6 @@ function userCarDetailsUpdate(formId, id, brand, brand_instance, year, year_inst
 $(document).ready(function () {
     $('#brand').change(function () {
         var model1Id = $(this).val();
-        console.log('model1Id', model1Id);
 
         if (model1Id) {
             $.get('/get_caryear_options/', { car_id: model1Id }, function (data) {
@@ -803,7 +775,7 @@ $(document).ready(function () {
         var model2Id = $('#year').val();
         var model3Id = $(this).val();
         if (model3Id) {
-            $.get('/get_cartrim_options/', {car_id: model1Id, year_id: model2Id, model_id: model3Id }, function (data) {
+            $.get('/get_cartrim_options/', { car_id: model1Id, year_id: model2Id, model_id: model3Id }, function (data) {
                 $('#trim').prop('disabled', false).html('<option value="">Select Trim</option>');
                 $.each(data, function (index, item) {
                     $('#trim').append($('<option></option>').attr('value', item.id).text(item.car_trim_name));
@@ -815,3 +787,74 @@ $(document).ready(function () {
     });
 
 });
+
+
+
+function handleUserTypeChange() {
+    const userTypeSelect = document.getElementById('user_type');
+    const sentToSelect = document.getElementById('sent_to');
+    const emailInput = document.getElementById('addemail');
+
+
+    if (userTypeSelect.value === "") {
+        // If no user type is selected, disable both Sent To and Email
+        sentToSelect.disabled = true;
+        emailInput.disabled = true;
+        // sentToSelect.value = ""; // Reset Sent To selection
+        // emailInput.value = ""; // Clear email input
+    } else {
+        // If a user type is selected, enable Sent To but keep Email disabled
+        sentToSelect.disabled = false;
+        emailInput.setAttribute('disabled', true);
+        emailInput.value = ""; // Clear email input when enabling/disabling
+    }
+}
+
+function handleSentToChange() {
+    const sentToSelect = document.getElementById('sent_to');
+    const emailInput = document.getElementById('addemail');
+
+    if (sentToSelect.value === "specific") {
+        // If "Specific" is selected, enable Email input
+        emailInput.disabled = false;
+    } else {
+        // If "All" is selected or no selection, disable Email input
+        emailInput.disabled = true;
+        emailInput.value = ""; // Clear email input when disabling
+    }
+}
+
+// Initial setup
+function initializeForm() {
+    handleUserTypeChange();
+    handleSentToChange();
+}
+
+// Call initializeForm when the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', initializeForm);
+
+
+function redirectToNotification(url) {
+    console.log('url', url);
+    window.location.href = url;
+
+}
+
+
+function hideShowDropdown(event, layerId, elementId) {
+    // Prevent event from bubbling up
+    event.stopPropagation();
+    console.log('calling hideShowDropdown');
+    
+
+    const layerElement = document.getElementById(layerId);
+    const childElement = document.getElementById(elementId);
+
+    if (!layerElement.classList.contains("show")) {
+        layerElement.classList.add("show");
+        childElement.classList.add("show");
+    } else {
+        layerElement.classList.remove("show");
+        childElement.classList.remove("show");
+    }
+}

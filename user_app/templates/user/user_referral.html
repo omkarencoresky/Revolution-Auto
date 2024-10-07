@@ -7,11 +7,11 @@
 <div class="container-fluid flex-grow-1 container-p-y">
     <!-- <div class="user-img">
         <div>
-            <img class="user_profile" src="{% static 'img/find_user.png' %}"
+            <img class="user_profile" src="{{user.profile_image}}"
                 style="background-color: black; border-radius: 70px;">
         </div>
         <div class="welcome-back-text">
-            <h2>Welcome back, <span>{{user.first_name}} {{user.last_name}}</span></h2>
+            <h3>{{user.first_name}} {{user.last_name}}</h3>
             <p>Managing your car has never been more convenient</p>
         </div>
     </div> -->
@@ -41,12 +41,14 @@
                 </div>
                 <div style="display: flex; align-items: center; justify-content: space-evenly; width: 100%; ">
                     <div style="width: 35%; border: 1px solid rgb(231, 228, 228); padding: 10px;">
-                        <form id="update-form" method="post">
+
+                        <form id="update-form" method="post" style="font-size: medium;">
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label for="referral_link" class="form-label">Your Referral Link:</label>
                                 <input type="text" class="form-control" id="referral_link"
-                                    placeholder="{{user.referral_link}}" disabled>
+                                    placeholder="http://127.0.0.1:8000/register/{{user.remember_token}}" disabled>
+                                    http://127.0.0.1:8000/register/{{user.remember_token}}
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email For Refer:</label>
@@ -55,25 +57,60 @@
                             </div>
                             <p class="small">Separate e-mails with a comma</p>
                             <div class="d-flex justify-content-around">
-                                <button type="button" class="btn btn-primary" onclick="closeModal('updateForm')">Preview
-                                    of mail</button>
+                                <button type="button" style=" font-weight: 900;" class="btn btn-white"  onclick="addopenModal('addForm')">Preview of
+                                    mail</button>
                                 <button type="submit" class="btn btn-dark">Send mail</button>
                             </div>
                         </form>
+
+                        <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+                            <div class="modal-content" style="max-width: 25%; height: 35%; padding-bottom: 0%;">
+                                <div class="modal-header">
+                                    <h3 class="modal-title" >Mail Content</h3>
+                                    <button type="button" class="close" onclick="closeModal('addForm')">×</button>
+                                </div>
+                                <div class="modal-body" id="modal-body" style="padding-bottom: 0%;">
+                                    <div style="font-size: medium;">
+                                        <p>Your friend <strong>{{user.first_name}}</strong> thought you should try us for your next car service, repair or
+                                            diagnostics so we are rewarding you with<strong> ₵ 30.</strong> 
+                                        </p>
+
+                                        <p>To redeem, book one of our services online and one of our mobile mechanics will come to
+                                            your home or office to service your vehicle, 7 days a week.
+                                        </p>
+
+                                        <p>
+                                            <a href="http://127.0.0.1:8000/register/{{user.remember_token}}"> Click here href="http://127.0.0.1:8000/register/{{user.remember_token}}</a>
+                                            today to sign up and get <strong> ₵ 30</strong>  off on your first booking.
+                                        </p>
+
+                                        <p>You can learn more about Uncle Fitter at: https://www.unclefitter.com</p>
+                                    </div>
+                
+                                    <div class="modal-footer justify-content-center">
+                                        <div class="modal_btn" >
+                                            <button type="button" class="btn btn-danger" onclick="closeModal('addForm')">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
+
                     <div class="col-md-4 custom-border p-4">
-                        <p class="text-center mb-5" style="font-size: larger; padding-bottom: 8px;">Lorem ipsum dolor sit amet consectetur adipisicing elit. Similique
+                        <p class="text-center mb-5" style="font-size: larger; padding-bottom: 8px;">Lorem ipsum dolor
+                            sit amet consectetur adipisicing elit. Similique
                             sapiente deleniti necessitatibus! Praesentium similique accusamus, doloremque id, at
                             voluptate consequatur deserunt iste vitae nemo sit officiis inventore officia et pariatur!
                         </p>
                         <div class="d-flex justify-content-around">
-                            <button class="btn btn-primary">Facebook</button>
+                            <button class="btn btn-white" style=" font-weight: 900;">Facebook</button>
                             <button class="btn btn-dark">Twitter</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Pagination Controls remove for now when required copy from the admin templates -->
         </div>
     </div>
 </div>

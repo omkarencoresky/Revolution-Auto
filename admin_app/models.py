@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from  user_app.models import CustomUser
 
 
 # Car management Models
@@ -195,3 +196,55 @@ class SubServiceOption(models.Model):
     class Meta:
         db_table = 'sub_service_option'
 
+
+
+class Notification(models.Model):
+
+    USER_TYPE_CHOICES = [
+        ('user', 'user'),
+        ('mechanic', 'mechanic'),
+        ('admin', 'admin'),
+    ]
+
+    STATUS_CHOICES = [
+        ('Sent', 'sent'),
+        ('Failed', 'failed'),
+    ]
+
+    id = models.AutoField(primary_key=True)
+    sender_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='sender_name')
+    recipient_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='recipient_name', blank= True, null= True)
+    recipient_type = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, blank=False, default=1)
+    title = models.CharField(max_length=255)
+    email_status = models.CharField(max_length=20, choices=STATUS_CHOICES, blank= False, default='complete')
+    message = models.TextField(max_length=5000, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'notification'
+
+    @classmethod
+    def get_unread_count(cls, user):
+        return cls.objects.filter(recipient_id=user, is_read=False).count()
+    
+    def mark_as_read(self):
+        self.is_read = True
+        self.save()
+
+
+class UserReferral(models.Model):
+    REDEEM_STATUS = {
+        'Redeemed':'redeemed',
+        'Available':'available',
+    }
+
+    id=models.AutoField(primary_key=True)
+    referrer_id = models.ForeignKey(CustomUser,on_delete=models.CASCADE, related_name='refer_by')
+    refered_email = models.EmailField(max_length=255, blank=False, unique=True)
+    redeem_status = models.CharField(max_length=20, choices=REDEEM_STATUS, blank=False)
+    booking_id = models.IntegerField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_referral'

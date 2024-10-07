@@ -1,5 +1,6 @@
 import os
 import json
+import hashlib
 import schemas
 import fastjsonschema
 from django.conf import settings
@@ -70,6 +71,7 @@ def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
 
                     mechanic.set_password(form.cleaned_data['password'])
                     mechanic.role = 'mechanic'
+                    mechanic.remember_token = hashlib.sha256(data.get('first_name').encode()).hexdigest()
                     mechanic.save()
                     
                     messages.success(request, "Your Details recorded, wait until confirmation.")
