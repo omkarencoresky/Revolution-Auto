@@ -47,4 +47,14 @@ urlpatterns = [
 
     # -------------- Referral based urls--------------
     path('user-referral/', user_views.referral_data_handler, name='referral_data_handler'),
+
+
+    
+    # -------------- Notification based urls--------------
+    path('user-notification/', user_views.user_notification_data_handler, name='user_notification_data_handler'),
+    path('user-notification/<int:id>/', user_views.user_notification_action_handler, name='user_notification_action_handler'),
+
+
+    # -------------- Referral based urls--------------
+    path('register/<str:referral_token>/', user_app_views.register, name='register'),
 ]

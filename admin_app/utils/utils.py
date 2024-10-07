@@ -1,7 +1,6 @@
 from admin_app.models import *
 from django.http import HttpRequest
 from user_app.models import CustomUser
-# from mechanic_app.models import Mechanic
 from django.core.paginator import Page
 from django.core.paginator import Paginator
 
@@ -285,3 +284,15 @@ def admin_pagination(request: HttpRequest) -> Page:
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj
+
+
+def all_data(request: HttpRequest, recipient_type) -> Page:
+
+    all = CustomUser.objects.filter(role=recipient_type)
+    return all
+
+
+def specific_account_notification(request: HttpRequest, user_id) -> Page:
+    
+    all_notifications = Notification.objects.filter(recipient_id=user_id)
+    return all_notifications

@@ -1,3 +1,4 @@
+import os
 import json
 import fastjsonschema
 import schemas.car_schema
@@ -17,12 +18,13 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from schemas.car_schema import validate_users_car_details
 from user_app.utils.utils import User_Car_Record_pagination
-from admin_app.models import CarBrand, CarModel, CarTrim, CarYear
+from admin_app.models import CarBrand, CarModel, CarTrim, CarYear, Notification
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_update_profile_details_schema
 
 curl = settings.CURRENT_URL+'/'
 context = {'curl' : curl}
+media_path = f'{settings.MEDIA_URL}'
 
 @never_cache
 @login_required
@@ -39,20 +41,25 @@ def user_dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     try:
         if request.method == 'GET':
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            
             context = {
-                'curl' : curl
+                'curl' : curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
             }
             return render(request, 'user/user_dashboard.html', context)
         
         else:
-            return render(request, 'home.html', context)
+            return redirect('Home')
         
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
         return render(request, 'home.html')
 
     except Exception as e:
-        # messages.error(request, f"{e}")
+        messages.error(request, f"{e}")
         return redirect("user_dashboard")
     
 @login_required
@@ -70,24 +77,36 @@ def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse |
     """
     try:
         if request.method == 'POST':
-                user_object = CustomUser.objects.get(user_id=id)
+            user_object = CustomUser.objects.get(user_id=id)
 
-                data = {
-                    'email': request.POST.get('email',user_object.email),
-                    'phone_no': request.POST.get('phone_no', user_object.phone_no),
-                    'last_name': request.POST.get('last_name', user_object.last_name), 
-                    'first_name': request.POST.get('first_name', user_object.first_name),
-                }
-                validate_update_profile_details_schema(data)
+            uploaded_file = request.FILES.get('profile_image')
+            data = {key: request.POST.get(key) for key in ['email', 'phone_no', 'last_name', 'first_name']}
 
-                user_object.email = data.get('email')
-                user_object.phone_no = data.get('phone_no')
-                user_object.last_name = data.get('last_name')
-                user_object.first_name = data.get('first_name')
-                user_object.save()
+            if uploaded_file:
+                image_extention = uploaded_file.name.split('.')[-1].lower()
+                data['profile_image_extention'] = image_extention
 
-                messages.success(request, "Updated successfully!")
-                return redirect("user_dashboard")
+            validate_update_profile_details_schema(data)
+
+            user_object.email = data.get('email')
+            user_object.phone_no = data.get('phone_no')
+            user_object.last_name = data.get('last_name')
+            user_object.first_name = data.get('first_name')
+
+            if uploaded_file:
+                image_url = f"{media_path}profile_images/{uploaded_file.name}"
+                media_directory = os.path.join(settings.BASE_DIR, 'media/profile_images')
+                user_object.profile_image = image_url
+                os.makedirs(media_directory, exist_ok=True)
+
+                file_path = os.path.join(media_directory, uploaded_file.name)
+                with open (file_path,'wb') as data:
+                    for chunks in uploaded_file.chunks():
+                        data.write(chunks)
+
+            user_object.save()
+            messages.success(request, "Updated successfully!")
+            return redirect("user_dashboard")
         
         elif request.method == 'DELETE':
             user_object = CustomUser.objects.get(user_id=id)
@@ -123,13 +142,6 @@ def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse |
         return redirect("user_dashboard")
 
 
-def referral_data_handler(request):
-    user = request.user
-    context = {
-        'curl' : curl
-    }
-    return render(request, 'user/user_referral.html', context)
-
 @login_required
 @require_GET
 def get_caryear_options(request):
@@ -163,11 +175,15 @@ def user_car_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     try:
         if request.method == 'GET':     
             page_obj = User_Car_Record_pagination(request)
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
 
             context = {
                 'curl' : curl,
                 'page_obj': page_obj,
                 'model1_options' : CarBrand.objects.all().values('id','brand'),
+                'notifications': notifications,
+                'unread_notification': unread_notification,
             }
             return render(request, 'user/user_car.html', context)
         
@@ -196,11 +212,15 @@ def user_car_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
 
         else:
             page_obj = User_Car_Record_pagination(request)
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
 
             context = {
                 'curl' : curl,
                 'model1_options' : CarBrand.objects.all().values('id','brand'),
-                'page_obj': page_obj
+                'page_obj': page_obj,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
             }
             return render(request, 'user/user_car.html', context)
     
@@ -219,7 +239,7 @@ def user_car_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'user_dashboard.html')
+        return redirect('user_dashboard')
 
     except Exception as e:
         return redirect('user_car_data_handler')
@@ -279,3 +299,129 @@ def user_car_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
 
     except Exception as e:
         return redirect('user_car_data_handler')
+    
+
+def user_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method handles show the messages list when the request type is GET.
+
+        Args:
+            request: The incoming HTTP request. For POST requests, it show the readed or unread messages list.
+
+        Returns:
+            HttpResponse: For GET requests it shows the messages list for the specific user based. If the request type is accept the GET it render it on the same page.
+    """
+    try:
+        if request.method == "GET":
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+
+            context = {
+                'curl': curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
+            }
+            return render(request, 'user/user_notification.html', context)
+        
+        else:
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+
+            context = {
+                'curl': curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
+            }
+            return render(request, 'user/user_notification.html', context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, f"User does not exist.")
+        return redirect("user_notification_data_handler")
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('user_dashboard')
+
+    except Exception as e:
+        print(e)
+        return redirect('user_notification_data_handler')
+    
+
+def user_notification_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method handles update messages status like read or not when user the request type is GET with an ID, and deleting message when the request type is DELETE with an ID.
+
+        Args:
+            request: The incoming HTTP request. For GET requests, it updates the message status specified by the ID in the request.
+            For DELETE requests, it deletes the message specified by the ID.
+
+        Returns:
+            HttpResponse: For GET requests, if the message status is update as read is successful, it redirects to the main page. If the update fails, 
+            it shows an error message and redirects to the main page.For DELETE requests, if the deletion is successful, it redirects to the main page. 
+            If the deletion fails, it shows an error message and redirects to the main page.
+    """
+    try:
+        if request.method == 'GET':
+            notification_object = Notification.objects.get(id=id)
+            
+            notification_object.is_read = True
+            notification_object.save()
+            
+            notification_read_status= {
+                'is_read': notification_object.is_read
+            }
+            messages.success(request, "This message mark as read")
+            return JsonResponse(notification_read_status)
+
+        elif request.method == 'DELETE':
+            notification_object = Notification.objects.get(id=id)
+
+            if notification_object:
+                notification_object.delete()
+
+                messages.success(request, "Deleted successfully !")
+                return redirect('user_notification_data_handler')
+            
+        else:
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            
+            context = {
+                'curl': curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
+            }
+            return render(request, 'user/user_notification.html', context)
+        
+    except ObjectDoesNotExist:
+        messages.error(request, f"User does not exist.")
+        return redirect("user_notification_data_handler")
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('user_dashboard')
+
+    except Exception as e:
+        print(e)
+        return redirect('user_notification_data_handler')
+    
+
+
+def referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    try:
+        if request.method == 'GET':
+            notifications = specific_account_notification(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+                    
+            context = {
+                'curl' : curl,
+                'notifications': notifications,
+                'unread_notification': unread_notification,
+            }
+            return render(request, 'user/user_referral.html', context)
+        
+        elif request.method == 'POST':
+            pass
+    except Exception as e:
+        return redirect('referral_data_handler')
+        

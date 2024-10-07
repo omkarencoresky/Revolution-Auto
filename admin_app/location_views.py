@@ -88,7 +88,7 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
     
     except Exception as e:
         print(e)
@@ -160,7 +160,7 @@ def location_action_handler(request: HttpRequest, id: int) -> HttpResponse:
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')            
+        return render(request, 'admin/admin_dashboard.html')            
 
     except Exception as e:
         messages.error(request, f'{e}')

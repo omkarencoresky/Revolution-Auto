@@ -246,18 +246,12 @@ label{
   }
   	
   
-  /* .user_profile {
-	width: 80px;
-	height: 80px;
-	object-fit: cover;
-	margin-right: 1rem;
-  } */
-  
   .welcome-back-text h2 {
 	font-size: 1.5rem;
 	margin-bottom: 0.5rem;
   }
   
+
   .welcome-back-text span {
 	color: #2b3371;
 	font-weight: 600;
@@ -270,13 +264,16 @@ label{
 	margin-bottom: 1rem;
   }
   
+
   .messages li {
 	color: #155724;
   }	
 
+
   .td_center{
 	vertical-align: center;
   }
+
 
 .icon-style{
 	border: 1px solid black;
@@ -298,3 +295,14 @@ label{
 	padding: 0%;
 	margin: 0%;
 }
+
+
+.temp{
+	background-color: #cbcbcb !important;
+}
+
+.show {
+	display: block !important;
+}
+
+

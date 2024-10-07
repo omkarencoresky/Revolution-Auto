@@ -1,5 +1,6 @@
 import json
 import schemas
+import hashlib
 import fastjsonschema
 import schemas.registration_schema
 
@@ -53,8 +54,10 @@ def user_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedire
 
                 if form.is_valid():
                     user = form.save(commit=False)
-                    user.set_password(form.cleaned_data['password'])
 
+                    user.set_password(form.cleaned_data['password'])
+                    user.remember_token = hashlib.sha256(data.get('first_name').encode()).hexdigest()
+                    
                     user.save()
                     messages.success(request, "User register successfully!")
                 
@@ -86,7 +89,7 @@ def user_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedire
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -161,7 +164,7 @@ def user_action_handler(request: HttpRequest, id: int, role=None) -> HttpRespons
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         # messages.error(request, f"{e}")
@@ -206,7 +209,7 @@ def admin_login_as_user(request: HttpRequest, id: int) -> HttpResponse | HttpRes
     
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return render(request, 'admin_dashboard.html')
+        return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
         # messages.error(request, f"{e}")

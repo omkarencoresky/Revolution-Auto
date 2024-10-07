@@ -25,9 +25,12 @@ urlpatterns = [
     # -------------------------------------Admin urls----------------------------- #
 
     path('dashboard/', admin_views.dashboard, name = 'admin_dashboard'), #name not include 
-    # path('registration/', admin_views.registration, name = 'admin_registration'),
+    
     path('admin-management/', admin_views.admin_data_handler, name = 'admin_data_handler'),
     path('admin-management/<int:id>/', admin_views.admin_action_handler, name = 'admin_action_handler'),
+
+    path('admin-notification/', admin_views.admin_notification_data_handler, name = 'admin_notification_data_handler'),
+    path('admin-notification/<int:id>/', admin_views.admin_notification_action_handler, name = 'admin_notification_action_handler'),
 
     # -------------------------------------Car Brand urls------------------------- #
 

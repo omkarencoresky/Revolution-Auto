@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from admin_app.models import CarBrand, CarModel, CarTrim, CarYear
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
 
@@ -54,6 +53,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     approved = models.SmallIntegerField(default=1, blank=False)
     role = models.CharField(max_length=20, choices=ROLE_CHOICE, default=USER)
     profile_image = models.ImageField(upload_to='profile_images/', default=0)
+    remember_token = models.CharField(max_length=100, blank=False, editable=False, unique=True)
 
     objects = CustomManager()
 
@@ -91,6 +91,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class UserCarRecord(models.Model):
+
+    from admin_app.models import CarBrand, CarModel, CarTrim, CarYear
+    
     id = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_details')
     car_brand = models.ForeignKey(CarBrand, on_delete=models.CASCADE, related_name='car_details')
