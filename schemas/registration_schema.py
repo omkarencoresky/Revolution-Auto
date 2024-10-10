@@ -39,13 +39,13 @@ registration_schema = {
             "pattern":  "[A-Za-z\d!@#%^&*()_+\-=\[\]{};':\\|,.<>/?]",
             "description": "Password should be 8 to 20 characters long, with at least 1 uppercase letter and 1 special character."
         },
-        "profile_image_extention":{
+        "profile_image_extension":{
             "type":"string",
             "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
             "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
         }
     },
-    "required": ["first_name", "last_name", "email", "phone_no", "password", "profile_image_extention"],
+    "required": ["first_name", "last_name", "email", "phone_no", "password", "profile_image_extension"],
     "additionalProperties": True
 }
 
@@ -83,7 +83,7 @@ update_detail_schema = {
             "pattern": "^[0-9]+$" , # Only numbers
             "description": "Contact number contains 10 digits, allow only number's."
         },
-        "profile_image_extention":{
+        "profile_image_extension":{
             "type":"string",
             "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
             "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
@@ -133,13 +133,13 @@ mechanic_register_schema = {
             "pattern":  "[A-Za-z\d!@#%^&*()_+\-=\[\]{};':\\|,.<>/?]",
             "description": "Password should be 8 to 20 characters long, with at least 1 uppercase letter and 1 special character."
         },
-        "profile_image_extention":{
+        "profile_image_extension":{
             "type":"string",
             "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
             "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."
         }
     },
-    "required": ["first_name", "last_name", "email", "phone_no", "password", "profile_image_extention"],
+    "required": ["first_name", "last_name", "email", "phone_no", "password", "profile_image_extension"],
     "additionalProperties": True
 }
 
@@ -176,7 +176,7 @@ mechanic_update_schema = {
             "pattern": "^[0-9]+$" , # Only numbers
             "description": "Contact number contains 10 digits, allow only number's."
         },
-        "profile_image_extention":{
+        "profile_image_extension":{
             "type":"string",
             "pattern": "^(jpg|jpeg|png|gif|bmp|tiff)$",
             "description": "Please select a image and with valid format like 'jpg', 'jpeg', 'png', 'gif', 'bmp', 'tiff'."

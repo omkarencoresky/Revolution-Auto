@@ -740,6 +740,8 @@ function userCarDetailsUpdate(formId, id, brand, brand_instance, year, year_inst
 $(document).ready(function () {
     $('#brand').change(function () {
         var model1Id = $(this).val();
+        console.log('brand', model1Id);
+        
 
         if (model1Id) {
             $.get('/get_caryear_options/', { car_id: model1Id }, function (data) {
@@ -800,8 +802,6 @@ function handleUserTypeChange() {
         // If no user type is selected, disable both Sent To and Email
         sentToSelect.disabled = true;
         emailInput.disabled = true;
-        // sentToSelect.value = ""; // Reset Sent To selection
-        // emailInput.value = ""; // Clear email input
     } else {
         // If a user type is selected, enable Sent To but keep Email disabled
         sentToSelect.disabled = false;
@@ -856,5 +856,233 @@ function hideShowDropdown(event, layerId, elementId) {
     } else {
         layerElement.classList.remove("show");
         childElement.classList.remove("show");
+    }
+}
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize location selection
+    const locationSelect = document.getElementById('location');
+    const locationMessage = document.querySelector('.location-message');
+    const confirmLocationBtn = document.getElementById('confirm-location');
+    const car_selection = document.getElementById('car_selection')
+
+    locationSelect.addEventListener('change', function() {
+        if (this.value) {
+            locationMessage.textContent = `Great! We have certified mobile mechanics in ${this.options[this.selectedIndex].text}`;
+            confirmLocationBtn.classList.remove('hidden');
+            car_selection.classList.add('hidden');
+            car_selection.classList.remove('car_selection');
+            
+            
+        } else {
+            locationMessage.textContent = '';
+            confirmLocationBtn.classList.add('hidden');
+            car_selection.classList.add('car_selection');
+            
+        }
+    });
+
+    // Handle tab navigation
+    const tabs = document.querySelectorAll('[role="tab"]');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Update tab states
+            tabs.forEach(t => {
+                t.setAttribute('aria-selected', 'false');
+                t.querySelector('a').classList.remove('active');
+            });
+            this.setAttribute('aria-selected', 'true');
+            this.querySelector('a').classList.add('active');
+        });
+    });
+});
+
+                        
+function showDiv() {
+    const confirmLocationBtn = document.getElementById('confirm-location');
+    const car_selection = document.getElementById('car_selection')
+    car_selection.classList.remove('hidden');
+    car_selection.classList.add('car_selection');
+    confirmLocationBtn.classList.add('hidden');
+    locationMessage.textContent = '';
+    
+  }
+
+
+function addBrandId(event){
+    const target = event.target;
+    const parent = target.parentNode.parentNode;
+
+    const activeElement = parent.querySelector('#brand');
+    if(activeElement) {
+        activeElement.removeAttribute('id');
+    }
+    target.setAttribute('id','brand');
+    onBrandChange(target)
+    
+}
+
+
+function onBrandChange(target) {
+    const model1Id = target.value;
+    
+
+    if (model1Id) {
+        fetch(`/get_caryear_options/?car_id=${model1Id}`)
+            .then(response => response.json())
+            .then(data => {
+                const year = document.getElementById('year_selection');
+                year.replaceChildren(); 
+                
+                const label = document.createElement('label');
+                label.setAttribute('for', 'year'); 
+                label.className = 'header-style'; 
+                label.textContent = 'Select Your Car Year';
+                document.getElementById('year_selection').appendChild(label);
+
+                data.forEach(item => {
+                    const label = document.createElement('label');
+                    label.className = 'car-options';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'year';  
+                    input.value = item.id;                    
+                    input.setAttribute('onchange', `addYearId(event, ${model1Id})`);
+                
+                    const div = document.createElement('div');
+                    div.className = 'custom-radio';
+                    div.textContent = item.year;
+                
+                    // Append the input and div to the label
+                    label.appendChild(input);
+                    label.appendChild(div);
+                    
+                    const yearContainer = document.getElementById('year_selection');
+                    yearContainer.appendChild(label);
+                });
+
+            });
+    }
+}
+
+
+function addYearId(event,car_id){
+    const year = event.target;
+    const parent = year.parentNode.parentNode;
+    
+
+    const activeElement = parent.querySelector('#year');
+    if(activeElement) {
+        activeElement.removeAttribute('id');
+    }
+    year.setAttribute('id','year');    
+    onYearChange(year, car_id)
+    
+}
+
+
+function onYearChange(year, car_id) {
+    const model2Id = year.value;
+    
+
+    if (model2Id) {
+        fetch(`/get_carmodel_options/?car_id=${car_id}&year_id=${model2Id}`)
+            .then(response => response.json())
+            .then(data => {
+                const year = document.getElementById('model_selection');
+                year.replaceChildren(); 
+                
+                const label = document.createElement('label');
+                label.setAttribute('for', 'model'); 
+                label.className = 'header-style'; 
+                label.textContent = 'Select Your Car model';
+                document.getElementById('model_selection').appendChild(label);
+
+                data.forEach(item => {
+                    const label = document.createElement('label');
+                    label.className = 'car-options';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'model';
+                    input.value = item.id;
+                    input.setAttribute('onchange', `addModelId(event, ${model2Id}, ${car_id})`);
+                
+                    const div = document.createElement('div');
+                    div.className = 'custom-radio';
+                    div.textContent = item.model_name;
+                
+                    // Append the input and div to the label
+                    label.appendChild(input);
+                    label.appendChild(div);
+                    
+                    const yearContainer = document.getElementById('model_selection');
+                    yearContainer.appendChild(label);
+                });
+
+            });
+    }
+}
+
+
+
+function addModelId(event, year_id, car_id){
+    const model = event.target;
+    const parent = model.parentNode.parentNode;
+    
+
+    const activeElement = parent.querySelector('#model');
+    if(activeElement) {
+        activeElement.removeAttribute('id');
+    }
+    model.setAttribute('id','model');    
+    onModelChange(model, car_id, year_id)
+    
+}
+
+
+function onModelChange(model, car_id, year_id) {
+    const model3Id = model.value;
+    
+
+    if (model3Id) {
+        fetch(`/get_cartrim_options/?car_id=${car_id}&year_id=${year_id}&model_id=${model3Id}`)
+            .then(response => response.json())
+            .then(data => {
+                const year = document.getElementById('trim_selection');
+                year.replaceChildren(); 
+                
+                const label = document.createElement('label');
+                label.setAttribute('for', 'trim'); 
+                label.className = 'header-style'; 
+                label.textContent = 'Select Your Car trim';
+                document.getElementById('trim_selection').appendChild(label);
+
+                data.forEach(item => {
+                    const label = document.createElement('label');
+                    label.className = 'trim-options';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = 'model';
+                    input.value = item.id;
+                    // input.setAttribute('onchange', `addModelId(event, ${model3Id}, ${car_id}, ${year_id})`);
+                
+                    const div = document.createElement('div');
+                    div.className = 'custom-radio';
+                    div.textContent = item.car_trim_name;
+                
+                    // Append the input and div to the label
+                    label.appendChild(input);
+                    label.appendChild(div);
+                    
+                    const yearContainer = document.getElementById('trim_selection');
+                    yearContainer.appendChild(label);
+                });
+
+            });
     }
 }

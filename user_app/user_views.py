@@ -4,21 +4,24 @@ import fastjsonschema
 import schemas.car_schema
 import schemas.registration_schema
 
+from admin_app.models import *
 from django.conf import settings
 from admin_app.utils.utils import *
 from django.contrib import messages
 from django.http import JsonResponse
-from user_app.forms import AddCarRecord
+from django.core.mail import send_mail
+from django.utils.html import strip_tags
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist
+from django.template.loader import render_to_string
 from django.views.decorators.http import require_GET
 from user_app.models import CustomUser, UserCarRecord
 from django.views.decorators.cache import never_cache
 from django.core.exceptions import ObjectDoesNotExist
+from user_app.forms import AddCarRecord, UserReferralForm
 from django.contrib.auth.decorators import login_required
 from schemas.car_schema import validate_users_car_details
 from user_app.utils.utils import User_Car_Record_pagination
-from admin_app.models import CarBrand, CarModel, CarTrim, CarYear, Notification
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_update_profile_details_schema
 
@@ -65,15 +68,17 @@ def user_dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 @login_required
 def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     """
-    This method handles updating user details when the request type is POST with an ID, and deleting user profile when the request type is DELETE with an ID.
+    This method handles updating user details when the request type is POST with an ID, and deleting user profile when the 
+        request type is DELETE with an ID.
 
         Args:
             request: The incoming HTTP request. For POST requests, it updates the user profile specified by the ID in the request.
             For DELETE requests, it deletes the user profile specified by the ID.
 
         Returns:
-            HttpResponse: For POST requests, if the update is successful, it redirects to the main page. If the update fails, it shows an error message and redirects to the main page. 
-            For DELETE requests, if the deletion is successful, it redirects to the main page. If the deletion fails, it shows an error message and redirects to the main page.
+            HttpResponse: For POST requests, if the update is successful, it redirects to the main page. If the update fails, 
+            it shows an error message and redirects to the main page. For DELETE requests, if the deletion is successful, 
+            it redirects to the main page. If the deletion fails, it shows an error message and redirects to the main page.
     """
     try:
         if request.method == 'POST':
@@ -83,8 +88,8 @@ def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse |
             data = {key: request.POST.get(key) for key in ['email', 'phone_no', 'last_name', 'first_name']}
 
             if uploaded_file:
-                image_extention = uploaded_file.name.split('.')[-1].lower()
-                data['profile_image_extention'] = image_extention
+                image_extension = uploaded_file.name.split('.')[-1].lower()
+                data['profile_image_extension'] = image_extension
 
             validate_update_profile_details_schema(data)
 
@@ -142,7 +147,7 @@ def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse |
         return redirect("user_dashboard")
 
 
-@login_required
+# @login_required
 @require_GET
 def get_caryear_options(request):
 
@@ -150,16 +155,15 @@ def get_caryear_options(request):
     options = CarYear.objects.filter(car_id=car_id).values('id', 'year')
     return JsonResponse(list(options), safe=False)
 
-@login_required
+# @login_required
 @require_GET
 def get_carmodel_options(request):
-
     car_id = request.GET.get('car_id')
     year_id = request.GET.get('year_id')
     options = CarModel.objects.filter(car_id=car_id, year_id=year_id).values('id', 'model_name')
     return JsonResponse(list(options), safe=False)
 
-@login_required
+# @login_required
 @require_GET
 def get_cartrim_options(request):
     
@@ -172,6 +176,19 @@ def get_cartrim_options(request):
 
 @login_required
 def user_car_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method handles show the Users car list when the request type is GET and when the request type is POST it allow to save the 
+        car for specific user.
+
+        Args:
+            request: The incoming HTTP request. For GET requests, it show all the car based on the specific user, 
+            and for POST requests, allows to add the car for users.
+
+        Returns:
+            HttpResponse: For GET requests it shows the cars list for the specific user based, 
+                if the request type is accept the GET it render it on the same page. 
+                If the request type is POST it add car for the user.
+    """
     try:
         if request.method == 'GET':     
             page_obj = User_Car_Record_pagination(request)
@@ -247,6 +264,19 @@ def user_car_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
 
 @login_required
 def user_car_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method handles updating user car details when the request type is POST with an ID, and deleting user car when the request 
+        type is DELETE with an ID.
+
+        Args:
+            request: The incoming HTTP request. For POST requests, it updates the user car specified by the ID in the request.
+            For DELETE requests, it deletes the user car specified by the ID.
+
+        Returns:
+            HttpResponse: For POST requests, if the update is successful, it redirects to the main page. If the update fails, 
+            it shows an error message and redirects to the main page. For DELETE requests, if the deletion is successful, 
+            it redirects to the main page. If the deletion fails, it shows an error message and redirects to the main page.
+    """
     try:
         if request.method == 'POST':
 
@@ -309,7 +339,8 @@ def user_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpR
             request: The incoming HTTP request. For POST requests, it show the readed or unread messages list.
 
         Returns:
-            HttpResponse: For GET requests it shows the messages list for the specific user based. If the request type is accept the GET it render it on the same page.
+            HttpResponse: For GET requests it shows the messages list for the specific user based. If the request type 
+                is accept the GET it render it on the same page.
     """
     try:
         if request.method == "GET":
@@ -349,7 +380,8 @@ def user_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpR
 
 def user_notification_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     """
-    This method handles update messages status like read or not when user the request type is GET with an ID, and deleting message when the request type is DELETE with an ID.
+    This method handles update messages status like read or not when user the request type is GET with an ID, and 
+        deleting message when the request type is DELETE with an ID.
 
         Args:
             request: The incoming HTTP request. For GET requests, it updates the message status specified by the ID in the request.
@@ -408,6 +440,19 @@ def user_notification_action_handler(request: HttpRequest, id: int) -> HttpRespo
 
 
 def referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method handles show the Users referral page for send a referral mail when the request type is GET and when the request type is POST
+        it allow to send a mail to the mention email for the referral.
+
+        Args:
+            request: The incoming HTTP request. For GET requests, it show the Users referral page for referrals, 
+            and for POST requests, allows to send a mail to the mention email for the referral.
+
+        Returns:
+            HttpResponse: For GET requests it shows the Users referral page, 
+                if the request type is accept the GET it render it on the same page. 
+                If the request type is POST it send a mail and render on same page with the successful message.
+    """
     try:
         if request.method == 'GET':
             notifications = specific_account_notification(request, request.user.user_id)
@@ -421,7 +466,53 @@ def referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
             return render(request, 'user/user_referral.html', context)
         
         elif request.method == 'POST':
-            pass
+            referred_email = request.POST.get('referred_email').lower()
+
+            already_user = CustomUser.objects.filter(email=referred_email).exists()
+            
+            if already_user:
+                messages.error(request, f"With '{referred_email}' already a user registered")
+                return redirect('referral_data_handler')
+
+            instance = UserReferral.objects.get(referred_email=referred_email, referrer_id = request.user.user_id) if (
+                UserReferral.objects.filter(referred_email=referred_email, referrer_id = request.user.user_id).exists()) else None
+            form = UserReferralForm(request.POST, instance=instance)
+
+            if form.is_valid():
+                refer_object = form.save(commit=False )
+
+                user = CustomUser.objects.get(email=request.user.email)
+                url = f"http://127.0.0.1:8000/register/{user.remember_token}"
+
+                
+                html_content = render_to_string('user/referral_mail.html', {'user': user, 'url': url})
+                plain_message = strip_tags(html_content)
+
+                refer_object.referrer_id = user
+
+                send_mail(
+                        "Revolution Auto referral !!",
+                        plain_message,
+                        request.user.email,
+                        [referred_email],
+                        fail_silently=False,
+                )
+
+                refer_object.save()
+                messages.success(request, f"Referred successfully send to {referred_email}")
+            else:
+                messages.error(request, "Please enter at-least one email for referral")
+            return redirect('referral_data_handler')
+        
+    except ObjectDoesNotExist:
+        messages.error(request, f"User does not exist.")
+        return redirect("referral_data_handler")
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('user_dashboard')
+
     except Exception as e:
+        print(e)
         return redirect('referral_data_handler')
         

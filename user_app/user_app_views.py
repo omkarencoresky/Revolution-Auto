@@ -5,9 +5,11 @@ import fastjsonschema
 import schemas.login_schema
 import schemas.registration_schema
 
+from admin_app.models import *
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import logout
+from user_app.models import CustomUser
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from schemas.login_schema import validate_login
@@ -18,6 +20,7 @@ from django.views.decorators.cache import never_cache
 from schemas.registration_schema import validate_registration
 from django.contrib.auth import authenticate, login as auth_login 
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+# from user_app.user_views import get_caryear_options, get_carmodel_options, get_cartrim_options
 
 curl = settings.CURRENT_URL
 media_path = f'{settings.MEDIA_URL}' 
@@ -103,7 +106,7 @@ def booking(request: HttpRequest) -> HttpResponse:
     }
     return render(request, 'booking.html', context, status=200)
 
-def register(request: HttpRequest,  referral_token: str =None) -> HttpResponse | HttpResponseRedirect:
+def register(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     If the request is get than it render the register page or if the request is post it apply the user register logic.
 
@@ -116,7 +119,8 @@ def register(request: HttpRequest,  referral_token: str =None) -> HttpResponse |
     try:
         if request.method == 'GET':
             form = CustomUserCreationForm()
-            print(referral_token)
+            referral_token = request.GET.get('referral_token', None)
+            print('referral_token',referral_token)
 
             context = {
                 'curl': curl,
@@ -130,16 +134,20 @@ def register(request: HttpRequest,  referral_token: str =None) -> HttpResponse |
             form = CustomUserCreationForm(request.POST, request.FILES)
 
             file = request.FILES.get('profile_image')
-            file_extention = file.name.split('.')[-1].lower()
+            file_extension = file.name.split('.')[-1].lower() if file else ""
 
             data = {key: request.POST.get(key) for key in ['email', 'password', 'phone_no', 'last_name', 'first_name']}
-            data['profile_image_extention'] = file_extention
+            data['profile_image_extension'] = file_extension
             validate_registration(data)
+
+            if CustomUser.objects.filter(email=data.get('email')).exists():
+                messages.error(request, "This email is already registered.")
+                return redirect('register')
             
             if data.get('password') == request.POST.get('confirm_password'):
                 if form.is_valid():
 
-                    user = form.save(commit=False)
+                    user = form.save(commit=False)  
                     image_url = f'{media_path}profile_images/{file.name}' 
                     media_directory = os.path.join(settings.BASE_DIR, 'media/profile_images')
                     user.profile_image = image_url
@@ -150,8 +158,17 @@ def register(request: HttpRequest,  referral_token: str =None) -> HttpResponse |
                         for chunk in file.chunks():
                             fp.write(chunk)
 
+                    user.email = data.get('email').lower()
                     user.set_password(form.cleaned_data['password'])
-                    user.remember_token = hashlib.sha256(data.get('first_name').encode()).hexdigest()
+                    user.remember_token = hashlib.sha256(data.get('email').lower().encode()).hexdigest()
+
+                    referral_token = CustomUser.objects.get(remember_token=request.POST.get('referral_token'))
+
+                    if referral_token:
+                        email = UserReferral.objects.get(referred_email=(request.POST.get('email').lower()), referrer_id=referral_token.user_id )
+                        email.referred_register_status = True
+                        email.save()
+                        
                     user.save()
                     messages.success(request, "User register successfully!")
                 
@@ -174,8 +191,12 @@ def register(request: HttpRequest,  referral_token: str =None) -> HttpResponse |
         messages.error(request, f"{e}")
         return redirect('register')
     
+    except ObjectDoesNotExist:
+        messages.error(request, f"Please use the same email address for registration that already used in your referral. Thank you!")
+        return redirect('register')
+    
     except TemplateDoesNotExist:
-        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        # messages.error(request, f"An unexpected error occurred. Please try again later.")
         return redirect('Home')
     
     except Exception as e:
@@ -185,13 +206,13 @@ def register(request: HttpRequest,  referral_token: str =None) -> HttpResponse |
 def login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     This method is used the credential and validate with fastjsonschema and after that login the 
-    user and render it according to the user's access like user, admin, superadmin.
+    user and render it according to the user's access like user, admin, super-admin.
 
     Args:
         request
 
     Returns:
-        HttpResponse: This method is used for login the user admin, superadmin.
+        HttpResponse: This method is used for login the user admin, super-admin.
     """
     try:
         if request.method == 'GET':
@@ -256,6 +277,26 @@ def login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         messages.error(request, f"{e}")
         return redirect('login')
     
+
+def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    # try:
+        if request.method == "GET":
+            years = CarYear.objects.all().order_by('id').filter(status=1)
+            brands = CarBrand.objects.all().order_by('id').filter(status=1)
+            locations = Location.objects.all().order_by('id').filter(status=1)
+
+            context = {
+                'curl': curl,
+                'years': years,
+                'brands': brands,
+                'locations': locations,
+            }
+            return render(request, 'service_quote.html', context, status= 200) 
+    # except Exception as e:
+    #     return redirect('request_data_handler')
+
+
+
 @never_cache
 def logout_view(request: HttpRequest) -> HttpResponseRedirect:
     """

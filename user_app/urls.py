@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, re_path
 from user_app import user_app_views, user_views
 
 urlpatterns = [
@@ -27,7 +27,7 @@ urlpatterns = [
     path('service/', user_app_views.service, name='Service'),
     path('booking/', user_app_views.booking, name='Booking'),
     path('logout/', user_app_views.logout_view, name='logout'),
-    path('register/', user_app_views.register, name='register'),
+    re_path(r'^register/$', user_app_views.register, name='register'),
 
 
     # -------------- User urls--------------
@@ -49,12 +49,12 @@ urlpatterns = [
     path('user-referral/', user_views.referral_data_handler, name='referral_data_handler'),
 
 
-    
     # -------------- Notification based urls--------------
     path('user-notification/', user_views.user_notification_data_handler, name='user_notification_data_handler'),
     path('user-notification/<int:id>/', user_views.user_notification_action_handler, name='user_notification_action_handler'),
 
 
-    # -------------- Referral based urls--------------
-    path('register/<str:referral_token>/', user_app_views.register, name='register'),
+    # -------------- Service and Bookings based urls--------------
+    path('request-a-quote/', user_app_views.request_data_handler, name='request_data_handler'),
+
 ]

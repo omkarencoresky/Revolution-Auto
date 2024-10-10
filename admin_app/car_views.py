@@ -666,7 +666,7 @@ def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                 old_brand = CarBrand.objects.get(id=int(trim.car_id.id))
                 old_model = CarModel.objects.get(id=int(trim.model_id.id))
 
-                # Check new deails select than update 
+                # Check new details select than update 
                 trim.car_id = CarBrand.objects.get(id=int(car_id)) if car_id else old_brand
                 trim.year_id = CarYear.objects.get(id=int(year_id)) if year_id else old_year
                 trim.model_id = CarModel.objects.get(id=int(model_id)) if model_id else old_model

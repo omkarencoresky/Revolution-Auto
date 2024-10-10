@@ -1,0 +1,80 @@
+{% extends 'admin_master.html' %}
+{% load static %}
+
+{% block title %}User Referral | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid container-p-y">
+    <h4 class="font-weight-bold py-3 mb-0">USERS</h4>
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="feather icon-home"></i> Admin Dashboard</a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'location_data_handler' %}">User Referral</a></li>
+        </ol>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card d-flex w-100 mb-4">
+            <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100" style="font-size: medium;">
+                    <caption class="caption-top fs-4 text-dark mb-2">Users Referral List</caption>
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">SR.No</th>
+                            <th scope="col">Referrer</th>
+                            <th scope="col">Referred Email</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Booking Id</th>
+                            <th scope="col">Redeem Status</th>
+                            <th scope="col">Registration Status</th>
+                        </tr>
+                    </thead>
+                    <tbody hx-target="body" hx-swap="outerHTML swap:1s">
+                        {% for referral in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ referral.referrer_id.email }}</td>
+                            <td>{{ referral.referred_email }}</td>
+                            <td>30</td>
+                            <td>{{ referral.booking_id }}</td>
+                            <td>{{referral.redeem_status}}</td>
+                            <td>{{referral.referred_register_status}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn bg-dark text-light">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn bg-dark text-light">previous</a>
+                    {% endif %}
+
+                    <span class="current font-weight-bold">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn bg-dark text-light">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn bg-dark text-light">last
+                        &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}

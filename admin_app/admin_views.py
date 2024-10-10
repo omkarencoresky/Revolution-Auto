@@ -12,7 +12,7 @@ from admin_app.utils.utils import *
 from django.contrib import messages
 from django.http import JsonResponse
 from user_app.models import CustomUser
-from django.core.mail import send_mail
+from django.core.mail import send_mail, send_mass_mail
 from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist
@@ -89,13 +89,13 @@ def admin_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
             form = AdminRegisterForm(request.POST, request.FILES)
 
             file = request.FILES.get('profile_image')
-            file_extention = file.name.split('.')[-1].lower() if file else ""
+            file_extension = file.name.split('.')[-1].lower() if file else ""
 
             data = {key: request.POST.get(key) for key in ['email', 'password', 'phone_no', 'last_name', 'first_name']}
             unique_email = CustomUser.objects.filter(email=data.get('email')).exists()
             
             if not unique_email:
-                data['profile_image_extention'] = file_extention
+                data['profile_image_extension'] = file_extension
                 validate_registration(data)
 
                 if form.is_valid():
@@ -116,7 +116,7 @@ def admin_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
 
                     admin.save() 
 
-                    messages.success(request, f"{data.get('first_name')} registerd as a 'Admin'")
+                    messages.success(request, f"{data.get('first_name')} registered as a 'Admin'")
                     return redirect('admin_data_handler')
                 
             else:
@@ -166,7 +166,7 @@ def admin_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
             data = {key: request.POST.get(key) for key in ['email', 'phone_no', 'last_name', 'first_name']}
 
             if uploaded_file:
-                data['profile_image_extention'] = uploaded_file.name.split('.')[-1].lower()
+                data['profile_image_extension'] = uploaded_file.name.split('.')[-1].lower()
 
             validate_update_profile_details_schema(data)
 
@@ -239,25 +239,27 @@ def admin_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
 def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     This method handles show the messages list when the request type is GET and when the request type is POST it allow to send the email/message to the 
-        different category based like specfic user or mechanic and to send a bulk email/message to the all user or mechanic.
+        different category based like specific user or mechanic and to send a bulk email/message to the all user or mechanic.
 
         Args:
-            request: The incoming HTTP request. For POST requests, it shoe all the recevice message based on the admin based, and for POST requests, allows to sendthe mail to users or mechanics.
+            request: The incoming HTTP request. For GET requests, it show all the receive message based on the admin based, 
+            and for POST requests, allows to send the mail to users or mechanics.
 
         Returns:
-            HttpResponse: For GET requests it shows the messages list for the specific user based, if the request type is accept the GET it render it on the same page. 
+            HttpResponse: For GET requests it shows the messages list for the specific user based, 
+                if the request type is accept the GET it render it on the same page. 
                 If the request type is POST it send mail to the user or mechanic's register mail id.
     """
     try:
         if request.method == 'GET':
 
-            curent_user = CustomUser.objects.get(user_id=request.user.user_id)
+            current_user = CustomUser.objects.get(user_id=request.user.user_id)
             unread_notification = Notification.get_unread_count(request.user.user_id)
             notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl': admin_curl,
-                'user': curent_user,
+                'user': current_user,
                 'notifications': notifications,
                 'unread_notification': unread_notification,
             }
@@ -269,46 +271,52 @@ def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | Http
             sent_to = request.POST.get('sent_to')
             sender_id = request.POST.get('sender_id')
             recipient_type = request.POST.get('recipient_type')
+
             data = {key:request.POST.get(key) for key in  ['title', 'message', 'recipient_type',]}
-            
             if sent_to == 'specific':
                 data['recipient_email'] = request.POST.get('recipient_email')
                 
             validate_notification(data)
 
             if form.is_valid():
-                notification = form.save(commit=False)
                 sender_object = CustomUser.objects.get(user_id=sender_id)
 
                 if recipient_type and sent_to == "all":
                     recipient_email_list = all_data(request, recipient_type=recipient_type)
 
-                    for recepient in list(recipient_email_list):
-                        mail = send_mail(
-                                    data.get('title'), data.get('message'), 
-                                    data.get('sender_id'), [recepient.email], fail_silently=False,
-                                    )
-                        # notification.status = 'Sent' if mail else 'Failed'
+                    mail_content = []
+                    for x, recipient in enumerate(recipient_email_list):
+
+                        x =(
+                                data.get('title'),
+                                data.get('message'),
+                                request.user.email,
+                                [recipient.email]
+                            )
+                        mail_content.append(x)
+                    send_mass_mail(tuple(mail_content))
+
+                    for recipient in list(recipient_email_list):
 
                         Notification.objects.create(sender_id=sender_object, 
-                                                recipient_id=CustomUser.objects.get(email=recepient.email), recipient_type=recipient_type, 
-                                                title= data.get('title'), message=data.get('message'), status='Sent', is_read=False
+                                                recipient_id=CustomUser.objects.get(email=recipient.email), recipient_type=recipient_type, 
+                                                title= data.get('title'), message=data.get('message'), email_status='Sent', is_read=False
                                                 )
 
                     messages.success(request, f"Message send successfully to all '{recipient_type}' !!")
                     return redirect(admin_notification_data_handler)
 
                 elif recipient_type and sent_to == "specific":
-                    specific_recipent = CustomUser.objects.filter(email=data.get('recipient_email')).exists()
+                    specific_recipient = CustomUser.objects.filter(email=data.get('recipient_email')).exists()
                     
-                    if specific_recipent:
+                    if specific_recipient:
                         mail = send_mail(data.get('title'), data.get('message'), data.get('sender_id'), [data.get('recipient_email')], fail_silently=False,)
                         # notification.status = 'Sent' if mail else 'Failed'  
 
                         Notification.objects.create(sender_id=sender_object, 
                                                     recipient_id=CustomUser.objects.get(email=data.get('recipient_email')), 
                                                     recipient_type=recipient_type, title= data.get('title'), 
-                                                    message=data.get('message'), status='Sent', is_read=False)
+                                                    message=data.get('message'), email_status='Sent', is_read=False)
                     
                         messages.success(request, f"Message send successfully to '{data.get('recipient_email')}' !!")
 
@@ -321,13 +329,13 @@ def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | Http
                 return redirect('admin_notification_data_handler')
             
         else:
-            curent_user = CustomUser.objects.get(user_id=request.user.user_id)
+            current_user = CustomUser.objects.get(user_id=request.user.user_id)
             unread_notification = Notification.get_unread_count(request.user.user_id)
             notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl': admin_curl,
-                'user': curent_user,
+                'user': current_user,
                 'notifications': notifications,
                 'unread_notification': unread_notification,
             }
@@ -351,7 +359,7 @@ def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | Http
         return render(request, 'admin/admin_dashboard.html')
 
     except Exception as e:
-        # print(e)
+        print(e)
         return redirect('admin_notification_data_handler')
 
 def admin_notification_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
@@ -392,7 +400,6 @@ def admin_notification_action_handler(request: HttpRequest, id: int) -> HttpResp
         else:
             notifications = specific_account_notification(request, request.user.user_id)
             unread_notification = Notification.get_unread_count(request.user.user_id)
-            print("Else")
 
             context = {
                 'curl': curl,

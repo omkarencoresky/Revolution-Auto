@@ -42,59 +42,63 @@
                 <div style="display: flex; align-items: center; justify-content: space-evenly; width: 100%; ">
                     <div style="width: 35%; border: 1px solid rgb(231, 228, 228); padding: 10px;">
 
-                        <form id="update-form" method="post" style="font-size: medium;">
+                        <form id="update-form" action="{% url 'referral_data_handler' %}" method="post" style="font-size: medium;">
                             {% csrf_token %}
                             <div class="mb-3">
                                 <label for="referral_link" class="form-label">Your Referral Link:</label>
                                 <input type="text" class="form-control" id="referral_link"
-                                    placeholder="http://127.0.0.1:8000/register/{{user.remember_token}}" disabled>
-                                    http://127.0.0.1:8000/register/{{user.remember_token}}
+                                    placeholder="http://127.0.0.1:8000/register/?referral_token={{user.remember_token}}" disabled>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email For Refer:</label>
-                                <input type="email" class="form-control" id="email" name="email"
+                                <input type="email" class="form-control" id="email" name="referred_email"
                                     placeholder="Email For Referral">
                             </div>
                             <p class="small">Separate e-mails with a comma</p>
                             <div class="d-flex justify-content-around">
                                 <button type="button" style=" font-weight: 900;" class="btn btn-white"  onclick="addopenModal('addForm')">Preview of
                                     mail</button>
-                                <button type="submit" class="btn btn-dark">Send mail</button>
+                                <button type="submit" class="btn btn-dark" onclick="hideShowDropdown(event, 'layer', 'loader_image')">Send mail</button>
                             </div>
-                        </form>
+                            <div id="layer">
+                                <img id="loader_image" src="{% static 'img/spin.webp' %}" alt="loader">
 
-                        <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
-                            <div class="modal-content" style="max-width: 25%; height: 35%; padding-bottom: 0%;">
-                                <div class="modal-header">
-                                    <h3 class="modal-title" >Mail Content</h3>
-                                    <button type="button" class="close" onclick="closeModal('addForm')">×</button>
-                                </div>
-                                <div class="modal-body" id="modal-body" style="padding-bottom: 0%;">
-                                    <div style="font-size: medium;">
-                                        <p>Your friend <strong>{{user.first_name}}</strong> thought you should try us for your next car service, repair or
-                                            diagnostics so we are rewarding you with<strong> ₵ 30.</strong> 
-                                        </p>
-
-                                        <p>To redeem, book one of our services online and one of our mobile mechanics will come to
-                                            your home or office to service your vehicle, 7 days a week.
-                                        </p>
-
-                                        <p>
-                                            <a href="http://127.0.0.1:8000/register/{{user.remember_token}}"> Click here href="http://127.0.0.1:8000/register/{{user.remember_token}}</a>
-                                            today to sign up and get <strong> ₵ 30</strong>  off on your first booking.
-                                        </p>
-
-                                        <p>You can learn more about Uncle Fitter at: https://www.unclefitter.com</p>
+                            </div>
+                            <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+                                <div class="modal-content" style="max-width: 25%; height: 38%; padding-bottom: 0%;">
+                                    <div class="modal-header">
+                                        <h3 class="modal-title" >Mail Content</h3>
+                                        <button type="button" class="close" onclick="closeModal('addForm')">×</button>
                                     </div>
-                
-                                    <div class="modal-footer justify-content-center">
-                                        <div class="modal_btn" >
-                                            <button type="button" class="btn btn-danger" onclick="closeModal('addForm')">Close</button>
+                                    <div class="modal-body" id="modal-body" style="padding-bottom: 0%;">
+                                        <div style="font-size: medium;" name="mail_content">
+                                            <p>Your friend <strong>{{user.first_name}}</strong> thought you should try us for your next car service, repair or
+                                                diagnostics so we are rewarding you with<strong> ₵ 30.</strong> 
+                                            </p>
+    
+                                            <p>To redeem, book one of our services online and one of our mobile mechanics will come to
+                                                your home or office to service your vehicle, 7 days a week.
+                                            </p>
+    
+                                            <p>
+                                                <span>Click here:-<a href="http://127.0.0.1:8000/register/?referral_token={{user.remember_token}}"> 
+                                                    http://127.0.0.1:8000/register/?referral_token={{user.remember_token}}</a></span>
+                                                    today to sign up and get <strong> ₵ 30</strong>  off on your first booking.
+                                            </p>
+    
+                                            <p>You can learn more about Uncle Fitter at: https://www.unclefitter.com</p>
+                                        </div>
+                    
+                                        <div class="modal-footer justify-content-center">
+                                            <div class="modal_btn" >
+                                                <button type="button" class="btn btn-danger" onclick="closeModal('addForm')">Close</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
+
                     </div>
 
 
