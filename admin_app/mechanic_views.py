@@ -48,10 +48,10 @@ def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
             form = AddMechanicForm(request.POST, request.FILES)
 
             file = request.FILES.get('profile_image')
-            image_extention = file.name.split('.')[-1].lower() if file else ""
+            image_extension = file.name.split('.')[-1].lower() if file else ""
 
             data = {key: request.POST.get(key) for key in ['email', 'password', 'phone_no', 'last_name', 'first_name']}
-            data["profile_image_extention"] = image_extention
+            data["profile_image_extension"] = image_extension
             validate_mechanic_register_detail_schema(data)
 
             if data.get('password') == request.POST.get('confirm_password'):
@@ -131,8 +131,8 @@ def mechanic_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
             file = request.FILES.get('profile_image')
 
             if file:
-                image_extention = file.name.split('.')[-1].lower()
-                data['profile_image_extention'] = image_extention
+                image_extension = file.name.split('.')[-1].lower()
+                data['profile_image_extension'] = image_extension
 
             validate_mechanic_update_detail_schema(data)
 

@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.urls import path
 from admin_app import admin_views, user_views
-from admin_app import car_views, location_views, service_views, mechanic_views
+from admin_app import car_views, location_views, service_views, mechanic_views, referral_views
 
 
 urlpatterns = [
@@ -31,6 +31,9 @@ urlpatterns = [
 
     path('admin-notification/', admin_views.admin_notification_data_handler, name = 'admin_notification_data_handler'),
     path('admin-notification/<int:id>/', admin_views.admin_notification_action_handler, name = 'admin_notification_action_handler'),
+
+    
+    path('referral-management/', referral_views.user_referral_data_handler, name = 'user_referral_data_handler'),
 
     # -------------------------------------Car Brand urls------------------------- #
 

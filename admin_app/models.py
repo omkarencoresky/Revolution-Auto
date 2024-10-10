@@ -241,10 +241,12 @@ class UserReferral(models.Model):
 
     id=models.AutoField(primary_key=True)
     referrer_id = models.ForeignKey(CustomUser,on_delete=models.CASCADE, related_name='refer_by')
-    refered_email = models.EmailField(max_length=255, blank=False, unique=True)
-    redeem_status = models.CharField(max_length=20, choices=REDEEM_STATUS, blank=False)
-    booking_id = models.IntegerField(blank=True)
+    referred_email = models.EmailField(max_length=255, blank=False)
+    booking_id = models.CharField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    referred_register_status = models.BooleanField(default=False)
+    redeem_status = models.CharField(max_length=20, choices=REDEEM_STATUS, blank=False, default='available')
 
     class Meta:
         db_table = 'user_referral'

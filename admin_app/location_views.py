@@ -20,7 +20,6 @@ admin_curl = f"{curl}/admin/"
 
 @login_required
 def location_data_handler(request: HttpRequest) -> HttpResponse:
-    print('run location')
     """This method is use to render the main page for locations and show the all location's list and status.
 
     Args:
@@ -37,7 +36,6 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
                 'curl' : admin_curl,
                 'page_obj': locations_pagination_data,
             }
-            print('run location1')
             return render(request, 'location/location.html', context)
         
         elif request.method == 'POST':

@@ -234,10 +234,10 @@ class AddNotification(forms.ModelForm):
         model = Notification
         fields = ['sender_id', 'recipient_id', 'message', 'title', 'recipient_type']
         widgets = {
-            'recipient': forms.Select({'required': False}),
+            'recipient_id': forms.Select({'required': False}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['recipient'].label_from_instance = lambda obj: f"{obj.email}"
+        self.fields['recipient_id'].label_from_instance = lambda obj: f"{obj.email}"
     

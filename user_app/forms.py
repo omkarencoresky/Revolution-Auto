@@ -1,5 +1,6 @@
 from django import forms
-from .models import CustomUser, UserCarRecord
+from admin_app.models import UserReferral
+from user_app.models import CustomUser, UserCarRecord
 
 class CustomUserCreationForm(forms.ModelForm):
     """
@@ -39,3 +40,12 @@ class AddCarRecord(forms.ModelForm):
     class Meta:
         model = UserCarRecord
         fields = ['car_brand', 'car_model', 'car_year', 'car_trim', 'vin_number']
+
+
+class UserReferralForm(forms.ModelForm):
+
+    class Meta:
+        model = UserReferral
+        fields = ["referred_email"]
+
+        

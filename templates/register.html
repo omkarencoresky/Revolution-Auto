@@ -28,7 +28,7 @@
             </div>
             <!-- <a href="contact.html" class="nav-item nav-link">Contact</a> -->
         </div>
-        <a href="" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Get A Quote<i
+        <a href="{% url 'request_data_handler' %}" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Get A Quote<i
                 class="fa fa-arrow-right ms-3"></i></a>
     </div>
 </nav>
@@ -97,6 +97,9 @@
                                 <label class="d-flex" for="profile_image" style="color: aliceblue; text-align: left;">Profile Image</label>
                                 <input type="file" class="form-control border-0" name="profile_image">
                             </div>
+                            
+                            <input type="text" class="form-control border-0" name="referral_token" value="{{referral_token}}" hidden>
+
                             <div class="col-12 col-sm-6">
                                 <a href="{% url 'login' %}" class="btn btn-secondary w-100 py-1">Login</a>
                             </div>

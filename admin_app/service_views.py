@@ -386,7 +386,7 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
                     messages.success(request,"Added successfully!!!")
                     return redirect('service_data_handler')
                 else:
-                    print(form.errors)
+                    messages.error(request, "Invalid data entered, try again")
                     return redirect('service_data_handler')
             
             else:

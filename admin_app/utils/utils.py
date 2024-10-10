@@ -296,3 +296,22 @@ def specific_account_notification(request: HttpRequest, user_id) -> Page:
     
     all_notifications = Notification.objects.filter(recipient_id=user_id)
     return all_notifications
+
+
+def referral_pagination(request: HttpRequest) -> Page:
+    
+    """Paginate a list of all mechanics and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for mechanics pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
+    """
+    referral = UserReferral.objects.all().order_by('id')
+    
+    # Pagination setup
+    paginator = Paginator(referral, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj

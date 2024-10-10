@@ -53,7 +53,7 @@ def register_mechanic_application(request: HttpRequest) -> HttpResponse | HttpRe
 
 
             if not unique_email:
-                data['profile_image_extention'] = file_extention
+                data['profile_image_extension'] = file_extention
                 validate_mechanic_register_detail_schema(data)
                 
                 if data.get('password') == request.POST.get('confirm_password'):
@@ -170,8 +170,8 @@ def mechanic_mechanicapp_data_controller(request: HttpRequest, id: int) -> HttpR
             data = {key: request.POST.get(key) for key in ['email', 'phone_no', 'last_name', 'first_name']}
 
             if uploaded_file:
-                image_extention = uploaded_file.name.split('.')[-1].lower()
-                data['profile_image_extention'] = image_extention
+                image_extension = uploaded_file.name.split('.')[-1].lower()
+                data['profile_image_extension'] = image_extension
                 
             validate_mechanic_update_detail_schema(data)
 
@@ -316,7 +316,6 @@ def mechanic_notification_action_handler(request: HttpRequest, id: int) -> HttpR
         else:
             notifications = specific_account_notification(request, request.user.user_id)
             unread_notification = Notification.get_unread_count(request.user.user_id)
-            print("Else")
 
             context = {
                 'curl': curl,
