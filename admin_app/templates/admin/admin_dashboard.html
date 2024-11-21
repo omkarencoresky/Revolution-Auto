@@ -6,12 +6,12 @@
 <div class="container-fluid flex-grow-1 container-p-y">
     <div class="user-img">
         <div>
-            <img class="user_profile" src="{{user.profile_image}}"
-                style="background-color: black; border-radius: 70px;">
+            <!-- <img class="user_profile" src="{{user.profile_image}}"
+                style="background-color: black; border-radius: 70px;"> -->
         </div>
         <div class="welcome-back-text">
             <h2>Welcome back, <span>{{user.first_name}} {{user.last_name}}</span></h2>
-            <p><i class="fa fa-envelope"></i>  &nbsp;{{user.email}}</p>
+            <p><i class="fa fa-envelope"></i>  &nbsp;{{user.email}}</p> 
             <p><i class="fa fa-phone" style="transform: rotate(90deg);"></i>  &nbsp;{{user.phone_no}}</p>
         </div>
     </div>
@@ -27,6 +27,10 @@
             {% for message in messages %}
             <li class="{{ message.tags }}">{{ message }}</li>
             {% endfor %}
+        </ul>
+        {% else %}
+        <ul class="messages hidden" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            <li id="final_error"></li>
         </ul>
         {% endif %}
     </div>

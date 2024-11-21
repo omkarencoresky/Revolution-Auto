@@ -147,7 +147,7 @@ class SubService(models.Model):
     service = models.ForeignKey(Services,on_delete=models.CASCADE)
     title = models.CharField(max_length=150, blank=False)
     description = models.TextField(max_length=5000, blank=True)
-    optional = models.CharField(max_length=5, choices=YES_NO_CHOICES, default='No' ) 
+    optional = models.CharField(max_length=5, choices=YES_NO_CHOICES, blank=True) 
     selection_type = models.CharField(max_length=8, choices=SELECTION_TYPE_CHOICES, blank=False ) 
 
     class Meta:
@@ -169,12 +169,7 @@ class SubServiceOption(models.Model):
         ('Yes', 'Yes'),
         ('No', 'No'),
     ]
-
-    SELECTION_TYPE_CHOICES = [
-        ('Single', 'Single'),
-        ('Multiple', 'Multiple'),
-    ]
-
+    
     OPTION_TYPE_CHOICES = [
         ('Text Type', 'Text Type'),
         ('Image Type', 'Image Type'),

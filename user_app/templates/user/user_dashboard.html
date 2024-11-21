@@ -4,6 +4,7 @@
 
 {% block title %}User Dashboard | Revolution Auto{% endblock %}
 {% block content %}
+
 <div class="container-fluid flex-grow-1 container-p-y">
     <div class="user-img">
         <div>
@@ -17,90 +18,32 @@
     </div>
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'user_dashboard' %}"><i class="feather icon-home"></i> User
-                    Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'user_dashboard' %}">
+                <i class="feather icon-home"></i> User Dashboard</a></li>
         </ol>
     </div>
-    <div>
+    
+    <div id="messageContainer">
         {% if messages %}
         <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
             {% for message in messages %}
             <li class="{{ message.tags }}">{{ message }}</li>
             {% endfor %}
         </ul>
+        {% else %}
+        <ul class="messages hidden" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            <li id="final_error"></li>
+        </ul>
         {% endif %}
     </div>
 </div>
-<!-- <div class="row">
-    <div class="col-md-12">
-        <div class="card d-flex w-100 mb-4">
-            <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
-                <div id="updateForm" style="padding-top: 100px;" class="modal-form h-100"
-                    onclick="closeModalIfOutside(event, 'updateForm')">
-                    <div class="modal-content" id="modal-content" style="max-width: 800px; height: 55%;">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Update Your Profile</h4>
-                            <button type="button" class="close" onclick="closeModal('updateForm')">×</button>
-                        </div>
-                        <div class="modal-body" id="modal-body">
-                            <form class="update-form" id="update-form" method="post">
-                                {% csrf_token %}
+{% endblock %}
 
-                                <div class="form-group brand">
-                                    <label class="control-label" for="first_name">First Name :</label>
-                                    <div>
-                                        <input class="form-control" name="first_name" id="first_name"
-                                            placeholder="First Name">
-                                        <span id="first_name1"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group brand">
-                                    <label class="control-label" for="first_name">Last Name :</label>
-                                    <div>
-                                        <input class="form-control" name="last_name" id="last_name"
-                                            placeholder="Last Name">
-                                        <span id="last_name"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group brand">
-                                    <label class="control-label" for="email">Email :</label>
-                                    <div>
-                                        <input class="form-control" name="email" placeholder="Email" id="email">
-                                        <span id="email1"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group brand">
-                                    <label class="control-label" for="phone_no">Phone Number :</label>
-                                    <div>
-                                        <input class="form-control" name="phone_no" id="phone_no"
-                                            placeholder="Last Name">
-                                        <span id="phone_no"></span>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <div class="row w-100">
-                                        <div class="w-100 modal_btn d-flex justify-content-around">
-                                            <button type="button" class="btn btn-danger" data-dismiss="modal"
-                                                onclick="closeModal('updateForm')">Close</button>
-                                            <button type="submit" class="btn btn-dark">Submit</button>
-                                        </div>
-                                        <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
-                                            style="display: none;">
-                                    </div>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Pagination Controls remove for now when required copy from the admin templates -->
-        </div>
-    </div>
-</div> -->
-</div>
-</div>
+{% block extra_js %}
+<script>
+    setTimeout(() => {
+        window.onload(submitStoredForm('{{ user.user_id|escapejs }}'));
+        
+    }, 1000);
+</script>
 {% endblock %}

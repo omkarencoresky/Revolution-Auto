@@ -48,6 +48,9 @@ SUPER_USER_FIRST_NAME = os.environ.get('SUPER_USER_FIRST_NAME')
 SUPER_USER_LAST_NAME = os.environ.get('SUPER_USER_LAST_NAME') 
 SUPER_USER_PHONE_NO = os.environ.get('SUPER_USER_PHONE_NO')
 
+STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
+STRIPE_PUBLISHABLE_KEY = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+
 
 # Email configurations
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -1,0 +1,89 @@
+{% extends 'admin_master.html' %}
+{% load static %}
+{% block title %}Services Bookings | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="font-weight-bold py-3 mb-0">SERVICES BOOKINGS</h4>
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="feather icon-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_data_handler' %}">Services Bookings</a></li>
+        </ol>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card d-flex w-100 mb-4">
+            <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+
+                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
+                    <marquee behavior="scroll" direction="left">
+                        <caption class="caption-top fs-4 text-dark mb-2">All Available Payments</caption>
+                    </marquee>
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">SR.No</th>
+                            <th scope="col">Payment Id</th>
+                            <th scope="col">User Name</th>
+                            <th scope="col">Car Details</th>
+                            <th scope="col">Payment Date</th>
+                            <th scope="col">Payment Amount</th>
+                            <th scope="col">Payment Mode</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody hx-target="body" hx-swap="outerHTML swap:1s">
+                        {% for booking in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ booking.stripe_payment_intent_id}}</td>
+                            <td>{{ booking.user.first_name }} {{ booking.user.last_name }}</td>
+                            <td>
+                                {{ booking.booking.car_brand.brand }}, {{ booking.booking.car_model.model_name }}, 
+                                {{ booking.booking.car_year.year }}, {{ booking.booking.car_trim.car_trim_name }}
+                            </td>
+                            <td>{{ booking.created_at }}</td>
+                            <td>${{booking.service_amount}}</td>
+                            <td>{{ booking.payment_mode}}</td>
+                            <td>{{ booking.status }}</td>
+                        </tr>
+                        {% endfor %}    
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        {{current_status}}
+        <div class="pagination">
+            <span class="step-links">
+                {% if page_obj.has_previous %}
+                <a href="?page=1&status={{current_status}}" class="btn bg-dark text-light">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}&status={{current_status}}" class="btn bg-dark text-light">previous</a>
+                {% endif %}
+
+                <span class="current font-weight-bold">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&status={{current_status}}" class="btn bg-dark text-light">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&status={{current_status}}" class="btn bg-dark text-light">last
+                    &raquo;</a>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+{% endblock %}

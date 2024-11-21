@@ -35,14 +35,15 @@ urlpatterns = [
     path('user/<int:id>/', user_views.user_userapp_action_handler, name='user_userapp_action_handler'),
 
     
-    path('users-car/', user_views.user_car_data_handler, name='user_car_data_handler'),
-    path('users-car/<int:id>/', user_views.user_car_action_handler, name='user_car_action_handler'),
+    path('user-cars/', user_views.user_car_data_handler, name='user_car_data_handler'),
+    path('user-cars/<int:id>/', user_views.user_car_action_handler, name='user_car_action_handler'),
+    path('car-service-history/', user_views.car_service_history, name='car_service_history'),
 
 
     # -------------- Add Car detail from options urls--------------
-    path('get_caryear_options/', user_views.get_caryear_options, name='get_caryear_options'),
-    path('get_cartrim_options/', user_views.get_cartrim_options, name='get_cartrim_options'),
-    path('get_carmodel_options/', user_views.get_carmodel_options, name='get_carmodel_options'),
+    path('get-caryear-options/', user_views.get_caryear_options, name='get_caryear_options'),
+    path('get-cartrim-options/', user_views.get_cartrim_options, name='get_cartrim_options'),
+    path('get-carmodel-options/', user_views.get_carmodel_options, name='get_carmodel_options'),
 
 
     # -------------- Referral based urls--------------
@@ -55,6 +56,23 @@ urlpatterns = [
 
 
     # -------------- Service and Bookings based urls--------------
-    path('request-a-quote/', user_app_views.request_data_handler, name='request_data_handler'),
+    path('user/request-a-quote', user_app_views.request_data_handler, name='request_data_handler'),
+
+
+    # -------------- Service and Bookings based urls--------------
+    path('get-services/', user_app_views.get_services, name='get_services'),
+    path('get-sub-service/', user_app_views.get_sub_service, name='get_sub_service'),
+    path('get-service-category/', user_app_views.get_service_category, name='get_service_category'),
+    path('get-sub-service-option/', user_app_views.get_sub_service_option, name='get_sub_service_option'),
+
+    path('check-login/', user_app_views.check_login, name='check_login'),
+    path('user-booking/', user_views.user_booking_data_handler, name='user_booking_data_handler'),
+    path('book-appointment/<int:id>', user_views.book_appointment_handler, name='book_appointment_handler'),
+    path('booking-service/<int:id>', user_app_views.booking_service_handler, name='booking_service_handler'),
+
+    path('create_checkout_session/<int:id>', user_views.create_checkout_session, name='create_checkout_session'),
+    path('payment/success/', user_views.payment_success, name='payment_success'),
+    path('payment/cancel/', user_views.payment_cancel, name='payment_cancel'),
+    path('payments/', user_views.user_payment, name='user_payment'),
 
 ]

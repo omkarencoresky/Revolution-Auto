@@ -1,6 +1,6 @@
 from django import forms
 from admin_app.models import UserReferral
-from user_app.models import CustomUser, UserCarRecord
+from user_app.models import CustomUser, UserCarRecord, BookingAndQuote, SubServiceAndOption, Service_payment
 
 class CustomUserCreationForm(forms.ModelForm):
     """
@@ -48,4 +48,16 @@ class UserReferralForm(forms.ModelForm):
         model = UserReferral
         fields = ["referred_email"]
 
+
+class   BookingAndQuoteForm(forms.ModelForm):
+
+    class Meta:
+        model = BookingAndQuote
+        fields = ["service_location", "car_brand", "car_year", "car_model", "car_trim", "car_service_type", 
+                  "car_service_category"]
         
+class BookingSubServiceForm(forms.ModelForm):
+
+    class Meta:
+        model = SubServiceAndOption
+        fields = ['booking_id']

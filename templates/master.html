@@ -37,6 +37,8 @@
     <!-- Template Stylesheet -->
     <link href="{% static 'css/style.css' %}" rel="stylesheet" type="text/css">
     <link rel="stylesheet" href="{% static 'css/additional.css' %}">
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    
 </head>
 
 {% endblock head %}
@@ -108,6 +110,11 @@
                 <a href="{{curl}}" class="nav-item nav-link active">Home</a>
                 <a href="{{curl}}/about/" class="nav-item nav-link">About</a>
                 <a href="{{curl}}/service/" class="nav-item nav-link">Services</a>
+                {% if user.role == 'user' %}
+                    <a href="{% url 'user_dashboard' %}" class="nav-item nav-link">Dashboard</a>
+                {% elif user.role == 'admin' %}
+                    <a href="{% url 'admin_dashboard' %}" class="nav-item nav-link">Dashboard</a>
+                {% endif %}
                 <div class="nav-item dropdown">
                     <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Pages</a>
                     <div class="dropdown-menu fade-up m-0">

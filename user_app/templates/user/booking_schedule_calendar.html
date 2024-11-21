@@ -1,0 +1,121 @@
+{% extends 'user_master.html' %}
+{% load static %}
+{% block title %}User Booking | Revolution Auto{% endblock %}
+{% block content %}
+
+<script>
+    setTimeout(() => {window.onload(bookingCalendar('{{unavailable_dates}}', '{{selected_loc}}'));}, 1000);
+</script>
+
+    <div id="calendar" ></div>
+    <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+        <div class="modal-content" style="max-width: 40%; height: 78%;">
+            <div class="modal-header d-flex justify-content-center">
+                <h4 class="modal-title">Schedule Booking</h4>
+                <button type="button" class="close" style="top: 70%;" onclick="closeModal('addForm')">×</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <form id="myFrom" action="{% url 'book_appointment_handler' booking_object.id %}" method="post">
+                    {% csrf_token %}
+
+                    <div class="d-flex justify-content-between">
+                        <div class="time-slot" onclick="selectSlot(this)">
+                            <input type="radio" name="schedule_time_slot" value="07:00 AM" id="slot1">
+                            <label class="remove_bottom_margin required" for="slot1">07:00 <span>AM</span></label>
+                        </div>
+                        <div class="time-slot" onclick="selectSlot(this)">
+                            <input type="radio" name="schedule_time_slot" value="09:00 AM" id="slot2">
+                            <label class="remove_bottom_margin required" for="slot2">09:00 <span>AM</span></label>
+                        </div>
+                        <div class="time-slot" onclick="selectSlot(this)">
+                            <input type="radio" name="schedule_time_slot" value="11:00 AM" id="slot3">
+                            <label class="remove_bottom_margin required" for="slot3">11:00 <span>AM</span></label>
+                        </div>
+                        <div class="time-slot" onclick="selectSlot(this)">
+                            <input type="radio" name="schedule_time_slot" value="01:00 PM" id="slot4">
+                            <label class="remove_bottom_margin required" for="slot4">01:00 <span>PM</span></label>
+                        </div>
+                        <div class="time-slot" onclick="selectSlot(this)">
+                            <input type="radio" name="schedule_time_slot" value="03:00 PM" id="slot5">
+                            <label class="remove_bottom_margin required" for="slot5">03:00 <span>PM</span></label>
+                        </div>
+                        <div class="time-slot" onclick="selectSlot(this)">
+                            <input type="radio" name="schedule_time_slot" value="05:00 PM" id="slot6">
+                            <label class="remove_bottom_margin required" for="slot6">05:00 <span>PM</span></label>
+                        </div>
+                    </div>
+
+                    <div class="py-3 w-100">
+                        <div>
+                            <label class="w-70" class="control-label" for="car_year">Selected Location :</label>
+                            <input class="border-0" type="text" name="service_location" placeholder="{{ booking_object.service_location.location_name}}" 
+                            value="{{ booking_object.service_location.location_name}}" readonly >
+                        </div>
+                        
+                        <div>
+                            <label class="w-70" class="control-label" for="car_year">Selected Date :</label>
+                            <input id="selected_date" name="schedule_date" class="border-0" type="text" >
+                        </div>
+                    </div>
+
+                    <div id="map"></div>
+                    
+                    <div class="w-100 pt-5">
+                        <div class="d-flex justify-content-between py-1" >
+                            <label class="w-70" class="control-label">Service Amount :</label>
+                            <input class="border-0 p-0" type="text" name="service_price" value="{{ booking_object.labour_amount}}" 
+                                placeholder="$ {{ booking_object.labour_amount}}" readonly >
+                        </div>
+                        <div class="d-flex justify-content-between py-1" >
+                            <label class="w-70" class="control-label">Parts Amount :</label>
+                            <input class="border-0 p-0" type="text" name="parts_price" value="{{ booking_object.parts_amount}} " 
+                                placeholder="$ {{ booking_object.parts_amount}}" readonly >
+                        </div>
+                        <div class="d-flex justify-content-between py-1" >
+                            <label class="w-70" class="control-label">VAT 0% :</label>
+                            <input class="border-0 p-0" type="text" placeholder="$ 6%" readonly >
+                        </div>
+                        <div class="d-flex justify-content-between py-1" >
+                            <label class="w-70" class="control-label">Redeem from referral :</label>
+                            <input class="border-0 p-0" type="text" placeholder="$ 0" readonly >
+                        </div>
+                        <div class="d-flex justify-content-between py-1" >
+                            <label class="w-30" class="control-label">Total Payable Amount :</label>
+                            <input class="border-0 p-0" type="text" name="total_price" placeholder="$ {{ booking_object.total_service_amount}}" 
+                                value="{{ booking_object.total_service_amount}}" readonly >
+                        </div>
+                        <hr style="color: black">
+                    </div>
+
+                    <div class="">  
+                        <h4>Select Payment Mode</h4> 
+                        <div class="modal_btn justify-content-start" style="gap: 20px;">
+    
+                            <div class="paymentMethod" onclick="selectPaymentMethod(event)">
+                                <input type="radio" name="payment_mode" value="stripe" id="stripe">
+                                <label class="remove_bottom_margin required" for="stripe">Pay via Stripe</label>
+                            </div>
+    
+                            <div class="paymentMethod" onclick="selectPaymentMethod(event)">
+                                <input type="radio" name="payment_mode" value="cash" id="cash">
+                                <label class="remove_bottom_margin required" for="cash">Cash on Site</label>
+                            </div>
+    
+                        </div>
+                    </div>
+
+                    <div class="modal-footer justify-content-end">
+                        <div class="modal_btn" style="gap: 20px;">
+                            <button type="button" class="btn btn-danger" style="background-color: #D81324; font-weight: bold;" 
+                            onclick="closeModal('addForm')">Cancel</button>
+                            <button id="saveSchedule" type="submit" onclick="submitForm(event)" class="btn btn-dark">Save Schedule</button>
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner ms-3"
+                                style="display: none;">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

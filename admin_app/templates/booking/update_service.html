@@ -1,0 +1,516 @@
+{% extends 'admin_master.html' %}
+{% load static %}
+{% block title %}Update Services | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y ">
+    <h4 class="font-weight-bold py-3 mb-0">Add/Update/Delete Service</h4>
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="feather icon-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_data_handler' %}">Services Bookings</a></li>
+        </ol>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <p class="hidden" id="existing_services" value="">{{ existing_services|safe }}</p>  
+    </div>
+
+    <div style="background: white;" class="p-4">
+        <h4>Booking Id : 
+            <input type="text" id="booking_id" class="border-0" value="{{booking_object.id}}" 
+            placeholder="{{booking_object.id}}" disabled style="background: white;">
+        </h4>
+        <div class="d-flex justify-content-start p-2" style="gap: 20%;">
+            <!-- User Info and Car Info sections remain unchanged -->
+            <div class="w-25">
+                <div class="col-md-12 p-3">
+                    <div class="w-100 p-2" style="font-size: large;">
+                        <p class="mb-2"><strong style="text-decoration: underline;">User Info</strong></p>
+                        <p class="m-0" id="name"><strong>Name: </strong>{{booking_object.user.first_name}} {{booking_object.user.last_name}}</p>
+                        <p class="m-0" id="email"><strong>Email: </strong>{{booking_object.user.email}}</p>
+                        <p class="m-0" id="phoneNo"><strong>Phone No: </strong>{{booking_object.user.phone_no}}</p>
+                    </div>
+                    <div class="p-2" style="font-size: large;">
+                        <p class="mb-2"><strong style="text-decoration: underline;">Car Info</strong></p>
+                        <p class="m-0" id="name"><strong>Brand: </strong>{{booking_object.car_brand.brand}}</p>
+                        <p class="m-0" id="email"><strong>year: </strong>{{booking_object.car_year.year}}</p>
+                        <p class="m-0" id="phoneNo"><strong>Model: </strong>{{booking_object.car_model.model_name}}</p>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Service Selection Area -->
+            <div class="row w-75 p-4">
+                <div class="w-50">
+                    <label for="service_type">Service Type</label>
+                    <select onchange="getServiceCategory('service_type', 'service_category')" type="text" name="service_type" 
+                        id="service_type" class="border-0" style="width: 85%; padding: 6px 0px;">
+                        <option value="">Select Service type here</option>
+                        {% for item in service_type %}
+                        <option value="{{item.id}}">{{item.service_type_name}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+    
+                <div class="w-50">
+                    <label for="service_category">Service Category</label>
+                    <select onchange="getService('service_category', 'service', 'service_selection')" type="text" 
+                        name="service_category" id="service_category" class="border-0" style="width: 85%; padding: 6px 0px;">
+                    </select>
+                </div>
+    
+                <div class="w-100 d-flex py-3" style="justify-content: space-evenly;">
+                    <div id="service" class="border-0" style="width: 45%; padding: 6px 0px;">
+                    </div>
+                    <div style="width: 45%;" id="subServiceOption">
+                    </div>
+                </div>
+            </div>
+        </div>
+    
+        <!-- <hr class="someClass"> -->
+    
+        <!-- Selected Services Display Area -->
+        <div class="d-flex justify-content-start p-2">
+            <div class="">
+            </div>
+            <div class="w-50" >
+                <div id="service_selection">
+                    <div class="d-flex justify-content-between p-2">
+                        <label class="m-0">Selected Services</label>
+                        <label class="m-0">Action</label>
+                    </div>
+                    <hr class="someClass m-0">
+                    <div id="selected_services_container">
+                        <!-- Selected services will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store selected services and their options
+        let selectedServices = {};
+        let currentServiceId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get existing services from the data attribute
+            const existingServicesElement = document.getElementById('existing_services');
+            if (existingServicesElement && existingServicesElement.innerHTML) {
+                try {
+                    const existingServices = JSON.parse(existingServicesElement.innerHTML);
+                    
+                    // Initialize selected services with existing data
+                    existingServices.forEach(service => {
+                        selectedServices[service.serviceId] = service;
+                    });
+                    
+                    // Update the display
+                    updateSelectedServicesDisplay();
+                    
+                    // // If there are existing services, initialize the service type and category
+                    // if (existingServices.length > 0) {
+                    //     const firstService = existingServices[0];
+                        
+                    //     // Set service type
+                    //     const serviceTypeSelect = document.getElementById('service_type');
+                    //     if (serviceTypeSelect) {
+                    //         serviceTypeSelect.value = firstService.serviceType;
+                    //         // Trigger service category loading
+                    //         getServiceCategory('service_type', 'service_category');
+                    //     }
+                        
+                    //     // Set service category after a small delay to ensure categories are loaded
+                    //     setTimeout(() => {
+                    //         const serviceCategorySelect = document.getElementById('service_category');
+                    //         if (serviceCategorySelect) {
+                    //             serviceCategorySelect.value = firstService.service_category_id;
+                    //             // Trigger service loading
+                    //             getService('service_category', 'service', 'service_selection');
+                    //         }
+                    //     }, 500);
+                    // }
+                } catch (error) {
+                    console.error('Error parsing existing services:', error);
+                }
+            }
+        });
+
+        function getServiceCategory(servicetype, servicecategory) {
+            const service_type = document.getElementById(servicetype).value;
+            
+            fetch(`/get-service-category/?service_type=${service_type}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    const target_element = document.getElementById(servicecategory);
+                    let options = '<option value="">Select Service Category</option>';
+                    
+                    data.forEach(item => {
+                        options += `<option value="${item.id}">${item.service_category_name}</option>`;
+                    });
+                    
+                    target_element.innerHTML = options;
+                    console.log('selectedServices', selectedServices);
+                    
+                    // // If we have selected services, set the category
+                    // const existingServices = Object.values(selectedServices);
+                    // if (existingServices.length > 0) {
+                    //    target_element.value = existingServices[0].service_category_id;
+                    // }
+                })
+                .catch(error => {
+                    console.error('Error fetching service categories:', error);
+                });
+        }
+
+        function getService(servicecategory, service, service_selection) {
+            const service_cat = document.getElementById(servicecategory).value;
+            
+            fetch(`/get-services/?service_category=${service_cat}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    let htmlContent = '<label class="w-25" for="service_type">Service</label>';
+                    const target_element = document.getElementById(service);
+                    
+                    data.forEach(item => {
+                        const isSelected = selectedServices[item.id] ? 'selected' : '';
+                        htmlContent += `
+                            <div id="option-${item.id}"
+                                class="service-item ${isSelected}"
+                                onclick="selectService('${item.id}', '${item.service_title}')">
+                                <p class="m-0">${item.service_title}</p>
+                            </div>`;
+                    });
+                    
+                    target_element.innerHTML = htmlContent;
+                    document.getElementById('subServiceOption').innerHTML = '';
+                })
+                .catch(error => {
+                    console.error('Error fetching services:', error);
+                });
+        }
+
+        function selectService(serviceId, serviceTitle) {
+            // Clear previous selection
+            document.querySelectorAll('.service-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Update current selection
+            const serviceElement = document.getElementById(`option-${serviceId}`);
+            if (serviceElement) {
+                serviceElement.classList.add('selected');
+            }
+            
+            currentServiceId = serviceId;
+            showSubServiceOptions(serviceId, serviceTitle);
+        }
+
+        function showSubServiceOptions(serviceId, serviceTitle) {
+            const target_element = document.getElementById('subServiceOption');
+            
+            fetch(`/get-sub-service/?service=${serviceId}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(subServices => {
+                    let allOptionsHTML = '';
+                    
+                    const processSubService = async (subService) => {
+                        const response = await fetch(`/get-sub-service-option/?sub_service=${subService.id}`);
+                        const options = await response.json();
+                        
+                        return `
+                            <div class="sub-service-container" data-service-id="${serviceId}">
+                                <div class="question-container">
+                                    <div class="question-title">
+                                        <h6 class="m-0">${subService.title}</h6>
+                                    </div>
+                                    <div class="options-container" id="options-${subService.id}"
+                                        data-sub-service-id="${subService.id}"
+                                        data-sub-service-title="${subService.title}">
+                                        ${createOptionsHTML(subService, options)}
+                                    </div>
+                                </div>
+                            </div>`;
+                    };
+                    
+                    Promise.all(subServices.map(processSubService))
+                        .then(htmlContents => {
+                            const addButtonHTML = `
+                                <div class="text-center mt-3">
+                                    <button class="action-button add-button"
+                                            onclick="addToSelected('${serviceId}', '${serviceTitle}')">
+                                        Add Service
+                                    </button>
+                                </div>`;
+                            
+                            target_element.innerHTML = htmlContents.join('') + addButtonHTML;
+                            
+                            // Initialize selected options if this service is already selected
+                            if (selectedServices[serviceId]) {
+                                initializeSelectedOptions(serviceId);
+                            }
+                        });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    target_element.innerHTML = 'Error loading options. Please try again.';
+                });
+        }
+
+        function initializeSelectedOptions(serviceId) {
+            console.log('selectedServices', selectedServices);
+            if (selectedServices[serviceId]) {
+                selectedServices[serviceId].sub_services.forEach(subService => {
+                    subService.sub_service_options.forEach(option => {
+                        const input = document.getElementById(`option-${subService.sub_service_id}-${option.sub_service_option_id}`);
+                        if (input) {
+                            input.checked = true;
+                            const optionItem = input.closest('.option-item');
+                            if (optionItem) {
+                                optionItem.classList.add('selected');
+                            }
+                        }
+                    });
+                });
+            }
+        }
+
+        function createOptionsHTML(subService, options) {
+            const inputType = subService.selection_type === 'Multiple' ? 'checkbox' : 'radio';
+            
+            return options.map(option => `
+                <div class="option-item">
+                    <input type="${inputType}" 
+                        id="option-${subService.id}-${option.id}" 
+                        name="subService-${subService.id}" 
+                        value="${option.id}"
+                        data-option-title="${option.title}"
+                        onchange="handleOptionChange('${subService.id}', '${option.id}', '${option.title}')"
+                        class="form-check-input me-2">
+                    <label for="option-${subService.id}-${option.id}" class="form-check-label">
+                        ${option.title}
+                    </label>
+                </div>
+            `).join('');
+        }
+
+        function handleOptionChange(subServiceId, optionId, optionTitle) {
+            const input = document.getElementById(`option-${subServiceId}-${optionId}`);
+            const optionContainer = input.closest('.option-item');
+            
+            if (input.type === 'radio') {
+                const groupOptions = document.getElementsByName(`subService-${subServiceId}`);
+                groupOptions.forEach(opt => {
+                    opt.closest('.option-item').classList.remove('selected');
+                });
+            }
+            
+            if (input.checked) {
+                optionContainer.classList.add('selected');
+            } else {
+                optionContainer.classList.remove('selected');
+            }
+        }
+
+        function addToSelected(serviceId, serviceTitle) {
+            const serviceType = document.getElementById('service_type').value;
+            const serviceCategoryId = document.getElementById('service_category').value;
+            const subServiceContainers = document.querySelectorAll(`[data-service-id="${serviceId}"] .options-container`);            
+            console.log('selectedServices', selectedServices);
+            
+            // Create the service object with the correct structure
+            const serviceData = {
+                serviceId: serviceId,
+                serviceType: serviceType,
+                service_title: serviceTitle,
+                service_category_id: serviceCategoryId,
+                sub_services: []
+            };
+
+            // Process each sub-service container
+            subServiceContainers.forEach(container => {
+                const subServiceId = container.dataset.subServiceId;
+                const subServiceTitle = container.dataset.subServiceTitle;
+                const selectedInputs = container.querySelectorAll('input:checked');
+                console.log('selectedInputs', selectedInputs);
+                
+
+                // Create sub-service object even if no options are selected
+                const subServiceData = {
+                    sub_service_id: subServiceId,
+                    sub_service_title: subServiceTitle,
+                    sub_service_options: []
+                };
+
+                // Add selected options if any
+                selectedInputs.forEach(input => {
+                    subServiceData.sub_service_options.push({
+                        sub_service_option_id: input.value,
+                        sub_service_option_title: input.dataset.optionTitle
+                    });
+                });
+
+                serviceData.sub_services.push(subServiceData);
+            });
+
+            // Add or update the service in selectedServices
+            selectedServices[serviceId] = serviceData;
+            updateSelectedServicesDisplay();
+
+            // Clear current selection
+            currentServiceId = null;
+            document.querySelectorAll('.service-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.getElementById('subServiceOption').innerHTML = '';
+        }
+
+        function updateSelectedServicesDisplay() {
+            const container = document.getElementById('selected_services_container');
+            let html = '';
+            
+            for (const [serviceId, serviceData] of Object.entries(selectedServices)) {
+                html += `
+                    <div class="selected-service" id="selected-${serviceId}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>${serviceData.service_title}</strong>
+                            <button class="action-button remove-button" 
+                                    onclick="removeFromSelected('${serviceId}')">
+                                Remove
+                            </button>
+                        </div>`;
+                
+                // Add selected options
+                serviceData.sub_services.forEach(subService => {
+                    if (subService.sub_service_options.length > 0) {
+                        html += `
+                            <div class="selected-options">
+                                <div class="sub-service-title">${subService.sub_service_title}</div>`;
+                        
+                        subService.sub_service_options.forEach(option => {
+                            html += `<div class="selected-option">• ${option.sub_service_option_title}</div>`;
+                        });
+                        
+                        html += `</div>`;
+                    }
+                });
+                
+                html += `</div>`;
+            }
+            
+            if (Object.keys(selectedServices).length > 0) {
+                html += `
+                    <div class="text-center mt-3">
+                        <button class="action-button update-button" onclick="updateLocalStorage()">
+                            Update Service
+                        </button>
+                    </div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function removeFromSelected(serviceId) {
+            delete selectedServices[serviceId];
+            updateSelectedServicesDisplay();
+            
+            if (currentServiceId === serviceId) {
+                currentServiceId = null;
+                document.getElementById('subServiceOption').innerHTML = '';
+            }
+        }
+
+        function updateLocalStorage() {
+        try {
+            const booking_id = document.getElementById('booking_id').value;
+            const csrftoken = getCookie('csrftoken');
+            
+            // Format the data for the backend
+            const backendData = {
+                services: Object.values(selectedServices)
+            };
+            
+
+            fetch(`/admin/service-update/${booking_id}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(backendData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error(`Network response was not ok: ${text}`);
+                        throw new Error(`Network response was not ok: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                } else {
+                    alert(data.message || 'Update failed');
+                }
+            })
+            .catch(error => {
+                console.log('Error:', error);
+                // alert(`Failed to update services. Please try again.`);   
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            alert('An unexpected error occurred');
+        }
+    }
+
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Initialize when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedServices = localStorage.getItem('selectedServices');
+            if (savedServices) {
+                try {
+                    selectedServices = JSON.parse(savedServices);
+                    updateSelectedServicesDisplay();
+                } catch (error) {
+                    console.error('Error loading saved services:', error);
+                    selectedServices = {};
+                }
+            }
+        });
+        
+    </script>
+</div>
+{% endblock %}

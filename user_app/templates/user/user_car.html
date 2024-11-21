@@ -147,19 +147,20 @@
                             <td>In-active</td>
                             {% endif %} -->
                             <td>
-                                <button class="btn btn-dark car-detail-button"
-                                    style="color: #c4c1c1; border-radius: 25px;">Get a Service</button>
+                                <a href="{% url 'booking_service_handler' id=cardetails.id %}" class="btn btn-dark car-detail-button"
+                                    style="color: #c4c1c1;">Get a Service</a>
                             </td>
                             <td>
-                                <button class="btn car-detail-button">
-                                    <i class="fas fa-history icon-style"></i> <br> View Service History
+                                <button class="btn car-detail-button"
+                                    onclick="userCarHistory('historyForm', '{{cardetails.id}}', '{{cardetails.user_id.user_id}}' )"><i class="fas fa-history icon-style"></i> <br> View Service History
                                 </button>
                                 <button class="btn car-detail-button">
                                     <i class="fas fa-heartbeat icon-style"></i> <br> View Car Healths
                                 </button>
                                 <button class="btn car-detail-button"
                                     onclick="userCarDetails('viewForm', '{{ cardetails.car_brand.image_url }}', '{{ cardetails.car_brand.brand }}', 
-                                '{{ cardetails.car_year.year }}', '{{ cardetails.car_model.model_name }}', '{{ cardetails.car_trim.car_trim_name }}', '{{ cardetails.vin_number }}')">
+                                    '{{ cardetails.car_year.year }}', '{{ cardetails.car_model.model_name }}', '{{ cardetails.car_trim.car_trim_name }}', 
+                                    '{{ cardetails.vin_number }}')">
                                     <i class="fas fa-car icon-style"></i> <br> View Car Details
                                 </button>
                             </td>
@@ -182,6 +183,7 @@
 
                 </table>
 
+                <!---------------------------Car detail form ---------------------->
                 <div id="viewForm" class="modal-form" onclick="closeModalIfOutside(event, 'viewForm')">
                     <div class="modal-content" style="max-width: 800px; height: 43%; width: 30%;">
                         <div class="modal-header">
@@ -237,6 +239,33 @@
                         </div>
                     </div>
                 </div>
+
+                <!---------------------------Car Service History form ---------------------->
+
+                <div id="historyForm" class="modal-form" onclick="closeModalIfOutside(event, 'historyForm')">
+                    <div class="modal-content" style="max-width: 800px; height: auto; width: 30%;">
+                        <div class="modal-header">
+                            <h4 class="modal-title w-100"
+                                style="text-align: center; font-size: 30px; font-weight: bold;">Car Service History</h4>
+                            <button type="button" class="close" onclick="closeModal('historyForm')"
+                                style="font-size: 30px; font-weight: bolder;">×</button>
+                        </div>
+                        <div class="modal-body" id="modal-body">
+                            <div class="history-form">
+                            </div>
+                            <div class="row w-100">
+                                <div class="w-100 modal_btn d-flex justify-content-around mt-3">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                        onclick="closeModal('historyForm')">Close</button>
+                                </div>
+                                <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
+                                    style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!---------------------------Update Car details form ---------------------->
 
                 <div id="updateForm" class="modal-form" onclick="closeModalIfOutside(event, 'updateForm')">
                     <div class="modal-content" style="max-width: 800px; height: 50%; ">

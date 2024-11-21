@@ -1,0 +1,70 @@
+{% extends 'master.html' %}
+{% load static %}
+
+<title>{% block title %}Request A Quote | Revolution Auto{% endblock %}</title>
+
+{% block Carousel %}
+<div class="col-md-12">
+    <h1 class="steps-heading" style="text-align: center;">Three Steps for your Quote</h1>
+    <!-- <div id="booking-loader" class="loading hidden">Loading…</div> -->
+
+    <div class="wizard" role="application" aria-label="Car Service Booking Wizard">
+        <nav class="steps">
+            <ul role="tablist">
+                <li role="tab" aria-selected="true" aria-controls="car-location-section" id="tab-car-location">
+                    <a  href="#car-location-section" class="tab_style steps-incomplete" id="car-location">Car & Location</a>
+                </li><i class="fas fa-arrow-right"></i>
+                <li role="tab" aria-selected="false" aria-controls="services-section" id="tab-services">
+                    <a href="#services-section" class="tab_style" id="car-services">Services</a>
+                </li><i class="fas fa-arrow-right"></i>
+                <li role="tab" aria-selected="false" aria-controls="review-section" id="tab-review">
+                    <a href="#review-section" class="tab_style" id="car-review">Review & Book</a>
+                </li>
+            </ul>
+            
+            <div id="service-selection-summary" class="service-selection-summary"></div>
+            <div class="d-flex justify-content-between align-items-center " id="formButtons">
+                {% if user.role == 'user' or user.role == 'admin' or user.role == 'superuser' %}
+                <div>
+                    <button type="submit" class="edit-button">Request Quote</button>
+                </div>
+                {% else %}
+                <div class="d-flex justify-content-evenly w-100">
+                    <div>
+                        <p class="m-1"><span >Already have an account?
+                            <a href="{% url 'login' %}">Login</a>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="m-1"><span >Already have an account?
+                            <a href="{% url 'register' %}">Registration</a>
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+</div>
+{% endblock Carousel %}
+
+{% block Service %}
+{% endblock Service %}
+
+{% block About %}
+{% endblock About %}
+
+{% block Team %}
+{% endblock Team %}
+
+{% block Fact %}
+{% endblock Fact %}
+
+{% block Service1 %}
+{% endblock Service1 %}
+
+{% block Booking %}
+{% endblock Booking %}
+
+{% block Testimonial %}
+{% endblock Testimonial %}

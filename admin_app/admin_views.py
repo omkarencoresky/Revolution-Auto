@@ -12,13 +12,13 @@ from admin_app.utils.utils import *
 from django.contrib import messages
 from django.http import JsonResponse
 from user_app.models import CustomUser
-from django.core.mail import send_mail, send_mass_mail
 from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist
 from .forms import AdminRegisterForm, AddNotification
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import never_cache 
+from django.core.mail import send_mail, send_mass_mail
 from django.contrib.auth.decorators import login_required
 from schemas.notification_schema import validate_notification
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
@@ -64,11 +64,11 @@ def dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 
     except TemplateDoesNotExist:
         messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return redirect('admin_registration')
+        return redirect('admin_dashboard')
     
     except Exception as e:                
         messages.error(request, f"{e}")        
-        return redirect('admin_registration')
+        return redirect('admin_dashboard')
 
 
 def admin_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
@@ -310,7 +310,8 @@ def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | Http
                     specific_recipient = CustomUser.objects.filter(email=data.get('recipient_email')).exists()
                     
                     if specific_recipient:
-                        mail = send_mail(data.get('title'), data.get('message'), data.get('sender_id'), [data.get('recipient_email')], fail_silently=False,)
+                        mail = send_mail(data.get('title'), data.get('message'), 
+                                         data.get('sender_id'), [data.get('recipient_email')], fail_silently=False,)
                         # notification.status = 'Sent' if mail else 'Failed'  
 
                         Notification.objects.create(sender_id=sender_object, 

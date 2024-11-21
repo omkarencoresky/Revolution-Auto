@@ -109,7 +109,7 @@ sub_services_schema = {
         },
         "optional": {
             "type": "string",
-            "minLength": 1,
+            "minLength": 0,
             "maxLength": 10,
             "pattern": "^.*$",
             "description": "Optional cannot be left blank."

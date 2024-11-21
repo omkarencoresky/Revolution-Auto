@@ -106,6 +106,7 @@ tr.htmx-swapping td {
 	border: none;
 	font-size: 1.5rem;
 	cursor: pointer;
+	padding: auto;
 }
 
 .form-group {
@@ -328,7 +329,7 @@ label{
 
 
 .tab_style {
-	font-weight: bold;
+	font-weight: 450 !important;
 	padding: 5px 15px 10px 15px;
 	border: 1px solid rgb(87, 85, 85); 
 	border-radius: 10px; 
@@ -336,15 +337,8 @@ label{
   }
   
 
-.tab_style:hover {
-	background-color: #D81324;
-	color: white;
-	
-  }
-
-
 .wizard {
-	max-width: 1200px;
+	max-width: 80%;
 	margin: 0 auto;
 	padding: 20px;
 }
@@ -355,19 +349,23 @@ label{
 	list-style: none;
 	padding: 0;
 	margin: 35px 0;
-	border-bottom: 2px solid #eee;
 }
 
 .tab_style {
 	text-decoration: none;
-	color: #333;
+	color: white;
+	background-color: black;
 	padding: 10px 20px;
 	position: relative;
 }
 
+.tab_style:hover{
+	color: white !important;
+}
+
 
 .tab_style.active::after {
-	content: '';
+	/* content: ''; */
 	position: absolute;
 	bottom: -2px;
 	left: 0;
@@ -432,15 +430,9 @@ label{
 	pointer-events: none;
 }
 
-.hidden {
-	display: none;
-}
-
 
 .car-options {
 	width: 20%; 
-	height: 40px; 
-	padding-top: 5px;
 	margin: 10px 28px; 
 	text-align: center; 
 	border-radius: 10px; 
@@ -464,15 +456,8 @@ label{
 }
 
 .active-car-brand{
-	border: 1px solid red;
-    color: red;
-}
-
-.custom-radio {
-    background-color: #f0f0f0;
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
+	border: 1px solid #D81324;;
+    color: #D81324;;
 }
 
 input[type="radio"] {
@@ -481,13 +466,31 @@ input[type="radio"] {
 
 /* Visual feedback for selection */
 input[type="radio"]:checked + .custom-radio {
-    background-color: #ff1e00;
+    background-color: #D81324;;
     color: white;
-    border-color: #ff1100;
+    border-color: #D81324;
 }
 
 
 .car_selection{
+	display: flex;
+	justify-content: start;
+	flex-wrap: wrap;
+}
+
+.year_selection{
+	display: flex;
+	justify-content: start;
+	flex-wrap: wrap;
+}
+
+.model_selection{
+	display: flex;
+	justify-content: start;
+	flex-wrap: wrap;
+}
+
+.trim_selection{
 	display: flex;
 	justify-content: start;
 	flex-wrap: wrap;
@@ -500,3 +503,566 @@ input[type="radio"]:checked + .custom-radio {
 	font-size: 25px; 
 	padding: 14px 0px 14px 0px; 
 }
+
+
+.nextButton, .remove-btn, .add-btn{
+	color: white;
+	border-radius: 5px;
+	border: 1px solid #2c2e3e;
+	background-color: #2c2e3e;
+	padding: 5px 15px;
+	font-weight: 600;
+}
+
+
+/* Container and Section Styles */
+.car-selection-container {
+    max-width: auto;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.section-content {
+    background: #fff;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Title Styles */
+.fs-title {
+    font-size: 24px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.fs-subtitle {
+    font-size: 16px;
+    color: #6c757d;
+    margin-bottom: 30px;
+}
+
+/* Account Section */
+.account-section {
+    margin-bottom: 30px;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.account-section p {
+    font-size: 15px;
+    margin: 0;
+}
+
+.account-section a {
+    color: #0B2154;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.account-section a:hover {
+    text-decoration: underline;
+}
+
+/* Form Elements */
+.header-style {
+    font-size: 18px;
+    font-weight: 500;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom: 15px;
+    transition: border-color 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+/* Car Options Styles */
+.car-options {
+    display: block;
+    margin: 0 10px 10px 0;
+}
+
+.car-options input[type="radio"] {
+    display: none;
+}
+
+.custom-radio {
+    background-color: #f8f9fa;
+    padding: 8px 20px;
+    border-radius: 6px;
+    width: 100%;
+    border: 2px solid #e9ecef;
+    /* margin: 20px 0; */
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 15px;
+    /* display: inline-block; */
+}
+
+/* Message Styles */
+.location-message {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.location-message.success {
+    color: #28a745;
+}
+
+/* Button Styles */
+#confirm-location, #nextStepButtonForService, #nextStepButtonForFinal, #addMore, .edit-button {
+	background: #0B2154;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+
+#confirm-location:hover, #nextStepButtonForService:hover, #nextStepButtonForFinal:hover, #addMore:hover, .edit-button:hover, {
+    transform: translateY(-1px);
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+#confirm-location:hover, #nextStepButtonForService:hover, #nextStepButtonForFinal:hover, #addMore:hover, .edit-button:hover {
+    background: #D81324;
+}
+
+
+/* Summary Section */
+.selection-summary {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    /* margin-bottom: 20px; */
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.summary-heading {
+	width: 100%;
+    padding: 10px;
+    color: white;
+    font-size: 20px;
+	font-weight: 450 !important;
+    margin: 20px 0px;
+	text-align: center;
+	border-radius: 10px;
+	background-color: #0B2154;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.summary-item {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.summary-item h3 {
+    color: #6c757d;
+    font-size: 14px;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.summary-item p {
+    color: #2c3e50;
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Utility Classes */
+.hidden {
+    display: none !important;
+}
+
+
+.steps-incomplete{
+	background-color: #D81324;
+}
+
+.steps-complete{
+	background-color: #0B2154;
+}
+
+.service-container{
+	background: white;
+	border-radius: 8px;
+	padding: 20px;
+	margin: 20px;
+	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.div-flex{
+	display: flex; 
+	flex-wrap: wrap; 
+	justify-content: space-between;
+}
+
+#register-submit:hover, #login-submit:hover{
+	cursor: pointer;
+}
+
+.service-action{
+	color:#c4c1c1 !important; 
+	font-size: small !important; 
+	padding: 2px 6px !important;
+}
+
+.fc .fc-daygrid-day-frame {
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+
+#calendar { 
+	max-width: 900px; 
+	margin: 10px auto; 
+}
+
+.fc-day-disabled { 
+	background-color: #f0f0f0; 
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
+
+/* This overwrite the other designing in add form */
+/* .form-group {
+	display: flex;
+	justify-content: space-evenly;
+	padding: 20px;
+} */
+
+
+.time-slot, .paymentMethod {
+	position: relative;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	transition: background-color 0.3s, border-color 0.3s;
+}
+
+.time-slot input[type="radio"] {
+	display: none;
+}
+
+.time-slot span {
+	margin-left: 10px;
+}
+
+
+.time-slot.selected {
+	background-color: #2c2e3e;
+	color: white;
+	border-color: #2c2e3e;
+}
+
+
+.paymentMethod.selected {
+	background-color: #2c2e3e;
+	color: white;
+	border-color: #2c2e3e;
+}
+
+/* Optional: Change cursor to pointer on hover */
+.time-slot:hover {
+	border-color: #2c2e3e;
+}
+
+.remove_bottom_margin{
+	margin-bottom: 0px !important;
+}
+
+#map {
+	height: 200px; 
+	width: 100%;
+}
+
+#modal-header{
+	justify-content: start;
+    gap: 7px;
+    padding-left: 0px;
+}
+
+
+/* Past dates styling */
+.fc-day-past-disabled {
+    background-color: #faf3f3 !important;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Already booked dates styling */
+.fc-day-booked {
+    background-color: #373848 !important; /* Light red background */
+	color: white;
+    position: relative;
+    pointer-events: auto !important; /* Enable hover effects */
+}
+
+/* Tooltip styling */
+.booking-tooltip {
+    display: none;
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    white-space: nowrap;
+}
+
+/* Optional: Add transition for smooth tooltip appearance */
+.booking-tooltip {
+    transition: display 0.3s ease;
+}
+
+/* Optional: Add hover effect on booked dates */
+.fc-day-booked:hover {
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+.price-input-group {
+    align-items: baseline;
+    box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.input-group-addon {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 11px; /* You can adjust padding as needed */
+}
+
+
+hr.someClass {
+	background-color: #2c2e3e;
+	width: 100%;
+	height: 1px;
+	border-top: 1px solid black
+  }
+
+  .option-item{
+	padding: 7px;
+	margin: 4px 0px;
+	background: whitesmoke;
+    border-radius: 11px
+  }
+
+
+#bstatus {
+	height: 25px;
+    border-radius: 5px;
+    padding: 0px 5px
+}
+
+.sub_service_div_checked {
+    background-color: #D81324;
+    border: 1px solid #D81324;
+    padding: 5px;
+	color: White;
+    border-radius: 4px;
+}
+
+
+.service-item {
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.service-item:hover {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.service-item.selected {
+    background-color: #2c2e3e;
+    border-color: #2c2e3e;
+	color: White;
+    font-weight: 500;
+}
+
+.option-item {
+    padding: 6px 10px;
+    margin: 4px 0;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.option-item:hover {
+    background-color: #f8f9fa;
+}
+
+.option-item.selected {
+    background-color: #2c2e3e;
+    border-color: #2c2e3e;
+	color: White;
+}
+
+.sub-service-container {
+    border-left: 2px solid #dee2e6;
+    padding-left: 15px;
+    margin: 10px 0;
+}
+
+.action-button {
+    margin-top: 10px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.add-button {
+    background-color: #2c2e3e;
+    color: white;
+}
+
+.add-button:hover {
+    background-color: #D81324;
+}
+
+.remove-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.remove-button:hover {
+    background-color: #c82333;
+}
+
+.selected-service {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.selected-options {
+    margin-top: 8px;
+    padding-left: 12px;
+    border-left: 2px solid #dee2e6;
+}
+
+.selected-option {
+    color: #495057;
+    padding: 4px 0;
+}
+
+.question-container {
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: white;
+}
+
+.question-title {
+    color: #495057;
+    font-weight: 500;
+}
+
+
+.filter{
+	width: 13% !important; 
+	font-size: 15px !important;
+	color: white !important; 
+	background:#2c2e3e !important; 
+	border-left: solid white 1px !important;
+}
+
+
+.historyItem{
+	background: white;
+	border-radius: 8px;
+	/* padding: 20px;
+	margin: 20px; */
+	box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+
+.serviceReport, .bookingReport{
+	max-width: 23% !important; 
+	max-height: 387px !important;
+	border-radius: 10px !important; 
+	border: 5px solid #dddfe4 !important; 
+	box-shadow: 0px 8px 15px 0px rgb(100, 99, 116) !important; 
+}
+
+
+.header-titles h4 {
+	font-size: 1.32rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
+  }
+  
+  .header-titles h5 {
+	font-size: 1.1rem;
+	font-weight: 600;
+	margin-bottom: 1rem;
+  }
+
+
+  .sub_service_parent, .payment_mode_selected{
+	background-color: #D81324;
+    padding: 5px 15px;
+	color: White;
+    border-radius: 4px;
+	font-weight: bold;
+  }
+
+  .payment_mode{
+	background-color: #2c2e3e;
+	padding: 5px 15px;
+	color: white;
+	border-radius: 4px;
+	font-weight: bold;
+  }
+
+  .payment_mode:hover{
+	background-color: #2c2e3e;
+	padding: 5px 15px;
+	color: white;
+	border-radius: 4px;
+	font-weight: bold;
+  }
+

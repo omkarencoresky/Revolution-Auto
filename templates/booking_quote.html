@@ -1,0 +1,110 @@
+{% extends 'master.html' %}
+{% load static %}
+
+<title>{% block title %}Book a Service| Revolution Auto{% endblock %}</title>
+
+{% block Carousel %}
+<div class="col-md-12" id="main_container">
+    <h1 class="steps-heading" style="text-align: center;">Three Steps for your Quote</h1>
+    <div id="booking-loader" class="loading hidden">Loading…</div>
+    <div id="messageContainer">
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <ul class="messages hidden" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            <li id="final_error"></li>
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="wizard" role="application" aria-label="Car Service Booking Wizard"> 
+        <nav class="steps">
+            <ul role="tablist">
+                <li role="tab" aria-selected="true" aria-controls="car-location-section" id="tab-car-location">
+                    <a  href="#car-location-section" class="tab_style steps-incomplete" id="car-location">Car & Location</a>
+                </li><i class="fas fa-arrow-right"></i>
+                <li role="tab" aria-selected="false" aria-controls="services-section" id="tab-services">
+                    <a href="#services-section" class="tab_style" id="car-services">Services</a>
+                </li><i class="fas fa-arrow-right"></i>
+                <li role="tab" aria-selected="false" aria-controls="review-section" id="tab-review">
+                    <a href="#review-section" class="tab_style" id="car-review">Review & Book</a>
+                </li>
+            </ul>
+            <div id="selection-summary" class="selection-summary hidden"></div>
+            <div id="service-selection-summary" class="service-selection-summary hidden"></div>
+            <div class="d-flex justify-content-between align-items-center hidden" id="formButtons">
+                <button  onclick="editServiceSelections()" class="edit-button">Edit Details</button>
+                <div>
+                    <a class="edit-button" onclick="selectedBookingCredential('{{car_details.id}}', 
+                    '{{car_details.car_brand.id}}','{{car_details.car_model.id}}','{{car_details.car_year.id}}'
+                    ,'{{car_details.car_trim.id}}','{{car_details.vin_number}}')">Confirm Details</a>
+                    <!--  hx-headers='{"X-CSRFToken": "{{ csrf_token }}" }' hx-target="body" class="edit-button">Confirm Details</a> -->
+                </div>
+            </div>
+        </nav>
+
+        <div class="car-selection-container" id="car-selection-container">
+            <section id="car-location-section" role="tabpanel" aria-labelledby="tab-car-location" class="section-content">
+                
+                <div class="location-section">
+                    <label class="summary-heading">Select Your Location</label>
+                    <select id="location" name="location" class="form-control" required>
+                        <option value="">Select Location</option>
+                        {% for location in locations %}
+                            <option value="{{location.id}}">{{location.location_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="location-message success" aria-live="polite"></p>
+                    <button type="button" id="confirm-location" onclick="showServiceSection()" class="hidden">Confirm Location</button>
+                </div>
+            </section>
+        </div> 
+
+        <div class="service-container hidden" id="service-container">
+            <div id="service-container-section" role="radiogroup">
+                <label class="summary-heading">Select Service Type</label>
+                <div class="div-flex">
+                    {% for service_type in service_type %}
+                        <label class="car-options">
+                            <input type="radio" onchange="addServiceTypeId(event)" name="service_type" value="{{ service_type.id }}">
+                            <div class="custom-radio">{{ service_type.service_type_name }}</div>
+                        </label>
+                    {% endfor %}
+                </div>
+                <div class="div-flex" id="service_category_selection" role="radiogroup"></div>
+                <div class="div-flex" id="services_selection" role="radiogroup"></div>
+                <div class="div-flex" id="sub_service_selection"></div>
+                <div style="padding: 30px 10px; text-align: end;">
+                    <button type="button" class="hidden" id="nextStepButtonForFinal" onclick="hideLocationSection('car-selection-container')">Review and booking<i class="fas fa-arrow-right"></i></button>
+                    <button type="button" class="hidden" id="addMore" onclick="storeCurrentData()">Add more service</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock Carousel %}
+
+{% block Service %}
+{% endblock Service %}
+
+{% block About %}
+{% endblock About %}
+
+{% block Team %}
+{% endblock Team %}
+
+{% block Fact %}
+{% endblock Fact %}
+
+{% block Service1 %}
+{% endblock Service1 %}
+
+{% block Booking %}
+{% endblock Booking %}
+
+{% block Testimonial %}
+{% endblock Testimonial %}

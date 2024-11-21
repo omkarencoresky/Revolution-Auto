@@ -1,8 +1,9 @@
 from admin_app.models import *
 from django.http import HttpRequest
-from user_app.models import CustomUser
 from django.core.paginator import Page
 from django.core.paginator import Paginator
+from user_app.models import CustomUser, BookingAndQuote, Service_payment
+
 
 
 def trim_pagination(request: HttpRequest, status=None) -> Page:
@@ -312,6 +313,68 @@ def referral_pagination(request: HttpRequest) -> Page:
     
     # Pagination setup
     paginator = Paginator(referral, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj
+
+
+
+def booking_pagination(request: HttpRequest, status: None) -> Page:
+    
+    """Paginate a list of all mechanics and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for mechanics pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
+    """
+
+    booking = BookingAndQuote.objects.all().order_by('-created_at')
+
+    if status:
+        booking = BookingAndQuote.objects.all().order_by('id').filter(status=status)
+    
+    # Pagination setup
+    paginator = Paginator(booking, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj
+
+
+def Mechanic_pagination(request: HttpRequest) -> Page:
+    
+    """Paginate a list of all mechanics and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for mechanics pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
+    """
+    mechanic = CustomUser.objects.filter(role='mechanic').order_by('user_id')
+    
+    # Pagination setup
+    paginator = Paginator(mechanic, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj
+
+
+def Service_payment_pagination(request: HttpRequest) -> Page:
+    
+    """Paginate a list of all mechanics and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for mechanics pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
+    """
+    payments = Service_payment.objects.all().order_by('-created_at')
+    
+    # Pagination setup
+    paginator = Paginator(payments, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return page_obj

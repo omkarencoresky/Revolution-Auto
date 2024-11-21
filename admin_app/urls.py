@@ -16,8 +16,8 @@ Including another URLconf
 """
 
 from django.urls import path
-from admin_app import admin_views, user_views
-from admin_app import car_views, location_views, service_views, mechanic_views, referral_views
+from admin_app import admin_views, user_adminapp_views, booking_views
+from admin_app import car_views, location_views, service_views, mechanic_views, referral_views, combo_views
 
 
 urlpatterns = [
@@ -86,16 +86,27 @@ urlpatterns = [
     path('sub-service-option/<int:id>/', service_views.sub_service_option_action_handler, name = 'sub_service_option_action_handler'),
        
      # -------------------------------------User management urls--------------------- #
-    path('user-management/', user_views.user_data_handler, name = 'user_data_handler'),
-    path('user-login-as-admin/<int:id>/', user_views.admin_login_as_user, name = 'admin_login_as_user'),
-    path('user-management/<int:id>/<str:role>/', user_views.user_action_handler, name = 'user_action_handler'),
+    path('user-management/', user_adminapp_views.user_data_handler, name = 'user_data_handler'),
+    path('user-login-as-admin/<int:id>/', user_adminapp_views.admin_login_as_user, name = 'admin_login_as_user'),
+    path('user-management/<int:id>/<str:role>/', user_adminapp_views.user_action_handler, name = 'user_action_handler'),
+
 
     # -------------------------------------Mechanic management urls--------------------- #
-
     path('mechanic-management/', mechanic_views.mechanic_data_handler, name = 'mechanic_data_handler'),
     path('mechanic-management/<int:id>/', mechanic_views.mechanic_action_handler, name = 'mechanic_action_handler'),
-    
 
+
+        # -------------------------------------Booking management urls--------------------- #
+    path('mechanic-data/', booking_views.mechanic_data_filter, name = 'mechanic_data_filter'),
+    path('booking-management/', booking_views.booking_data_handler, name = 'booking_data_handler'),
+    path('service-update/<int:id>/', booking_views.service_update_handler, name = 'service_update_handler'),
+    path('booking-report/<int:id>/', booking_views.booking_report_handler, name = 'booking_report_handler'),
+    path('Update-booking-management/<int:id>/', booking_views.handle_service_status_and_car_details, name = 'handle_service_status_and_car_details'),
+    path('booking-management/<int:id>/', booking_views.handle_service_quote_and_mechanic_assignment, name = 'handle_service_quote_and_mechanic_assignment'),
+    path('booking-payments/', booking_views.service_payment_handler, name = 'service_payment_handler'),    
+
+    # -------------------------------------Booking management urls--------------------- #
+    path('combo-management/', combo_views.combo_data_handler, name = 'combo_data_handler'),
 ]
 
 

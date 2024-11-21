@@ -32,7 +32,7 @@
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
             <div class="modal-body" id="modal-body" s>
-                <form action="{% url 'user_data_handler' %}" method="post">
+                <form action="{% url 'user_data_handler' %}" method="post" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group brand">
                         <label class="control-label" for="first_name">First Name :</label>
@@ -79,6 +79,15 @@
                         <input type="password" class="form-control" name="confirm_password"
                             placeholder="Confirm Password">
                         <span id="Password1"></span>
+                    </div>
+
+                    <div class="form-group brand">
+                        <label class="control-label" for="profile_image">Profile Image :</label>
+                        <div>
+                            <input type="file" class="form-control" name="profile_image" id="profile_image"
+                                >
+                            <span id="profile_image"></span>
+                        </div>
                     </div>
                     <div class="modal-footer justify-content-center">
                         <div class="modal_btn" style="gap: 254px;">

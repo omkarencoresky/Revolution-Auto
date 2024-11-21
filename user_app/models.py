@@ -91,7 +91,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class UserCarRecord(models.Model):
-
     from admin_app.models import CarBrand, CarModel, CarTrim, CarYear
     
     id = models.AutoField(primary_key=True)
@@ -106,3 +105,101 @@ class UserCarRecord(models.Model):
 
     class Meta:
         db_table = 'user_car_record'
+
+
+
+class BookingAndQuote(models.Model):
+    from admin_app.models import CarBrand, CarModel, CarTrim, CarYear, ServiceType, ServiceCategory, Services, SubService, SubServiceOption, Location
+    
+    BOOKING_STATUS = {
+        # this content is write according to steps
+        
+        'Pending for Quote':'pending for quote',
+        'Quoted':'quoted',
+        'Progressing': 'progressing',
+        'Scheduled':'scheduled',
+        'Pending':'pending',
+        'Deleted':'deleted',
+        'Complete':'complete',
+        'Cancelled':'cancelled',
+    }
+
+    id=models.AutoField(primary_key=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_service', blank=False, null=True)
+    service_location = models.ForeignKey(Location, on_delete=models.CASCADE, related_name='service_location')
+    car_brand = models.ForeignKey(CarBrand, on_delete=models.CASCADE, related_name='service_car_brand')
+    car_year = models.ForeignKey(CarYear, on_delete=models.CASCADE, related_name='service_car_year')
+    car_model = models.ForeignKey(CarModel, on_delete=models.CASCADE, related_name='service_car_model')
+    car_trim = models.ForeignKey(CarTrim, on_delete=models.CASCADE, related_name='service_car_trim')
+    car_vno = models.CharField(max_length=16, blank=True, null=True)
+    car_service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name='car_service_type')
+    car_service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name='car_service_category')
+    car_services = models.CharField(max_length=500)
+    status = models.CharField(max_length=50, choices=BOOKING_STATUS, default='pending for quote', blank=True, null=True)
+    mechanic = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='assign_mechanic', blank=True, null=True)
+    total_service_amount = models.FloatField(blank=False, null=True)
+    parts_amount = models.FloatField(blank=False, null=True)
+    labour_amount = models.FloatField(blank=False, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    schedule_at = models.CharField(blank=True, null=True)
+    schedule_time_slot = models.CharField(blank=True, null=True)
+
+    class Meta:
+        db_table = 'booking'       
+        
+
+
+class SubServiceAndOption(models.Model):
+    from admin_app.models import Services
+    id = models.AutoField(primary_key=True)
+    booking_id = models.ForeignKey(BookingAndQuote, on_delete=models.CASCADE, related_name='booking_id')
+    service_id = models.ForeignKey(Services, on_delete=models.CASCADE, related_name='service_id', blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'sub_service_and_option'
+
+    
+class SubServiceBasedOption(models.Model):
+    from admin_app.models import SubService
+    id = models.AutoField(primary_key=True)
+    subServiceAndOptionId = models.ForeignKey(SubServiceAndOption, on_delete=models.CASCADE, related_name='subServiceAndOptionId')
+    sub_service = models.ForeignKey(SubService, on_delete=models.CASCADE, related_name='sub_service')
+    sub_service_option = models.CharField(max_length=500)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'sub_service_based_option'
+
+
+class Mechanic_leaves(models.Model):
+    
+    id = models.AutoField(primary_key=True)
+    mechanic_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='mechanic_id')
+    start_date = models.DateField()
+    end_date = models.DateField()
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'mechanic_leaves'
+
+
+
+class Service_payment(models.Model):
+    
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user')
+    booking = models.ForeignKey(BookingAndQuote, on_delete=models.CASCADE, related_name='booking')
+    service_amount = models.IntegerField()
+    status = models.CharField(max_length=200, default='pending') 
+    payment_mode = models.CharField(max_length=20, default='cash') 
+    stripe_payment_intent_id = models.CharField(max_length=255)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'booking_payment'

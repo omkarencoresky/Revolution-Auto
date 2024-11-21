@@ -4,9 +4,9 @@ import hashlib
 import schemas
 import fastjsonschema
 import schemas.car_schema
+from schemas import car_schema
 from django.conf import settings
 from django.contrib import messages
-from schemas import car_schema
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
 from django.views.decorators.csrf import csrf_exempt

@@ -354,7 +354,7 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
         if request.method == 'GET':
 
             services_pagination_data = services_pagination(request)
-            service_category_pagination_data = service_category_pagination(request, status=1)
+            service_category_pagination_data = ServiceCategory.objects.all().order_by('id')
             context = {
                 'curl': admin_curl,
                 'page_obj': services_pagination_data,
@@ -512,8 +512,8 @@ def sub_services_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
     try:
         if request.method == 'GET':
 
-            sub_services_pagination_data = sub_services_pagination(request)
-            services_pagination_data = services_pagination(request, status=1)
+            sub_services_pagination_data = SubService.objects.all().order_by('id')
+            services_pagination_data = Services.objects.all().order_by('id').filter(status=1)
             context = {
                 'curl': admin_curl,
                 'services': services_pagination_data,
@@ -692,8 +692,8 @@ def sub_service_option_data_handler(request: HttpRequest) -> HttpResponse | Http
     try:
         if request.method == 'GET':
 
-            inspection_pagination_data = inspection_pagination(request)
-            sub_services_pagination_data = sub_services_pagination(request, status=1)
+            inspection_pagination_data = Inspection.objects.all().order_by('id')
+            sub_services_pagination_data = SubService.objects.all().order_by('id')
             sub_service_option_pagination_data = sub_service_option_pagination(request)
 
             context = {

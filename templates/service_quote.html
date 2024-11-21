@@ -5,49 +5,56 @@
 
 {% block Carousel %}
 <div class="col-md-12">
-    <h1 class="steps-heading">Three Steps for your Quote</h1>
-    <!-- <div id="booking-loader" class="loading hidden">Loading…</div> -->
+    <h1 class="steps-heading" style="text-align: center;">Three Steps for your Quote</h1>
+    <div id="booking-loader" class="loading hidden">Loading…</div>
 
-    <form id="example-form" method="POST" action="http://unclefitter.encoreskydev.com/submit-quotation"
-        novalidate="novalidate">
-        <div class="wizard" role="application" aria-label="Car Service Booking Wizard">
-            <nav class="steps">
-                <ul role="tablist">
-                    <li role="tab" aria-selected="true" aria-controls="car-location-section" id="tab-car-location">
-                        <a href="#car-location-section" class="tab_style active">Car & Location</a>
-                    </li>
-                    <li role="tab" aria-selected="false" aria-controls="services-section" id="tab-services">
-                        <a href="#services-section" class="tab_style">Services</a>
-                    </li>
-                    <li role="tab" aria-selected="false" aria-controls="review-section" id="tab-review">
-                        <a href="#review-section" class="tab_style">Review & Book</a>
-                    </li>
-                </ul>
-            </nav>
-    
-            <div class="wizard-content">
-                <section id="car-location-section" role="tabpanel" aria-labelledby="tab-car-location" class="section-content">
-                    <h1 class="fs-title">Answer a few simple questions to get a quote.</h1>
-                    <h1 class="fs-subtitle">Service at your home or office, Monday to Sunday.</h1>
-    
-                    <div class="account-section">
-                        <p><span style="color: #333;">Already have an account?</span> <a href="/login">Log in</a></p>
-                    </div>
-    
-                    <div class="location-section">
-                        <label for="location" class="header-style">Select Your Location</label>
-                        <select id="location" name="location" class="form-control" required>
-                            <option value="">Select Location</option>
-                            {% for location in locations %}
-                                <option value="{{location.id}}">{{location.location_name}}</option>
-                            {% endfor %}
-                        </select>
-                        <p class="location-message success" aria-live="polite"></p>
-                        <button type="button" id="confirm-location" onclick="showDiv()" class="hidden">Confirm Location</button>
-                    </div>
+    <div class="wizard" role="application" aria-label="Car Service Booking Wizard">
+        <nav class="steps">
+            <ul role="tablist">
+                <li role="tab" aria-selected="true" aria-controls="car-location-section" id="tab-car-location">
+                    <a  href="#car-location-section" class="tab_style steps-incomplete" id="car-location">Car & Location</a>
+                </li><i class="fas fa-arrow-right"></i>
+                <li role="tab" aria-selected="false" aria-controls="services-section" id="tab-services">
+                    <a href="#services-section" class="tab_style" id="car-services">Services</a>
+                </li><i class="fas fa-arrow-right"></i>
+                <li role="tab" aria-selected="false" aria-controls="review-section" id="tab-review">
+                    <a href="#review-section" class="tab_style" id="car-review">Review & Book</a>
+                </li>
+            </ul>
+            <div id="selection-summary" class="selection-summary hidden"></div>
+            <div id="service-selection-summary" class="service-selection-summary hidden"></div>
+            <div class="d-flex justify-content-between align-items-center hidden" id="formButtons">
+                <button  onclick="editServiceSelections()" class="edit-button">Edit Details</button>
+                <div >
+                    <a href="{% url 'check_login' %}" onclick="selectedCredential()" class="edit-button">Confirm Details</a>
+                </div>
+            </div>
+        </nav>
 
-                    <div class="hidden" id="car_selection" role="radiogroup">
-                        <label for="brand" class="header-style" >Select Your Car Make</label>
+        <div class="car-selection-container">
+            <section id="car-location-section" role="tabpanel" aria-labelledby="tab-car-location" class="section-content">
+                <h1 class="fs-title">Answer a few simple questions to get a quote.</h1>
+                <h1 class="fs-subtitle">Service at your home or office, Monday to Sunday.</h1>
+
+                <div class="account-section">
+                    <p><span style="color: #0B2154;">Already have an account?</span> <a href="/login">Log in</a></p>
+                </div>
+
+                <div class="location-section">
+                    <label class="summary-heading">Select Your Location</label>
+                    <select id="location" name="location" class="form-control" required>
+                        <option value="">Select Location</option>
+                        {% for location in locations %}
+                            <option value="{{location.id}}">{{location.location_name}}</option>
+                        {% endfor %}
+                    </select>
+                    <p class="location-message success" aria-live="polite"></p>
+                    <button type="button" id="confirm-location" onclick="showDiv()" class="hidden">Confirm Location</button>
+                </div>
+
+                <div class="hidden" id="car_selection" role="radiogroup">
+                    <label class="summary-heading">Select Your Car Make</label>
+                    <div class="div-flex">
                         {% for brand in brands %}
                             <label class="car-options">
                                 <input type="radio" onchange="addBrandId(event)" name="brand" value="{{ brand.id }}">
@@ -55,39 +62,35 @@
                             </label>
                         {% endfor %}
                     </div>
+                </div>
 
-                    <div class="" id="year_selection" role="radiogroup">
-                    </div>
-
-                    <div class="" id="model_selection" role="radiogroup">
-                    </div>
-
-                    <div class="" id="trim_selection" role="radiogroup"></div>
-                    </div>
-                </section>
-            </div>
-    
-            <nav class="actions">
-                <!-- {% for year in years %}
-                    <label class="car-options">
-                        <input type="radio" name="year" value="{{ year.id }}">
-                        <div class="custom-radio">{{ year.year }}</div>
-                    </label>
-                {% endfor %} -->
-                <!-- <ul>
-                    <li class="disabled">
-                        <a href="#previous" role="button" aria-disabled="true">Previous</a>
-                    </li>
-                    <li>
-                        <a href="#next" role="button">Next</a>
-                    </li>
-                    <li class="hidden">
-                        <a href="#finish" role="button">Finish</a>
-                    </li>
-                </ul> -->
-            </nav>
+                <div class="div-flex hidden" id="year_selection" role="radiogroup"></div>
+                <div class="div-flex" id="model_selection" role="radiogroup"></div>
+                <div class="div-flex" id="trim_selection" role="radiogroup"></div>
+            </section>
         </div>
-    </form>
+
+        <div class="service-container hidden" id="service-container">
+            <div id="service-container-section" role="radiogroup">
+                <label class="summary-heading">Select Service Type</label>
+                <div class="div-flex">
+                    {% for service_type in service_type %}
+                        <label class="car-options">
+                            <input type="radio" onchange="addServiceTypeId(event)" name="service_type" value="{{ service_type.id }}">
+                            <div class="custom-radio">{{ service_type.service_type_name }}</div>
+                        </label>
+                    {% endfor %}
+                </div>
+                <div class="div-flex" id="service_category_selection" role="radiogroup"></div>
+                <div class="div-flex" id="services_selection" role="radiogroup"></div>
+                <div class="div-flex" id="sub_service_selection"></div>
+                <div style="padding: 30px 10px; text-align: end;">
+                    <button type="button" class="hidden" id="nextStepButtonForFinal">Review and booking<i class="fas fa-arrow-right"></i></button>
+                    <button type="button" class="hidden" id="addMore" onclick="storeCurrentData()">Add more service</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock Carousel %}
 

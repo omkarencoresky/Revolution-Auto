@@ -36,7 +36,7 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
                 'curl' : admin_curl,
                 'page_obj': locations_pagination_data,
             }
-            return render(request, 'location/location.html', context)
+            return render(request, 'location/location_management.html', context)
         
         elif request.method == 'POST':
             form = AddLocationForm(request.POST)
@@ -69,7 +69,7 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
                     'page_obj':locations_pagination_data,
                 }
                 messages.success(request, "Added successfully!!!")
-                return render(request, 'location/location.html', context)
+                return render(request, 'location/location_management.html', context)
             
         else:
             messages.error(request, 'Invalid inputs, please try again')
@@ -141,7 +141,7 @@ def location_action_handler(request: HttpRequest, id: int) -> HttpResponse:
                 location.delete()
 
                 messages.success(request, f"Delete successfully!!")
-                return render(request, 'location/location.html', context, status=200)
+                return render(request, 'location/location_management.html', context, status=200)
 
     except fastjsonschema.exceptions.JsonSchemaValueException as e:
         messages.error(request,schemas.location_schema.location_schema.

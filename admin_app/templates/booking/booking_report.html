@@ -1,0 +1,424 @@
+{% extends 'admin_master.html' %}
+{% load static %}
+{% block title %}Booking Report | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid flex-grow-1 container-p-y">
+    <h4 class="font-weight-bold py-3 mb-0">BOOKING REPORT</h4>
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'admin_dashboard' %}"><i class="feather icon-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'booking_data_handler' %}">Booking Report</a></li>
+        </ol>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <section class="content">
+        <div class="row" style="margin-bottom: 3%; justify-content: space-between;">
+            <!-- Booking Details -->
+            <div class="col-sm-12  d-flex flex-column bg-white p-3"
+                style="border: 5px solid #dddfe4; border-radius: 10px; max-width: 23%; box-shadow: 0px 8px 15px 0px rgb(100, 99, 116);">
+                <div class="panel panel-bd">
+                    <div class="panel-heading">
+                        <div class="panel-title text-center">
+                            <h4>Booking Details</h4>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Booking Id</h5>
+                            </div>
+                            <h5>
+                                <span>{{ booking.id }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Status</h4>
+                            </div>
+                            <h5>
+                                <label class="text-progressing" style="text-transform: capitalize;">
+                                    {{ booking.status}}</label>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Details -->
+            <div class="col-sm-12 d-flex flex-column bg-white p-3"
+                style="border: 5px solid #dddfe4; border-radius: 10px; max-width: 23%; box-shadow: 0px 8px 15px 0px rgb(100, 99, 116);">
+                <div class="panel panel-bd">
+                    <div class="panel-heading">
+                        <div class="panel-title text-center">
+                            <h4>User Details</h4>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Name</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.user.first_name }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Email</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.user.email }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Phone Number</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.user.phone_no }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Location</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.service_location.location_name }}</span>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Car Details -->
+            <div class="col-sm-12 d-flex flex-column bg-white p-3"
+                style="border: 5px solid #dddfe4; border-radius: 10px; max-width: 23%; box-shadow: 0px 8px 15px 0px rgb(100, 99, 116);">
+                <div class="panel panel-bd">
+                    <div class="panel-heading">
+                        <div class="panel-title text-center">
+                            <h4>Car Details</h4>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Brand</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.car_brand.brand }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Year</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.car_year.year }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Model</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.car_model.model_name }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Trim</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.car_trim.car_trim_name }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>VIN Number</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.vin_number }}</span>
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mechanic Details -->
+            <div class="col-sm-12 d-flex flex-column bg-white p-3"
+                style="border: 5px solid #dddfe4; border-radius: 10px; max-width: 23%; box-shadow: 0px 8px 15px 0px rgb(100, 99, 116);">
+                <div class="panel panel-bd">
+                    <div class="panel-heading">
+                        <div class="panel-title text-center">
+                            <h4>Mechanic Details</h4>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="header-titles">
+                            {% if booking.mechanic %}
+                            <h5>{{ booking.mechanic.first_name }}</h5>
+                            <div class="panel-body">
+                                <div class="mb-2">
+                                    <div class="header-titles">
+                                        <h4>Name</h4>
+                                    </div>
+                                    <h5>
+                                        <span>{{ booking.mechanic.first_name }}</span>
+                                    </h5>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="header-titles">
+                                        <h4>Email</h4>
+                                    </div>
+                                    <h5>
+                                        <span>{{ booking.mechanic.email }}</span>
+                                    </h5>
+                                </div>
+                                <div class="mb-2">
+                                    <div class="header-titles">
+                                        <h4>Phone Number</h4>
+                                    </div>
+                                    <h5>
+                                        <span>{{ booking.mechanic.phone_no }}</span>
+                                    </h5>
+                                </div>
+                            </div>
+                            {% else %}
+                            <h4>Not assigned yet</h4>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-bottom: 3%; justify-content: space-between;">
+            <!-- Service Cost -->
+            <div class="col-sm-12 d-flex flex-column bg-white p-3 serviceReport">
+               <div class="panel panel-bd">
+                    <div class="panel-heading">
+                        <div class="panel-title text-center">
+                            <h4>Service Cost</h4>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="mb-2 d-flex justify-content-between">
+                            <div class="header-titles">
+                                <h4>Parts</h4>
+                            </div>
+                            <h5>
+                                <span>$&nbsp;{{ booking.parts_amount }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <div class="header-titles">
+                                <h4>Labour</h4>
+                            </div>
+                            <h5>
+                                <span>$&nbsp;{{ booking.labour_amount }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <div class="header-titles">
+                                <h4>VAT</h4>
+                            </div>
+                            <h5>
+                                <span>$&nbsp;{{ booking.vat_amount }} (6%)</span>
+                            </h5>
+                        </div>
+                        <div class="col-xs-12">
+                            <hr>
+                        </div>
+                        <div class="mb-2 d-flex justify-content-between">
+                            <div class="header-titles">
+                                <h4>Total</h4>
+                            </div>
+                            <h5>
+                                {% if booking.total_service_amount %}
+                                <span>$&nbsp;{{ booking.total_service_amount }}</span>
+                                {% else %}
+                                <span>0</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Details -->
+            <div class="col-sm-12 d-flex flex-column bg-white p-3 bookingReport">
+                <div class="panel panel-bd">
+                    <div class="panel-heading">
+                        <div class="panel-title text-center">
+                            <h4>Schedule Details</h4>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Booking Date Time</h4>
+                            </div>
+                            <h5>
+                                <span>{{ booking.created_at }}</span>
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Schedule Date</h4>
+                            </div>
+                            <h5>
+                                {% if booking.schedule_at %}
+                                <span>{{ booking.schedule_at }}</span>
+                                {% else %}
+                                <span>Not schedule</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>Start Time</h4>
+                            </div>
+                            <h5>
+                                {% if booking.start_time %}
+                                <span>{{ booking.start_time }}</span>
+                                {% else %}
+                                <span>Not Confirmed</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="mb-2">
+                            <div class="header-titles">
+                                <h4>End Time</h4>
+                            </div>
+                            <h5>
+                                {% if booking.end_time %}
+                                <span>{{ booking.end_time }}</span>
+                                {% else %}
+                                <span>Not Confirmed</span>
+                                {% endif %}
+                            </h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Details -->
+            <div class="col-sm-12 d-flex flex-column bg-white p-3"
+                style="border: 5px solid #dddfe4; border-radius: 10px; max-width: 48%; box-shadow: 0px 8px 15px 0px rgb(100, 99, 116);">
+                <div class="col-sm-12 booking-table-mobile">
+                    <div class="panel panel-bd">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <h4>Car Health</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body my-bookings">
+                            <div class="row booking-service-details-row">
+                                <div class="col-md-12 col-xs-12 col-sm-12 booking-service-details p-2">
+                                    <div class="d-flex justify-content-left">
+                                        <h4>{{ service }}</h4>
+                                        <h4>Not Available Yet</h4>  
+                                    </div>
+                                </div>
+                            </div>
+                        </div> 
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="row" style="margin-bottom: 3%; justify-content: space-between;">
+            <!-- Service Details -->
+            <div class="col-sm-12 d-flex flex-column bg-white p-3"
+                style="border: 5px solid #dddfe4; border-radius: 10px; max-width: 100%; box-shadow: 0px 8px 15px 0px rgb(100, 99, 116);">
+                <div class="col-sm-12 booking-table-mobile">
+                    <div class="panel panel-bd">
+                        <div class="panel-heading">
+                            <div class="panel-title">
+                                <div class="row">
+                                    <div class="col-sm-12 col-md-12">
+                                        <h4>Service Details</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-body my-bookings">
+                            <div class="row booking-service-details-row">
+                                {% for service, details in sub_service_details.items %}
+                                    <div class="col-md-12 col-xs-12 col-sm-12 booking-service-details p-2">
+                                        <div class="d-flex justify-content-between">
+                                            <h4>{{ service }}</h4>
+                                            <button class="service-description-booking-detail-link btn" 
+                                            style="background: #2c2e3e; color: white; font-weight: bold;" 
+                                            onclick="initializeServiceDescriptions('description-{{ service }}', 
+                                                '{{ details.description|escapejs }}')">Show Description
+                                            </button>
+                                        </div>
+                                        <ul>
+                                            {% if details.subservices %}
+                                                {% for subservice in details.subservices %}
+                                                    {% for subservice_name, options in subservice.items %}
+                                                        <li>
+                                                            <strong>{{ subservice_name }}</strong>
+                                                            <ul>
+                                                                {% for option in options %}
+                                                                    <li>{{ option }}</li>
+                                                                {% endfor %}
+                                                            </ul>
+                                                        </li>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            {% else %}
+                                                <li>Sub service selected</li>
+                                            {% endif %}
+                                        </ul>
+                                        <div class="service-description p-3">
+                                            <div id="description-{{ service }}" class="hidden"></div>
+                                        </div>
+                                    </div>
+                                    <hr class="someClass">
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        function initializeServiceDescriptions(elementId, description) {
+            const descriptionElement = document.getElementById(elementId);
+            
+            if (descriptionElement.classList.contains('hidden')) {
+                descriptionElement.classList.remove('hidden');
+                descriptionElement.innerHTML = description; // Corrected `innerHtml` to `innerHTML`
+            } else {
+                descriptionElement.classList.add('hidden');
+                descriptionElement.innerHTML = ''; // Clear description when hiding
+            }
+        }
+    </script>
+</div>
+{% endblock %}

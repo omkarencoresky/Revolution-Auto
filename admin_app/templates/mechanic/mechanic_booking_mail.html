@@ -1,0 +1,38 @@
+<div style="font-size: medium;" name="mail_content">
+    <!-- <div style="width: 100%;">
+        <img src="/admin_app/static/img/logo-dark.png" alt="">
+    </div> -->
+    <p>Dear <strong>{{ mechanic.first_name }}</strong>,</p>
+
+    <p>We are pleased to inform you that you have been assigned to the next scheduled service. Please find the details below:</p>
+
+    <p><strong>User Information:</strong></p>
+    <p>Name: <strong>{{ quote_object.user.first_name }}</strong></p>
+    <p>Phone Number: <strong>{{ quote_object.user.phone_no }}</strong></p>
+    <p>Email: <strong>{{ quote_object.user.email }}</strong></p>
+
+    <p><strong>Car Information:</strong></p>
+    <p>Car Brand: <strong>{{ quote_object.car_brand.brand }}</strong></p>
+    <p>Car Model: <strong>{{ quote_object.car_model.model_name }}</strong></p>
+    <p>Car Year: <strong>{{ quote_object.car_year.year }}</strong></p>
+    <p>Car Trim: <strong>{{ quote_object.car_trim.car_trim_name }}</strong></p>
+
+    <p><strong>Service Information:</strong></p>
+    <p>Service Category: <strong>{{ quote_object.car_service_category.service_category_name }}</strong></p>
+    <p>Service Type: <strong>{{ quote_object.car_service_type.service_type_name }}</strong></p>
+    
+
+    <p><strong>Service Date and Time:</strong></p>
+    <p>Date: <strong>{{ quote_object.schedule_at }}</strong></p>
+    <p>Time: <strong>{{ quote_object.schedule_time_slot }}</strong></p>
+
+    <p><strong>Location:</strong></p>
+    <p>{{ quote_object.service_location.location_name }}</p>
+
+    <p>Please ensure that you arrive on time and prepare for the required service. If you have any questions, feel free to contact us at 'omkar.parmar@encoresky.com'.</p>
+    <p>Looking forward to your excellent work.</p>
+
+
+    <p>Thanks & Regards</p>
+    <p>Revolution Auto</p>
+</div>

@@ -13,6 +13,7 @@
     <meta name="author" content="Revolution Auto" />
     <link rel="shortcut icon" href="{% static 'img/carousel-1.png' %}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Google fonts -->
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
@@ -37,10 +38,7 @@
 
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/12.0.0/classic/ckeditor.js"></script>
-     
-
-
-
+        
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -93,7 +91,7 @@
                         <!-- Layouts -->
                         <!-- <li class="sidenav-header small font-weight-semibold">UI Components</li> -->
                         <li class="sidenav-item">
-                            <a href="typography.html" class="sidenav-link">
+                            <a href="{% url 'booking_data_handler' %}" class="sidenav-link">
                                 <i class="sidenav-icon fa fa-calendar-check"></i>
                                 <div>Service Bookings</div>
                             </a>
@@ -191,10 +189,18 @@
                                 {% endif %}
                             </ul>
                         </li>
+
                         <li class="sidenav-item">
-                            <a href="tables_bootstrap.html" class="sidenav-link">
+                            <a href="{% url 'service_payment_handler' %}" class="sidenav-link">
                                 <i class="sidenav-icon fa fa-credit-card"></i>
                                 <div>Billings and Payments</div>
+                            </a>
+                        </li>
+
+                        <li class="sidenav-item">
+                            <a href="{% url 'combo_data_handler' %}" class="sidenav-link">
+                                <i class="sidenav-icon fa fa-shopping-bag"></i>
+                                <div>Combo Management</div>
                             </a>
                         </li>
 
@@ -315,7 +321,7 @@
                                 <div class="demo-navbar-user nav-item dropdown" onclick="hideShowDropdown(event, 'profileLayer', 'profileitem')">
                                     <a class="nav-link dropdown-toggle" href="#">
                                         <span class="d-inline-flex flex-lg-row-reverse align-items-center align-middle">
-                                            <img src="{{user.profile_image}}" alt class="d-block ui-w-30 rounded-circle">
+                                            <!-- <img src="{{user.profile_image}}" alt class="d-block ui-w-30 rounded-circle"> -->
                                             <span class="px-1 mr-lg-2 ml-2 ml-lg-0">{{user.first_name}}</span>
                                         </span>
                                     </a>
