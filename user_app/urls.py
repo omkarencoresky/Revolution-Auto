@@ -75,4 +75,6 @@ urlpatterns = [
     path('payment/cancel/', user_views.payment_cancel, name='payment_cancel'),
     path('payments/', user_views.user_payment, name='user_payment'),
 
+    path('combos/', user_views.user_combo, name='user_combo'),
+
 ]

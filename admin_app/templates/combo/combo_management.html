@@ -11,11 +11,11 @@
     });
 </script>
 <div class="container-fluid flex-grow-1 container-p-y">
-    <h4 class="font-weight-bold py-3 mb-0">COMBO MANAGEMENTS</h4>
+    <h4 class="font-weight-bold py-3 mb-0">COMBO MANAGEMENT</h4>
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{curl}}dashboard/"><i class="feather icon-home"></i></a></li>
-            <li class="breadcrumb-item"> <a href="{% url 'location_data_handler' %}">COMBOS</a></li>
+            <li class="breadcrumb-item"> <a href="{% url 'combo_data_handler' %}">COMBOS</a></li>
         </ol>
         <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
             onclick="addopenModal('addForm')">Add Combo</button>
@@ -36,12 +36,12 @@
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
             <div class="modal-body">
-                <form action="{% url 'location_data_handler' %}" method="post">
+                <form method="post">
                     {% csrf_token %}
                     <div class="form-group d-flex">
                         <label class="control-label col-sm-3 m-0" style="max-width: 14%; padding: 5px 0px;" for="combo_name">Combo Name :-  </label>
-                        <input class="form-control m-0 p-0" style="width: 80%;" name="combo_name" placeholder="Combo Name">
-                        <span id="combo_name"></span>
+                        <input class="form-control m-0 p-0" style="width: 80%;" id="combo_name" name="combo_name" placeholder="Combo Name">
+                        <span></span>
                     </div>
     
                     <div class="form-group description">
@@ -68,7 +68,7 @@
                     </div>
     
                     <div class="d-flex justify-content-start">
-                        <div class="" style="width: 94.2%;">
+                        <div class="" style="width: 94.2%; background-color: aliceblue; padding: 10px 1px 10px 0px;">
                             <div id="service_selection">
                                 <div class="d-flex justify-content-between">
                                     <label class="m-0">Selected Services</label>
@@ -80,12 +80,36 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-group d-flex">
+                        <label class="control-label col-sm-3 m-0" style="max-width: 17%; padding: 5px 0px;" for="combo_name">All service Price :-  </label>
+                        <input class="form-control m-0 p-0" style="width: 77%;" id="price" name="price" placeholder="Total service Price">
+                        <span></span>
+                    </div>
+
+                    <div class="form-group d-flex">
+                        <label class="control-label col-sm-3 m-0" style="max-width: 16%; padding: 5px 0px;" for="combo_name">Discount Price :-  </label>
+                        <input class="form-control m-0 p-0" style="width: 78%;" id="discount_price" name="discount_price" placeholder="Combo Price">
+                        <span></span>
+                    </div>
+
+                    <div class="form-group d-flex justify-content-between">
+                        <div class="form-group d-flex" style="width: 48%;">
+                            <label class="control-label col-sm-3 m-0" style="max-width: 25%; padding: 5px 0px;" for="combo_name">Start Date :-  </label>
+                            <input type="date" class="form-control m-0 p-0" style="width: 63%;" id="start_date" name="start_date" placeholder="Start Date">
+                        </div>
+
+                        <div class="form-group d-flex" style="width: 48%;">
+                            <label class="control-label col-sm-3 m-0" style="max-width: 25%; padding: 5px 0px;" for="combo_name">End Date :-  </label>
+                            <input type="date" class="form-control m-0 p-0" style="width: 63%;" id="end_date" name="end_date" placeholder="End Date">
+                        </div>
+                    </div>
     
                     <div class="modal-footer">
                         <div class="row w-100">
                             <div class="w-100 modal_btn d-flex justify-content-around" id="button-container">
                                 <button type="button" class="btn btn-danger" style="background-color: #D81324;" data-dismiss="modal" onclick="closeModal()">Close</button>
-                                <button type="submit" class="btn btn-dark">Submit</button>
+                                <button type="button" class="btn btn-dark" onclick="updateLocalStorage()">Submit</button>
                                 <button type="button" class="btn btn-dark" onclick="resetSelection()">Reset Selection</button>
                             </div>
                             <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner" style="display: none;">
@@ -102,50 +126,35 @@
             <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
 
                 <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
-                    <marquee behavior="scroll" direction="left">
-                        <caption class="caption-top fs-4 text-dark mb-2">All Available Locations</caption>
-                    </marquee>
+                    <caption class="caption-top fs-4 text-dark mb-2">All Available Locations</caption>
+
                     <thead class="table-light">
                         <tr>
                             <th scope="col">SR.No</th>
-                            <th scope="col">locations Name</th>
-                            <th scope="col">Country Code</th>
-                            <th scope="col">Service Availability</th>
-                            <th scope="col">Store Status</th>
-                            <th scope="col">Action</th>
+                            <th scope="col">Combo Name</th>
+                            <th scope="col">Without Offer Price</th>
+                            <th scope="col">Offer Price</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
+                            <!-- <th scope="col">Action</th> -->
                         </tr>
                     </thead>
+
                     <tbody hx-target="body" hx-swap="outerHTML swap:1s">
-                        {% for location in page_obj %}
+                        {% for combo in page_obj %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ location.location_name }}</td>
-                            <td>{{ location.country_code }}</td>
-
-                            {% if location.service_availability %}
-                            <td>Yes</td>
-                            {% else %}
-                            <td>No</td>
-                            {% endif %}
-
-                            {% if location.status == 1 %}
-                            <td>Active</td>
-                            {% else %}
-                            <td>In-active</td>
-                            {% endif %}
-
-                            <td>
-                                <button class="btn" hx-delete="{% url 'location_action_handler' location.id %}"
-                                    hx-confirm="Are you sure you want to delete this brand?">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                                <button class="btn" onclick="updatelocation('updateForm', '{{ location.id }}', 
-                                '{{ location.location_name }}', '{{ location.country_code }}', 
-                                '{{ location.status }}', '{{ location.service_availability }}')">
+                            <td>{{ combo.name }}</td>
+                            <td>{{ combo.price }}</td>
+                            <td>{{ combo.discount_price }}</td>
+                            <td>{{ combo.start_date }}</td>
+                            <td>{{ combo.end_date }}</td>
+                            <!-- <td>
+                                <button style="border: none; font-size: small; padding: 0px 9px;" 
+                                    onclick="updateStatusModal('updateStatusForm', '{{ combo.id }}', '{{ combo.status }}')">
                                     <i class="fa fa-edit"></i>
                                 </button>
-                            </td>
-
+                            </td> -->
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -175,4 +184,7 @@
     </div>
 </div>
 </div>
+<script>
+    
+</script>
 {% endblock %}

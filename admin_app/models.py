@@ -248,7 +248,7 @@ class UserReferral(models.Model):
 
 
     
-class ServiceCombo(models.Model):
+class ComboDetails(models.Model):
     
     id=models.AutoField(primary_key=True)
     name = models.CharField(max_length=100)
@@ -258,3 +258,33 @@ class ServiceCombo(models.Model):
     discount_price = models.CharField(max_length=20, default=0)
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'combo_details'
+
+
+class  ComboServiceDetails(models.Model):
+    
+    id=models.AutoField(primary_key=True)
+    combo = models.ForeignKey(ComboDetails, on_delete=models.CASCADE, related_name="combo_id")
+    service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name="combo_service_Type_id")
+    service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name="combo_service_category_id")
+    service = models.ForeignKey(Services, on_delete=models.CASCADE, related_name="combo_service_id")
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'combo_service_details'
+
+
+class  ComboSubServiceDetails(models.Model):
+    
+    id=models.AutoField(primary_key=True)
+    combo_service_id = models.ForeignKey(ComboServiceDetails, on_delete=models.CASCADE, related_name="service_detail_id")
+    sub_service_id = models.ForeignKey(SubService, on_delete=models.CASCADE, related_name="sub_service_id", blank=True, null=True)
+    sub_service_option_id = models.CharField(max_length=50, blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'combo_sub_service_details'

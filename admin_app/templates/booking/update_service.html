@@ -160,7 +160,6 @@
                     });
                     
                     target_element.innerHTML = options;
-                    console.log('selectedServices', selectedServices);
                     
                     // // If we have selected services, set the category
                     // const existingServices = Object.values(selectedServices);
@@ -274,7 +273,6 @@
         }
 
         function initializeSelectedOptions(serviceId) {
-            console.log('selectedServices', selectedServices);
             if (selectedServices[serviceId]) {
                 selectedServices[serviceId].sub_services.forEach(subService => {
                     subService.sub_service_options.forEach(option => {
@@ -348,7 +346,6 @@
                 const subServiceId = container.dataset.subServiceId;
                 const subServiceTitle = container.dataset.subServiceTitle;
                 const selectedInputs = container.querySelectorAll('input:checked');
-                console.log('selectedInputs', selectedInputs);
                 
 
                 // Create sub-service object even if no options are selected

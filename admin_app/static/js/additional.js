@@ -1339,7 +1339,6 @@ function handleOptionSelection(input, selectionType) {
         allRadios.forEach(radio => {
             
             if (radio !== input) {
-                console.log('radio', radio);    
                 radio.checked = false;
                 radio.classList.remove('sub_service_checked');
                 radio.closest('.option-item').classList.remove('sub_service_parent');
@@ -1707,7 +1706,6 @@ function selectedCredential() {
         car_service_category: result.serviceType.serviceCategory.id,
         car_services: result.serviceType.serviceCategory.services,
     };
-    console.log('selections', selections);
     
     localStorage.setItem('selections', JSON.stringify(selections));
 }
@@ -1716,10 +1714,8 @@ function selectedCredential() {
 // Booking from saved cars parse Credential in backend
 
 function selectedBookingCredential(car_id, brand, model, year, trim, car_vno) {
-    console.log('');
     
     try {
-
         const locationElement = document.getElementById('location');
 
         const selections = {
@@ -1756,7 +1752,6 @@ function selectedBookingCredential(car_id, brand, model, year, trim, car_vno) {
             return response.json();
         })
         .then((data) => {
-           console.log('data', data);
             const hideContent = document.getElementById('main_container');
             const newContent = `
                 <div class="text-center" style="margin-top:5%">
@@ -1774,7 +1769,6 @@ function selectedBookingCredential(car_id, brand, model, year, trim, car_vno) {
         })
         .catch(error => {
             messageElement = document.getElementById('final_error')
-            console.log('Error:', messageElement);
             messageElement.parentNode.classList.remove('hidden')
             messageElement.innerHTML = error
         });
@@ -1852,12 +1846,10 @@ function submitStoredForm(user) {
         .then(data => {
             if (data.status === 'error') {
                 // Display error messages to the user
-                console.log('Error:', data.message);
                 messageElement = document.getElementById('final_error')
                 messageElement.parentNode.classList.remove('hidden')
                 messageElement.innerHTML = data.message
             } else {
-                console.log('Success:', data);
                 messageElement = document.getElementById('final_error')
                 messageElement.parentNode.classList.remove('hidden')
                 messageElement.innerHTML = data.message
@@ -2056,7 +2048,6 @@ function selectSlot(selectedSlot) {
 function selectPaymentMethod(event) {
     event.preventDefault();
     let selectedSlot = event.target;
-    console.log("selectedSlot", selectedSlot);
     
     const timeSlotSelected = document.querySelector('input[name="schedule_time_slot"]:checked');
     
@@ -2081,7 +2072,6 @@ function submitForm(event) {
 
     // Ensure that payment method is selected
     const paymentSelected = document.querySelector('input[name="payment_mode"]:checked');
-    console.log('paymentSelected', paymentSelected);
     
     if (!paymentSelected) {
         isValid = false;
@@ -2207,8 +2197,7 @@ function assignMechanic(formId, id, scheduleDate, user){
             }
             return response.json(); 
         })
-        .then(data => {
-            console.log(data);        
+        .then(data => {      
             const mechanicSelect = document.getElementById('mechanic-selction');
         
             // Clear previous options (optional, if you want to reset the list)
@@ -2547,14 +2536,11 @@ function addToSelected(serviceId, serviceTitle) {
         serviceData.sub_services.push(subServiceData);
     });
     
-    // Add or update the service in selectedServices
-    selectedServices[serviceId] = serviceData;
+    selectedServices[serviceId] = serviceData; // Add or update the service in selectedServices
+    localStorage.setItem('selectedServices', JSON.stringify(selectedServices)); // Save to local storage
+    updateSelectedServicesDisplay(selectedServices); // Update display
+    testItem = localStorage.getItem('selectedServices', JSON.stringify(selectedServices));
     
-    // Save to local storage
-    localStorage.setItem('selectedServices', JSON.stringify(selectedServices));
-    
-    // Update display
-    updateSelectedServicesDisplay(selectedServices);
 
     // Clear current selection
     currentServiceId = null;
@@ -2566,6 +2552,7 @@ function addToSelected(serviceId, serviceTitle) {
 
 // Function to update selected services display
 function updateSelectedServicesDisplay(services) {
+    
     const container = document.getElementById('selected_services_container');
     let html = '';
     
@@ -2598,19 +2585,6 @@ function updateSelectedServicesDisplay(services) {
         html += `</div>`;
     }
     
-    // let resethtml = '';
-    // if (Object.keys(services).length > 0) {
-    //     resethtml = `
-    //         <div class="text-center">
-    //             <button class="btn btn-dark" onclick="resetSelection()">
-    //                 Reset Selection
-    //             </button>
-    //         </div>`;
-    // }
-    // const buttoncontainer = document.getElementById('button-container');
-    // console.log('buttoncontainer', buttoncontainer);
-    
-    // buttoncontainer.innerHTML +=resethtml
     container.innerHTML = html;
 }
 
@@ -2656,27 +2630,27 @@ function resetSelection() {
     currentServiceId = null;
 }
 
-// Initialize page with stored services on load
-document.addEventListener('DOMContentLoaded', () => {
-    selectedServices = JSON.parse(localStorage.getItem('selectedServices')) || {};
-    
-    if (Object.keys(selectedServices).length > 0) {
-        updateSelectedServicesDisplay(selectedServices);
-    }
-});
 
 function updateLocalStorage() {
 try {
-    const booking_id = document.getElementById('booking_id').value;
     const csrftoken = getCookie('csrftoken');
+    comboName = document.getElementById('combo_name').value
+    price = document.getElementById('price').value
+    discountPrice = document.getElementById('discount_price').value
+    start_date = document.getElementById('start_date').value
+    end_date = document.getElementById('end_date').value
     
     // Format the data for the backend
     const backendData = {
         services: Object.values(selectedServices)
     };
+    backendData["price"] = price
+    backendData["end_date"] = end_date
+    backendData["comboName"] = comboName
+    backendData["start_date"] = start_date
+    backendData["discountPrice"] = discountPrice
     
-
-    fetch(`/admin/service-update/${booking_id}/`, {
+    fetch(`/admin/combo-management/`, {
         method: 'POST',
         headers: {
             'X-CSRFToken': csrftoken,

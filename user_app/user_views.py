@@ -29,7 +29,7 @@ from user_app.forms import AddCarRecord, UserReferralForm
 from user_app.models import CustomUser, UserCarRecord, Service_payment
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_update_profile_details_schema
-from user_app.utils.utils import User_Car_Record_pagination, User_booking_pagination, User_payments_pagination
+from user_app.utils.utils import User_Car_Record_pagination, User_booking_pagination, User_payments_pagination, Combos_pagination
 
 
 curl = settings.CURRENT_URL+'/'
@@ -76,7 +76,8 @@ def user_dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     except Exception as e:
         messages.error(request, f"{e}")
         return redirect("user_dashboard")
-    
+
+
 @login_required
 def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     """
@@ -851,7 +852,6 @@ def payment_cancel(request):
     return redirect('user_booking_data_handler')
 
 
-
 def user_payment(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     try:
         if request.method == 'GET':
@@ -877,6 +877,23 @@ def user_payment(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 
     except Exception as e:
         # messages.error(request,f'{e}')
+        return redirect('user_dashboard')
+
+
+
+def user_combo(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    try:
+        if request.method == 'GET':
+            combos = Combos_pagination(request)
+
+            context = {
+                'page_obj': combos,
+                'curl': curl,
+            }
+            return render(request, 'user/combo.html', context)
+        
+    except Exception as e:
+        print(e)
         return redirect('user_dashboard')
 
 
