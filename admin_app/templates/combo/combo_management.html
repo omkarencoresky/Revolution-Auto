@@ -4,6 +4,12 @@
 
 {% block title %}Combo Management | Revolution Auto{% endblock %}
 {% block content %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        localStorage.clear(); // Clears all localStorage items
+        console.log('localStorage cleared on page reload');
+    });
+</script>
 <div class="container-fluid flex-grow-1 container-p-y">
     <h4 class="font-weight-bold py-3 mb-0">COMBO MANAGEMENTS</h4>
     <div class="d-flex justify-content-between">
@@ -12,7 +18,7 @@
             <li class="breadcrumb-item"> <a href="{% url 'location_data_handler' %}">COMBOS</a></li>
         </ol>
         <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-            onclick="addopenModal('addForm')">Add COMBO</button>
+            onclick="addopenModal('addForm')">Add Combo</button>
     </div>
     <div>
         {% if messages %}
@@ -24,57 +30,71 @@
         {% endif %}
     </div>
     <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
-        <div class="modal-content">
+        <div class="modal-content form-scroll" >
             <div class="modal-header">
-                <h4 class="modal-title">Add COMBO</h4>
+                <h4 class="modal-title">Add Combo</h4>
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
             <div class="modal-body">
                 <form action="{% url 'location_data_handler' %}" method="post">
                     {% csrf_token %}
-                    <div class="form-group brand">
-                        <label class="control-label col-sm-3" for="Location Name">Combo Name:</label>
-                        <div class="col-sm-6 mw-100">
-                            <input class="form-control" name="location_name" placeholder="Location Name">
-                            <span id="location_name1"></span>
-                        </div>
+                    <div class="form-group d-flex">
+                        <label class="control-label col-sm-3 m-0" style="max-width: 14%; padding: 5px 0px;" for="combo_name">Combo Name :-  </label>
+                        <input class="form-control m-0 p-0" style="width: 80%;" name="combo_name" placeholder="Combo Name">
+                        <span id="combo_name"></span>
                     </div>
-
+    
                     <div class="form-group description">
-                        <label class="control-label col-sm-3" for="Country code">Country code :</label>
-                        <div class="col-sm-6 mw-100">
-                            <input class="form-control" name="country_code" placeholder="Country code">
-                            <span id="country_code1"></span>
+                        <label for="service_type">Service Type :- </label>
+                        <select onchange="getServiceCategory('service_type', 'service_category')" type="text" name="service_type" id="service_type" class="border-0" style="width: 81%; padding: 6px 0px;">
+                            <option value="">Select Service type here</option>
+                            {% for item in service_type %}
+                                <option value="{{item.id}}">{{item.service_type_name}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+    
+                    <div class="form-group">
+                        <label for="service_category">Service Category:- </label>
+                        <select onchange="getService('service_category', 'service', 'service_selection')" type="text" name="service_category" id="service_category" class="border-0" style="width: 78%; padding: 6px 0px;">
+                        </select>
+                    </div>
+    
+                    <div class="w-100 d-flex py-3" style="justify-content: start; gap: 4%;">
+                        <div id="service" class="border-0" style="width: 45%; padding: 6px 0px;">
+                        </div>
+                        <div style="width: 45%;" id="subServiceOption">
                         </div>
                     </div>
-
-                    <div class="form-group description">
-                        <label class="control-label col-sm-3" for="Service Availability">Service Availability :</label>
-                        <div class="col-sm-6 mw-100">
-                            <select name="service_availability" id="service_availability2" class="form-control">
-                                service availability
-                                <option value="True" selected>Yes</option>
-                                <option value="False">No</option>
-                            </select>
-                            <span id="service_availability3"></span>
+    
+                    <div class="d-flex justify-content-start">
+                        <div class="" style="width: 94.2%;">
+                            <div id="service_selection">
+                                <div class="d-flex justify-content-between">
+                                    <label class="m-0">Selected Services</label>
+                                    <label class="m-0">Action</label>
+                                </div>
+                                <hr class="someClass m-0">
+                                <div id="selected_services_container">
+                                </div>
+                            </div>
                         </div>
                     </div>
+    
                     <div class="modal-footer">
                         <div class="row w-100">
-                            <div class="w-100 modal_btn d-flex justify-content-around">
-                                <button type="button" class="btn btn-danger" data-dismiss="modal"
-                                    onclick="closeModal()">Close</button>
+                            <div class="w-100 modal_btn d-flex justify-content-around" id="button-container">
+                                <button type="button" class="btn btn-danger" style="background-color: #D81324;" data-dismiss="modal" onclick="closeModal()">Close</button>
                                 <button type="submit" class="btn btn-dark">Submit</button>
+                                <button type="button" class="btn btn-dark" onclick="resetSelection()">Reset Selection</button>
                             </div>
-                            <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
-                                style="display: none;">
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner" style="display: none;">
                         </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-</div>
 <div class="row">
     <div class="col-md-12">
         <div class="card d-flex w-100 mb-4">
@@ -130,91 +150,7 @@
                         {% endfor %}
                     </tbody>
                 </table>
-
-                <div id="updateForm" class="modal-form" onclick="closeModalIfOutside(event, 'updateForm')">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h4 class="modal-title">Update Service Category</h4>
-                            <button type="button" class="close" onclick="closeModal('updateForm')">×</button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="modal-body">
-                                <form class="update-form" method="post">
-                                    {% csrf_token %}
-                                    <div class="form-group location_name">
-                                        <label class="control-label col-sm-3" for="location_name">Location Name:</label>
-                                        <div class="col-sm-6 mw-100">
-                                            <input type="text" class="form-control" id="location_name" name="location_name"
-                                                value="{{location.location_name}}" value="">
-                                            <span id="location_name2"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group country_code">
-                                        <label class="control-label col-sm-3" for="country_code">Country Code :</label>
-                                        <div class="col-sm-6 mw-100">
-                                            <input class="form-control" id="country_code" name="country_code"
-                                                value="{{location.country_code}}">
-                                            <span id="country_code2"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group service_availability">
-                                        <label class="control-label col-sm-3" for="service_availability">Service
-                                            Availability :</label>
-                                        <div class="col-sm-6 mw-100">
-                                            <select class="form-control" id="service_availability" name="service_availability">
-                                                <option value="{{location.service_availability}}">
-                                                    {% if location.service_availability %}
-                                                    Yes
-                                                    {% else %}
-                                                    No
-                                                    {% endif %}
-                                                </option>
-                                                <option value="True">Yes</option>
-                                                <option value="False">No</option>
-                                            </select>
-                                            <span id="service_availability1"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-group Status">
-                                        <label class="control-label col-sm-3" for="status">Status :</label>
-                                        <div class="col-sm-6 mw-100">
-                                            <select class="form-control" id="exampleSelect" name="status">
-                                                <option value="" disabled>Select status</option>
-                                                    {% if location.status == 1 %}
-                                                    Active
-                                                    {% elif location.status == 2 %}
-                                                    In-active
-                                                    {% endif %}
-                                                </option>
-                                                <option value="1">Active</option>
-                                                <option value="0">In-active</option>
-                                            </select>
-                                            <span id="Status"></span>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <div class="row w-100">
-                                            <div class="w-100 modal_btn d-flex justify-content-around">
-                                                <button type="button" class="btn btn-danger" data-dismiss="modal"
-                                                    onclick="closeModal('updateForm')">Close</button>
-                                                <button type="submit" class="btn btn-dark">Submit</button>
-                                            </div>
-                                            <img src="http://unclefitter.encoreskydev.com/images/spin.webp"
-                                                class="spinner" style="display: none;">
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-
+                
                 <!-- Pagination Controls -->
                 <div class="pagination">
                     <span class="step-links">

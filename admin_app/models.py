@@ -245,3 +245,16 @@ class UserReferral(models.Model):
 
     class Meta:
         db_table = 'user_referral'
+
+
+    
+class ServiceCombo(models.Model):
+    
+    id=models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    price = models.CharField(max_length=20, default=0)
+    discount_price = models.CharField(max_length=20, default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)

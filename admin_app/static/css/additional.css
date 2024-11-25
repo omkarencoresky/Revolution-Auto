@@ -962,19 +962,20 @@ hr.someClass {
 }
 
 .remove-button {
-    background-color: #dc3545;
+    background-color: #D81324;
     color: white;
 }
 
 .remove-button:hover {
-    background-color: #c82333;
+    background-color: #D81324;
 }
 
 .selected-service {
-    background-color: #f8f9fa;
+    background-color: #eceef0;
     border-radius: 6px;
     padding: 12px;
-    margin-bottom: 10px;
+    margin: 10px;
+	border: 1px solid rgb(242 223 223)	;
 }
 
 .selected-options {
@@ -1066,3 +1067,11 @@ hr.someClass {
 	font-weight: bold;
   }
 
+
+.form-scroll{
+	max-width: 850px !important;
+	min-height: 400px !important;
+	max-height: 1000px !important;
+	overflow: scroll !important;
+	scroll-behavior: smooth !important;
+}

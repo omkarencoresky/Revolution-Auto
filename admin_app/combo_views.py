@@ -2,8 +2,8 @@ import json
 import schemas
 import hashlib
 import fastjsonschema
-from .models import Location
 import schemas.location_schema
+from .models import ServiceType
 from django.conf import settings
 from .forms import AddLocationForm
 from django.contrib import messages
@@ -11,9 +11,7 @@ from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
 from django.http import HttpResponse, HttpRequest
 from django.core.exceptions import ObjectDoesNotExist
-from admin_app.utils.utils import locations_pagination
 from django.contrib.auth.decorators import login_required
-from schemas.location_schema import validate_location_schema
 
 curl = settings.CURRENT_URL
 admin_curl = f"{curl}/admin/"
@@ -30,13 +28,18 @@ def combo_data_handler(request: HttpRequest) -> HttpResponse:
     """
     try:
         if request.method == 'GET':
+            service_type = ServiceType.objects.all()
             context = {
                 'curl': curl,
+                'service_type': service_type,
             }
             return render(request, 'combo/combo_management.html', context)
+        
+        elif request.method == 'POST':
+            pass
     
     except ObjectDoesNotExist:
-        messages.error(request, f'Object not fountd, Try again')
+        messages.error(request, f'Object not found, Try again')
         return redirect('location_data_handler') 
     
     except TemplateDoesNotExist:

@@ -437,49 +437,49 @@
         }
 
         function updateLocalStorage() {
-        try {
-            const booking_id = document.getElementById('booking_id').value;
-            const csrftoken = getCookie('csrftoken');
-            
-            // Format the data for the backend
-            const backendData = {
-                services: Object.values(selectedServices)
-            };
-            
+            try {
+                const booking_id = document.getElementById('booking_id').value;
+                const csrftoken = getCookie('csrftoken');
+                
+                // Format the data for the backend
+                const backendData = {
+                    services: Object.values(selectedServices)
+                };
+                
 
-            fetch(`/admin/service-update/${booking_id}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(backendData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        console.error(`Network response was not ok: ${text}`);
-                        throw new Error(`Network response was not ok: ${text}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.status === 'success') {
-                    alert(data.message);
-                } else {
-                    alert(data.message || 'Update failed');
-                }
-            })
-            .catch(error => {
-                console.log('Error:', error);
-                // alert(`Failed to update services. Please try again.`);   
-            });
-        } catch (error) {
-            console.error('Error:', error);
-            alert('An unexpected error occurred');
+                fetch(`/admin/service-update/${booking_id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(backendData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            console.error(`Network response was not ok: ${text}`);
+                            throw new Error(`Network response was not ok: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert(data.message);
+                    } else {
+                        alert(data.message || 'Update failed');
+                    }
+                })
+                .catch(error => {
+                    console.log('Error:', error);
+                    // alert(`Failed to update services. Please try again.`);   
+                });
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An unexpected error occurred');
+            }
         }
-    }
 
 
         function getCookie(name) {
