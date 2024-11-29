@@ -33,7 +33,7 @@ function toggleMenu(menuId) {
 // For show the add form
 
 function addopenModal(formId) {
-    const modal = document.getElementById(formId);
+    const modal = document.getElementById(formId);    
     modal.style.display = 'flex';
 }
 
@@ -936,7 +936,7 @@ document.getElementById('location').addEventListener('change', function() {
 });
 
 // Brand Selection
-function addBrandId(event) {
+function addBrandId(event, is_combo) {
     const target = event.target;
     const year_selection = document.getElementById('year_selection');
     const model_selection = document.getElementById('model_selection');
@@ -961,11 +961,11 @@ function addBrandId(event) {
 
     // Show year selection and fetch options
     year_selection.classList.remove('hidden');
-    onBrandChange(target);
+    onBrandChange(target, is_combo);
 }
 
 // Year Selection
-function onBrandChange(target) {
+function onBrandChange(target, is_combo) {
     const brandId = target.value;
     const yearSelection = document.getElementById('year_selection');
 
@@ -980,7 +980,7 @@ function onBrandChange(target) {
                     data.forEach(item => {
                         yearSelection.innerHTML += `
                             <label class="car-options">
-                                <input type="radio" name="year" value="${item.id}" onchange="addYearId(event, ${brandId})">
+                                <input type="radio" name="year" value="${item.id}" onchange="addYearId(event, ${brandId}, ${is_combo})">
                                 <div class="custom-radio">${item.year}</div>
                             </label>
                         `;
@@ -994,7 +994,7 @@ function onBrandChange(target) {
 }
 
 // Model Selection
-function addYearId(event, car_id) {
+function addYearId(event, car_id, is_combo) {
     const target = event.target;
     const model_selection = document.getElementById('model_selection');
     const trim_selection = document.getElementById('trim_selection');
@@ -1012,10 +1012,10 @@ function addYearId(event, car_id) {
     // nextStepButton.classList.add('hidden');
 
     model_selection.classList.remove('hidden');
-    onYearChange(target, car_id);
+    onYearChange(target, car_id, is_combo);
 }
 
-function onYearChange(year, car_id) {
+function onYearChange(year, car_id, is_combo) {
     const yearId = year.value;
     const modelSelection = document.getElementById('model_selection');
 
@@ -1030,7 +1030,7 @@ function onYearChange(year, car_id) {
                     data.forEach(item => {
                         modelSelection.innerHTML += `
                             <label class="car-options">
-                                <input type="radio" name="model" value="${item.id}" onchange="addModelId(event, ${yearId}, ${car_id})">
+                                <input type="radio" name="model" value="${item.id}" onchange="addModelId(event, ${yearId}, ${car_id}, ${is_combo})">
                                 <div class="custom-radio">${item.model_name}</div>
                             </label>
                         `;
@@ -1044,7 +1044,7 @@ function onYearChange(year, car_id) {
 }
 
 // Trim Selection
-function addModelId(event, year_id, car_id) {
+function addModelId(event, year_id, car_id, is_combo) {
     const target = event.target;
     const trim_selection = document.getElementById('trim_selection');
     // const nextStepButton = document.getElementById('nextStepButtonForService');
@@ -1063,10 +1063,10 @@ function addModelId(event, year_id, car_id) {
 
     // Show trim selection and fetch options
     trim_selection.classList.remove('hidden');
-    onModelChange(target, car_id, year_id);
+    onModelChange(target, car_id, year_id, is_combo);
 }
 
-function onModelChange(model, car_id, year_id) {
+function onModelChange(model, car_id, year_id, is_combo) {
     const modelId = model.value;
     const trimSelection = document.getElementById('trim_selection');
 
@@ -1081,13 +1081,13 @@ function onModelChange(model, car_id, year_id) {
                     data.forEach(item => {
                         trimSelection.innerHTML += `
                             <label class="car-options">
-                                <input type="radio" name="trim" value="${item.id}" onchange="showNextStep('nextStepButtonForService')">
+                                <input type="radio" name="trim" value="${item.id}" onchange="showNextStep('nextStepButtonForService', ${is_combo})">
                                 <div class="custom-radio">${item.car_trim_name}</div>
                             </label>
                         `;
                     });
                     trimSelection.innerHTML += `<div style="padding: 30px 10px; text-align: end; width: 100%;">
-                        <button type="button" class="hidden" id="nextStepButtonForService">GO FOR STEP 2 <i class="fas fa-arrow-right"></i></button>
+                        <button type="button" class="hidden" id="nextStepButtonForService">Submit <i class="fas fa-arrow-right"></i></button>
                     </div>`
                 } else {
                     trimSelection.innerHTML = '<label class="summary-heading">No trim options available</label>';
@@ -1098,14 +1098,16 @@ function onModelChange(model, car_id, year_id) {
 }
 
 // Next Step Button
-function showNextStep(id) {
+function showNextStep(id, is_combo) {
     const nextStepButton = document.getElementById(id);
     nextStepButton.classList.remove('hidden');
 
     // Add click handler for next step button
-    document.getElementById(id).addEventListener('click', function() {
-        id==='nextStepButtonForFinal' ? displayFinalSummary() :  displaySelectionSummary();  
-    });    
+    if (!is_combo){
+        document.getElementById(id).addEventListener('click', function() {
+            id==='nextStepButtonForFinal' ? displayFinalSummary() :  displaySelectionSummary();  
+        });    
+    }
 }
 
 
@@ -2592,11 +2594,7 @@ function updateSelectedServicesDisplay(services) {
 function removeFromSelected(serviceId) {
     // Retrieve existing selected services from local storage
     selectedServices = JSON.parse(localStorage.getItem('selectedServices')) || {};
-    
-    // Remove the specific service
     delete selectedServices[serviceId];
-    
-    // Update local storage
     localStorage.setItem('selectedServices', JSON.stringify(selectedServices));
     
     // Update display
@@ -2611,10 +2609,7 @@ function removeFromSelected(serviceId) {
 
 // Function to reset the entire selection
 function resetSelection() {
-    // Clear local storage
     localStorage.removeItem('selectedServices');
-    
-    // Clear global selected services
     selectedServices = {};
     
     // Clear display
@@ -2639,6 +2634,7 @@ try {
     discountPrice = document.getElementById('discount_price').value
     start_date = document.getElementById('start_date').value
     end_date = document.getElementById('end_date').value
+    usage_limit = document.getElementById('usage_limit').value
     
     // Format the data for the backend
     const backendData = {
@@ -2649,6 +2645,7 @@ try {
     backendData["comboName"] = comboName
     backendData["start_date"] = start_date
     backendData["discountPrice"] = discountPrice
+    backendData["usage_limit"] = usage_limit
     
     fetch(`/admin/combo-management/`, {
         method: 'POST',
@@ -2659,6 +2656,8 @@ try {
         body: JSON.stringify(backendData)
     })
     .then(response => {
+        console.log('response', response);
+        
         if (!response.ok) {
             return response.text().then(text => {
                 console.error(`Network response was not ok: ${text}`);
@@ -2666,10 +2665,12 @@ try {
             });
         }
         return response.json();
-    })
+    })  
     .then(data => {
+        console.log('data', data);
         if (data.status === 'success') {
-            alert(data.message);
+            alert(data.messages);
+            redirectToNotification('http://127.0.0.1:8000/admin/combo-management/')
         } else {
             alert(data.message || 'Update failed');
         }
@@ -2683,3 +2684,205 @@ try {
     alert('An unexpected error occurred');
 }
 }
+
+
+function combo_detail(formId, id, is_combo_selection, user_combo_id) {
+    const container = document.getElementById('combo-details-container');
+    container.innerHTML = '';
+
+    
+    fetch(`/combo/operation/${id}`)
+
+        .then(response => response.json())
+        .then(data => {            
+            addopenModal(formId)
+            
+            if (is_combo_selection){
+                renderComboD(data.services, user_combo_id)
+            } else{
+                renderComboDetails(data.services);
+            }
+        })
+        .catch(error => console.error('Error fetching combo details:', error));
+}
+
+
+function renderComboDetails(services) {
+    const container = document.getElementById('combo-details-container');
+    container.innerHTML = '';
+
+    services.forEach(service => {
+        const serviceElement = document.createElement('div');
+        serviceElement.classList.add('combo-item');
+
+        serviceElement.innerHTML = `
+            <h3>${service.service_title}</h3>
+            <p><strong>Service Type:</strong> ${service.service_type_name}</p>
+            <p><strong>Service Category:</strong> ${service.service_category_name}</p>
+            <h4>${service.sub_service_title}</h4>
+            <ul>
+                ${service.sub_service_option_id
+                    .map(option => `<li>${option.title}</li>`)
+                    .join('')}
+            </ul>   
+        `;
+        container.appendChild(serviceElement);
+    });
+}
+
+
+// Used to show the Combo data to user's
+
+function renderComboD(services, user_combo_id) {
+    const container = document.getElementById('combo-details-container');
+    
+    const existingServicesMap = new Map();
+    services.forEach(service => {
+        const serviceKey = `${service.service}-${service.service_type}`;
+
+        if (existingServicesMap.has(serviceKey)) {
+            const existingServiceElement = existingServicesMap.get(serviceKey);
+            
+            const existingOptionsContainer = existingServiceElement.querySelector('.options-container');
+            const optionsHTML = service.sub_service_option_id
+                .map((option, index) => 
+                    `<div data-value="${option.id}" class="option">
+                        ${index + 1}. ${option.title}
+                    </div>`
+                )
+                .join('');
+            
+            existingOptionsContainer.innerHTML += `
+                <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
+                    Sub Service Question:- ${service.sub_service_title}
+                </p>
+                ${optionsHTML}
+            `;
+        } else {
+            const serviceElement = document.createElement('div');
+            serviceElement.classList.add('combo-item');
+            serviceElement.classList.add('clickable-service');
+
+            const optionsHTML = service.sub_service_option_id
+                .map((option, index) => 
+                    `<div data-value="${option.id}" class="option">
+                        ${index + 1}. ${option.title}
+                    </div>`
+                )
+                .join('');
+
+            serviceElement.innerHTML = `
+                <div class="service-header">
+                    <input value="${user_combo_id}" id="combo_id" name="combo_id" hidden>
+                    <h3 id="service" data-value="${service.service}">${service.service_title}</h3>
+                    <p id="service_type" data-value="${service.service_type}" class="my-0">
+                        Service Type:- ${service.service_type_name}
+                    </p>
+                    <p id="service_category" data-value="${service.service_category}" class="my-0">
+                        Service Category:- ${service.service_category_name}
+                    </p>
+                    <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
+                        Sub Service Question:- ${service.sub_service_title}
+                    </p>
+                </div>
+                <div class="options-container">
+                    ${optionsHTML}
+                </div>
+            `;
+
+            serviceElement.addEventListener('click', function() {
+                const isSelected = serviceElement.classList.toggle('selected');
+            });
+
+            container.appendChild(serviceElement);
+            existingServicesMap.set(serviceKey, serviceElement);
+        }
+    });
+}
+
+
+function collectSelectedOptions(test){
+    const testelement= document.getElementById(test)
+    const backendFinalData = [];
+    testelement.childNodes.forEach(el => {
+    const backendData = {};
+        if (el.classList.contains('selected')){
+            const serviceHeader = el.querySelector('.service-header')
+            const optionsContainer = el.querySelector('.options-container')
+            let sub_services = ''
+            console.log('sub_service', document.querySelectorAll('.sub_service'));            
+            document.querySelectorAll('.sub_service').forEach(sub_service => {
+                sub_services += sub_service.getAttribute('data-value') + ','
+                console.log('sub_servicesss', sub_services);
+                
+            })
+            
+            let options = ''
+            optionsContainer.querySelectorAll('.option').forEach(option =>{
+                options += option.getAttribute('data-value') + ','
+            });
+            
+            const service = serviceHeader.querySelector('#service').getAttribute('data-value')
+            const service_type = serviceHeader.querySelector('#service_type').getAttribute('data-value')
+            const service_category = serviceHeader.querySelector('#service_category').getAttribute('data-value')
+            const combo_id = serviceHeader.querySelector('#combo_id').value
+            const location = document.getElementById('service_location').value
+            
+            backendData["service"] = service
+            backendData["service_type"] = service_type
+            backendData["service_category"] = service_category
+            backendData["sub_service"] = sub_services
+            backendData["sub_service_options"] = options
+            backendData["combo_id"] = combo_id
+            backendData["location"] = location
+        }
+        backendFinalData.push(backendData)
+        
+    })
+    
+    let csrftoken = getCookie('csrftoken');
+    fetch(`/combo/booking/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrftoken,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(backendFinalData)
+    })
+    .then(response => {
+        
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error(`Network response was not ok: ${text}`);
+                throw new Error(`Network response was not ok: ${text}`);
+            });
+        }
+        return response.json();
+    })  
+    .then(data => {
+        if (data.status === 'success') {
+            alert(data.messages);
+            redirectToNotification('http://127.0.0.1:8000/admin/combo-management/')
+        } else {
+            alert(data.message || 'Update failed');
+        }
+    })
+    .catch(error => {
+        console.log('Error:', error);
+        // alert(`Failed to update services. Please try again.`);   
+    });
+    
+}
+
+
+
+
+// function combo_car_selection(formId, id){
+//     const modal = document.getElementById(formId);
+
+//     const Form = modal.querySelector('#car_selection')
+//     var url = `http://127.0.0.1:8000/combo/operation/${id}`;
+//     Form.setAttribute('action', url);
+
+//     modal.style.display = 'flex';
+// }

@@ -175,7 +175,7 @@ class SubServiceBasedOption(models.Model):
         db_table = 'sub_service_based_option'
 
 
-class Mechanic_leaves(models.Model):
+class MechanicLeaves(models.Model):
     
     id = models.AutoField(primary_key=True)
     mechanic_id = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='mechanic_id')
@@ -189,7 +189,7 @@ class Mechanic_leaves(models.Model):
 
 
 
-class Service_payment(models.Model):
+class ServicePayment(models.Model):
     
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user')
@@ -203,3 +203,36 @@ class Service_payment(models.Model):
 
     class Meta:
         db_table = 'booking_payment'
+
+
+    
+class UserComboPackage(models.Model):
+    from admin_app.models import ComboDetails
+    
+    id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user_Id')
+    car_id = models.ForeignKey(UserCarRecord, on_delete=models.CASCADE, related_name='car_Id')
+    remaining_combo_usage = models.SmallIntegerField(blank=True, null=True, default=0)
+    combo = models.ForeignKey(ComboDetails, on_delete=models.CASCADE, related_name='combo_Id')
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_combo_package'
+
+    
+class UserComboTracking(models.Model):
+    from admin_app.models import Services, ServiceType, ServiceCategory, SubService
+    
+    id = models.AutoField(primary_key=True)
+    user_combo_id = models.ForeignKey(UserComboPackage, on_delete=models.CASCADE, related_name='user_combo_id', blank=True, null=True)
+    service = models.ForeignKey(Services, on_delete=models.CASCADE, related_name='combo_service')
+    service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name='combo_service_type')
+    service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name='combo_service_category')
+    sub_service = models.CharField(max_length=100, null=True, blank=False)
+    sub_service_option = models.CharField(max_length=100, null=True, blank=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'user_combo_tracking'

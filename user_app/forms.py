@@ -1,6 +1,6 @@
 from django import forms
 from admin_app.models import UserReferral
-from user_app.models import CustomUser, UserCarRecord, BookingAndQuote, SubServiceAndOption, Service_payment
+from user_app.models import CustomUser, UserCarRecord, BookingAndQuote, SubServiceAndOption, ServicePayment
 
 class CustomUserCreationForm(forms.ModelForm):
     """

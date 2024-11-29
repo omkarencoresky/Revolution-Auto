@@ -1,0 +1,185 @@
+{% extends 'user_master.html' %}
+{% load static %}
+{% block title %}User Combo | Revolution Auto{% endblock %}
+{% block content %}
+<div class="container-fluid container-p-y">
+    <h4 class="font-weight-bold py-3 mb-0">MY COMBOS</h4>
+    <div class="d-flex justify-content-between">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'user_dashboard' %}"><i class="feather icon-home"></i> User
+                    Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'location_data_handler' %}">My Combos</a></li>
+        </ol>
+    </div>
+    <div>
+        {% if messages %}
+        <ul class="messages" style="color: rgb(4, 104, 29); padding-left: 0px; margin-bottom: 2px; list-style: none;">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card d-flex w-100 mb-4">
+            <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
+                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100"
+                    style="text-align: center;">
+                    <caption class="caption-top fs-4 text-dark mb-2">All Available Users</caption>
+
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col">SR.No</th>
+                            <th scope="col">Combo Name</th>
+                            <th scope="col">Car Details</th>
+                            <th scope="col">Max Usage Limit</th>
+                            <th scope="col">Remaining Usage Limit</th>
+                            <!--<th scope="col">Request Date</th> -->
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody hx-target="body" hx-swap="outerHTML swap:1s">
+                        {% for combo in page_obj %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ combo.combo.name }}</td>
+                            <td>{{ combo.car_id.car_brand.brand }}, {{ combo.car_id.vin_number }}</td>
+                            <td>{{ combo.combo.usage_limit }}</td>
+                            <td>{{ combo.remaining_combo_usage }}</td>
+                            
+                            <td>
+                                <button class="btn btn-dark car-detail-button" onclick="combo_detail('comboForm', '{{combo.combo.id}}', is_combo_selection=true, '{{combo.id}}')" 
+                                    style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
+                            </td>
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- <div id="viewForm" class="modal-form" onclick="closeModalIfOutside(event, 'viewForm')"> 
+                    <div class="modal-content" style="max-width: 800px; height: 43%; width: 30%;">
+                        <div class="modal-header">
+                            <h4 class="modal-title w-100"
+                                style="text-align: center; font-size: 30px; font-weight: bold;">Car
+                                Detail</h4>
+                            <button type="button" class="close" onclick="closeModal('viewForm')"
+                                style="font-size: 30px; font-weight: bolder;">×</button>
+                        </div>
+                        <div class="modal-body" id="modal-body">
+                            <div class="update-form ">
+                                <div style="text-align: center; margin-bottom: 20px;">
+                                    <img style="height: 100px; width: 200px;" id="image_url" alt="Brand_image">
+                                </div>
+                                <div>
+                                    <div style="font-size: larger; font-weight: 600; border: none;">
+                                        <label for="car_year_detail" style="font-size: larger;">Year : </label>
+                                        <input style="font-weight: 500;" id="car_year_detail" class="border-0"
+                                            disabled></input>
+                                    </div>
+
+                                    <div style="font-size: larger; font-weight: 600; border: none;">
+                                        <label for="car_trim" style="font-size: larger;">Car Trim : </label>
+                                        <input style="font-weight: 500;" id="car_trim_name" class="border-0"
+                                            disabled></input>
+                                    </div>
+                                    <div style="font-size: larger; font-weight: 600; border: none;">
+                                        <label for="car_model" style="font-size: larger;">Car Model : </label>
+                                        <input style="font-weight: 500;" id="car_model_name" class="border-0"
+                                            disabled></input>
+                                    </div>
+                                    <div style="font-size: larger; font-weight: 600; border: none;">
+                                        <label for="car_brand_name" style="font-size: larger;">Brand Name : </label>
+                                        <input style="font-weight: 500;" id="car_brand_name" class="border-0"
+                                            disabled></input>
+                                    </div>
+                                    <div style="font-size: larger; font-weight: 600; border: none;">
+                                        <label for="vin_number" style="font-size: larger;">Vehicle Identification Number
+                                            : </label>
+                                        <input style="font-weight: 500;" id="vin_number" class="border-0"
+                                            disabled></input>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row w-100">
+                                <div class="w-100 modal_btn d-flex justify-content-around mt-3">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                        onclick="closeModal('viewForm')">Close</button>
+                                </div>
+                                <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
+                                    style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                <div id="comboForm" class="modal-form" onclick="closeModalIfOutside(event, 'comboForm')">
+                    <div class="modal-content" style="max-width: 800px; height: auto; max-height: 1000px; ">
+                        <div class="modal-header">
+                            <h4 class="modal-title w-100"
+                                style="text-align: center; font-size: 30px; font-weight: bold;">Update Car
+                                Detail</h4>
+                            <button type="button" class="close" onclick="closeModal('comboForm')"
+                                style="font-size: 30px; font-weight: bolder;">×</button>
+                        </div>
+                        <div class="modal-body" id="modal-body">
+                            <form class="update-form" method="post">
+                                {% csrf_token %}
+
+                                <div class="modal-body my-0 py-0" id="modal-body">
+                                    <div id="location-item">
+                                        <label style="width: 15%; padding: 5px;" for="">Select City:- </label>                    
+                                        <select class="location-select" name="service_location" id="service_location">
+                                            <option  value="">Select City Here</option>
+                                            {% for location in locations %}
+                                                <option value="{{location.id}}">{{location.location_name}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="modal-body" id="modal-body">
+                                    <div id="combo-details-container"></div>                    
+                                </div>
+
+                                <div class="modal-footer justify-content-center">
+                                    <div class="modal_btn" style="gap: 254px;">
+                                        <button type="button" class="btn btn-danger"
+                                            onclick="closeModal('comboForm')">Close</button>
+                                        <button type="button" onclick="collectSelectedOptions('combo-details-container', )" class="btn btn-dark">Submit</button>
+                                        <img src="http://unclefitter.encoreskydev.com/images/spin.webp"
+                                            class="spinner ms-3" style="display: none;">
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div class="pagination">
+                <span class="step-links">
+                    {% if page_obj.has_previous %}
+                    <a href="?page=1" class="btn bg-dark text-light">&laquo; first</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" class="btn bg-dark text-light">previous</a>
+                    {% endif %}
+
+                    <span class="current font-weight-bold">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="btn bg-dark text-light">next</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" class="btn bg-dark text-light">last
+                        &raquo;</a>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

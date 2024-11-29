@@ -135,7 +135,7 @@
                             <td>{{ booking.total_service_amount }}</td>
                             <td>{{ booking.id }}</td>
                            <td>
-                                {{ booking.car_brand.barnd }}
+                                {{ booking.car_brand.brand }}
                                 {{ booking.car_year.year }}
                                 {{ booking.car_model.model_name }}
                                 {{ booking.car_trim.car_trim_name }}
@@ -150,7 +150,7 @@
                             {% else %}
                                 <td>
                                     <a href="{% url 'book_appointment_handler' id=booking.id%}" class="btn btn-dark car-detail-button" 
-                                    style="color: #c4c1c1; padding-right: 10px;">Book Appointment</a>
+                                        style="color: #c4c1c1; padding-right: 10px;">Book Appointment</a>
                                 </td>
                             {% endif %}
                             

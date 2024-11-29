@@ -2,8 +2,8 @@ import os
 import json
 import hashlib
 import fastjsonschema
-import schemas.booking_schema
 import schemas.login_schema
+import schemas.booking_schema
 import schemas.registration_schema
 
 from admin_app.models import *
@@ -16,15 +16,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from schemas.login_schema import validate_login
 from django.template import TemplateDoesNotExist 
+from schemas.booking_schema import quote_data_schema
 from django.views.decorators.http import require_GET
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import never_cache 
-from schemas.booking_schema import quote_data_schema
 from schemas.registration_schema import validate_registration
 from django.contrib.auth import authenticate, login as auth_login 
+from user_app.forms import CustomUserCreationForm, BookingAndQuoteForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
-from schemas.booking_schema import quote_sub_service_option_data_schema
-from user_app.forms import CustomUserCreationForm, BookingAndQuoteForm, BookingSubServiceForm
 from user_app.models import CustomUser, SubServiceAndOption, UserCarRecord, SubServiceBasedOption
 
 
@@ -96,21 +95,6 @@ def team(request: HttpRequest) -> HttpResponse:
         'curl': curl
     }
     return render(request, 'team.html', context, status=200)
-
-def booking(request: HttpRequest) -> HttpResponse:
-    """
-    This function is used for render the booking.html page for.
-
-    Args:
-        request
-
-    Returns:
-        HttpResponse: booking page of our apllication.
-    """
-    context = {
-        'curl': curl
-    }
-    return render(request, 'booking.html', context, status=200)
 
 def register(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """

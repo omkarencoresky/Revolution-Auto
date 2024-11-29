@@ -7,7 +7,6 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         localStorage.clear(); // Clears all localStorage items
-        console.log('localStorage cleared on page reload');
     });
 </script>
 <div class="container-fluid flex-grow-1 container-p-y">
@@ -42,6 +41,36 @@
                         <label class="control-label col-sm-3 m-0" style="max-width: 14%; padding: 5px 0px;" for="combo_name">Combo Name :-  </label>
                         <input class="form-control m-0 p-0" style="width: 80%;" id="combo_name" name="combo_name" placeholder="Combo Name">
                         <span></span>
+                    </div>
+
+                    <div class="form-group d-flex">
+                        <label class="control-label col-sm-3 m-0" style="max-width: 17%; padding: 5px 0px;" for="combo_name">All service Price :-  </label>
+                        <input class="form-control m-0 p-0" style="width: 77%;" id="price" name="price" placeholder="Total service Price">
+                        <span></span>
+                    </div>
+
+                    <div class="form-group d-flex">
+                        <label class="control-label col-sm-3 m-0" style="max-width: 16%; padding: 5px 0px;" for="combo_name">Discount Price :-  </label>
+                        <input class="form-control m-0 p-0" style="width: 78%;" id="discount_price" name="discount_price" placeholder="Combo Price">
+                        <span></span>
+                    </div>
+
+                    <div class="form-group d-flex">
+                        <label class="control-label col-sm-3 m-0" style="max-width: 16%; padding: 5px 0px;" for="combo_name">Usage Limit :-  </label>
+                        <input class="form-control m-0 p-0" style="width: 78%;" id="usage_limit" name="usage_limit" placeholder="Usage Limit">
+                        <span></span>
+                    </div>
+
+                    <div class="form-group d-flex justify-content-between">
+                        <div class="form-group d-flex" style="width: 48%;">
+                            <label class="control-label col-sm-3 m-0" style="max-width: 25%; padding: 5px 0px;" for="combo_name">Start Date :-  </label>
+                            <input type="date" class="form-control m-0 p-0" style="width: 63%;" id="start_date" name="start_date" placeholder="Start Date">
+                        </div>
+
+                        <div class="form-group d-flex" style="width: 48%;">
+                            <label class="control-label col-sm-3 m-0" style="max-width: 25%; padding: 5px 0px;" for="combo_name">End Date :-  </label>
+                            <input type="date" class="form-control m-0 p-0" style="width: 63%;" id="end_date" name="end_date" placeholder="End Date">
+                        </div>
                     </div>
     
                     <div class="form-group description">
@@ -80,30 +109,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group d-flex">
-                        <label class="control-label col-sm-3 m-0" style="max-width: 17%; padding: 5px 0px;" for="combo_name">All service Price :-  </label>
-                        <input class="form-control m-0 p-0" style="width: 77%;" id="price" name="price" placeholder="Total service Price">
-                        <span></span>
-                    </div>
-
-                    <div class="form-group d-flex">
-                        <label class="control-label col-sm-3 m-0" style="max-width: 16%; padding: 5px 0px;" for="combo_name">Discount Price :-  </label>
-                        <input class="form-control m-0 p-0" style="width: 78%;" id="discount_price" name="discount_price" placeholder="Combo Price">
-                        <span></span>
-                    </div>
-
-                    <div class="form-group d-flex justify-content-between">
-                        <div class="form-group d-flex" style="width: 48%;">
-                            <label class="control-label col-sm-3 m-0" style="max-width: 25%; padding: 5px 0px;" for="combo_name">Start Date :-  </label>
-                            <input type="date" class="form-control m-0 p-0" style="width: 63%;" id="start_date" name="start_date" placeholder="Start Date">
-                        </div>
-
-                        <div class="form-group d-flex" style="width: 48%;">
-                            <label class="control-label col-sm-3 m-0" style="max-width: 25%; padding: 5px 0px;" for="combo_name">End Date :-  </label>
-                            <input type="date" class="form-control m-0 p-0" style="width: 63%;" id="end_date" name="end_date" placeholder="End Date">
-                        </div>
-                    </div>
     
                     <div class="modal-footer">
                         <div class="row w-100">
@@ -136,7 +141,7 @@
                             <th scope="col">Offer Price</th>
                             <th scope="col">Start Date</th>
                             <th scope="col">End Date</th>
-                            <!-- <th scope="col">Action</th> -->
+                            <th scope="col">Usage Limit</th>
                         </tr>
                     </thead>
 
@@ -149,6 +154,7 @@
                             <td>{{ combo.discount_price }}</td>
                             <td>{{ combo.start_date }}</td>
                             <td>{{ combo.end_date }}</td>
+                            <td>{{ combo.usage_limit }}</td>
                             <!-- <td>
                                 <button style="border: none; font-size: small; padding: 0px 9px;" 
                                     onclick="updateStatusModal('updateStatusForm', '{{ combo.id }}', '{{ combo.status }}')">

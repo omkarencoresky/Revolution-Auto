@@ -134,11 +134,24 @@
                         </a>
                     </li>
 
-                    <li class="sidenav-item d-flex">
-                        <a href="{% url 'user_combo' %}" class="sidenav-link">
+                    <li class="sidenav-item">
+                        <a href="javascript:" class="sidenav-link sidenav-toggle" 
+                        onclick="toggleMenu('sidenav-dropdown-menu-User-Management')" id="sidenav-dropdown-User-Management">
                             <i class="sidenav-icon fa fa-gift"></i>
                             <div>Combo & Packages</div>
                         </a>
+                        <ul class="sidenav-menu" id="sidenav-dropdown-menu-User-Management">
+                            <li class="sidenav-item">
+                                <a href="{% url 'user_combo_data_handler' %}" class="sidenav-link">
+                                    <div class="sidenav-item-padding">Hot Combo</div>
+                                </a>
+                            </li>
+                            <li class="sidenav-item">
+                                <a href="{% url 'user_combo_handler' %}" class="sidenav-link">
+                                    <div class="sidenav-item-padding">My Combo</div>
+                                </a>
+                            </li>
+                        </ul>
                     </li>
 
                 </ul>

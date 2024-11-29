@@ -254,6 +254,7 @@ class ComboDetails(models.Model):
     name = models.CharField(max_length=100)
     start_date = models.DateField()
     end_date = models.DateField()
+    usage_limit = models.SmallIntegerField(blank=True, null=True)
     price = models.CharField(max_length=20, default=0)
     discount_price = models.CharField(max_length=20, default=0)
     updated_at = models.DateTimeField(auto_now=True)

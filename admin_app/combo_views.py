@@ -6,6 +6,7 @@ import schemas.location_schema
 from django.conf import settings
 from django.db import transaction
 from django.contrib import messages
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
 from django.http import HttpResponse, HttpRequest
@@ -42,18 +43,21 @@ def combo_data_handler(request: HttpRequest) -> HttpResponse:
 
             with transaction.atomic():
                 data = json.loads(request.body)
+                print('data', data)
                 
                 price = data['price']
                 end_date = data['end_date']
                 comboName = data['comboName']
                 start_date = data['start_date']
                 discountPrice = data['discountPrice']
+                usage_limit = data['usage_limit']
                 
                 ComboDetail = ComboDetails.objects.create(
                     name = comboName,
                     start_date = start_date,
                     end_date = end_date,
                     price = price,
+                    usage_limit = int(usage_limit),
                     discount_price = discountPrice,
                 )
                 for service  in data['services']:
@@ -80,8 +84,10 @@ def combo_data_handler(request: HttpRequest) -> HttpResponse:
                             sub_service_id = SubService.objects.get(id=sub_service_id),
                             sub_service_option_id = options[:-1]
                         )
-            messages.success(request, 'Combo Created successfully !')
-            return redirect('combo_data_handler') 
+            message = ('Combo Created successfully !')
+            data = {'messages': message, 'status': 'success'}
+            return JsonResponse(data)
+            # return redirect('combo_data_handler') 
     
     except ObjectDoesNotExist:
         messages.error(request, f'Object not found, Try again')

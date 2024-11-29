@@ -26,10 +26,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from schemas.car_schema import validate_users_car_details
 from user_app.forms import AddCarRecord, UserReferralForm
-from user_app.models import CustomUser, UserCarRecord, Service_payment
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_update_profile_details_schema
-from user_app.utils.utils import User_Car_Record_pagination, User_booking_pagination, User_payments_pagination, Combos_pagination
+from user_app.models import CustomUser, UserCarRecord, ServicePayment, UserComboPackage, UserComboTracking
+from user_app.utils.utils import User_Car_Record_pagination, User_booking_pagination, User_payments_pagination, Combos_pagination, User_combos_pagination
 
 
 curl = settings.CURRENT_URL+'/'
@@ -670,7 +670,7 @@ def book_appointment_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
             
             elif payment_mode == 'cash':
 
-                Service_payment.objects.create(
+                ServicePayment.objects.create(
                     user=booking_object.user,
                     booking=booking_object,
                     service_amount=booking_object.total_service_amount,
@@ -772,8 +772,8 @@ def payment_success(request):
             booking_object = BookingAndQuote.objects.get(id=session.metadata.get('booking_id'))
             
             # Check if payment already recorded
-            if not Service_payment.objects.filter(stripe_payment_intent_id=session.payment_intent).exists():
-                Service_payment.objects.create(
+            if not ServicePayment.objects.filter(stripe_payment_intent_id=session.payment_intent).exists():
+                ServicePayment.objects.create(
                     user=booking_object.user,
                     booking=booking_object,
                     service_amount=booking_object.total_service_amount,
@@ -818,8 +818,8 @@ def payment_cancel(request):
             booking_object = BookingAndQuote.objects.get(id=session.metadata.get('booking_id'))
             
             # Only create payment record if it doesn't exist
-            if not Service_payment.objects.filter(stripe_payment_intent_id=session.payment_intent).exists():
-                Service_payment.objects.create(
+            if not ServicePayment.objects.filter(stripe_payment_intent_id=session.payment_intent).exists():
+                ServicePayment.objects.create(
                     user=booking_object.user,
                     booking=booking_object,
                     service_amount=booking_object.total_service_amount,
@@ -880,58 +880,160 @@ def user_payment(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         return redirect('user_dashboard')
 
 
-
-def user_combo(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     try:
         if request.method == 'GET':
             combos = Combos_pagination(request)
+            user_car = User_Car_Record_pagination(request, user_id=request.user.user_id)
 
             context = {
                 'page_obj': combos,
                 'curl': curl,
+                'user_car' : user_car,
             }
             return render(request, 'user/combo.html', context)
         
+    except ObjectDoesNotExist:
+        messages.error(request, f"Object does not exist.")
+        return redirect('user_combo_data_handler')
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('user_dashboard')
+                
     except Exception as e:
         print(e)
+        return redirect('user_combo_data_handler')
+    
+
+def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    try:
+        if request.method == 'GET':
+            combo_detail = ComboDetails.objects.get(id=id)
+            combo_service_detail = ComboServiceDetails.objects.filter(combo=combo_detail.id)
+
+            services_list = []
+            for service in combo_service_detail:
+                
+                sub_services = ComboSubServiceDetails.objects.filter(combo_service_id=service.id)
+                for sub_service in sub_services:
+                    service_dict = {
+                            'service_type': service.service_type.id,
+                            'service_type_name': service.service_type.service_type_name,
+                            'service_category': service.service_category.id,
+                            'service_category_name': service.service_category.service_category_name,
+                            'service': service.service.id,
+                            'service_title': service.service.service_title,
+                        }
+                
+                    service_dict['sub_service_id'] =  sub_service.sub_service_id.id
+                    service_dict['sub_service_title'] =  sub_service.sub_service_id.title
+                    # service_dict['sub_service_option_id'] =  sub_service.sub_service_option_id
+                    if len(sub_service.sub_service_option_id) != 0:
+                        service_dict['sub_service_option_id'] = list(SubServiceOption.objects.filter(id__in=sub_service.sub_service_option_id.split(',')).values('id', 'title'))
+
+                    services_list.append(service_dict)
+            return JsonResponse({'services': services_list})
+        
+        elif request.method == 'POST':
+            user = request.user.user_id
+            check_combo = UserComboPackage.objects.filter(user_id=user, combo=id).first()
+
+            if check_combo is None:
+                UserComboPackage.objects.create(
+                    user_id = request.user.user_id,
+                    combo = ComboDetails.objects.get(id=id),
+                    car_id = UserCarRecord.objects.get(id=request.POST.get('car_id')),
+                )
+                messages.success(request, f'You have successfully purchase combo pack')
+            else:
+                messages.error(request, 'This Combo is already purchased')
+                    
+            return redirect('user_combo_data_handler')
+        
+        else:
+            messages.error(request, 'In-valid method, try again')
+            return redirect('user_combo_data_handler')
+    
+    except ObjectDoesNotExist:
+        messages.error(request, f"Object does not exist.")
+        return redirect('user_combo_data_handler')
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
         return redirect('user_dashboard')
 
+    except Exception as e:
+        # print(e)
+        return redirect('user_combo_data_handler')
 
 
-# @csrf_exempt
-# def stripe_webhook(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
-#     print('this is run')
-#     payload = request.body
-#     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-    
-#     endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
-    
-#     try:
-#         event = stripe.Webhook.construct_event(
-#             payload, sig_header, endpoint_secret
-#         )
-#     except ValueError as e:
-#         return JsonResponse({'error': 'Invalid payload'}, status=400)
-    
-#     except stripe.error.SignatureVerificationError as e:
-#         return JsonResponse({'error': 'Invalid signature'}, status=400)
+def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    try:
+        if request.method == 'GET':
+            combos = User_combos_pagination(request, request.user.user_id)
+            locations = Location.objects.all()
 
-#     if event['type'] == 'payment_intent.succeeded':
-#         print('succeeded is run')
-#         payment_intent = event['data']['object']
-#         payment_intent_id = payment_intent['id']
+            context = {
+                'curl': curl,
+                'page_obj': combos,
+                'locations': locations
+            }
+            return render(request, 'user/user_combo.html', context)
         
-#         payment = Service_payment.objects.get(stripe_payment_intent_id=payment_intent_id)
-#         payment.status = 'succeeded'
-#         payment.save()
-    
-#     elif event['type'] == 'payment_intent.payment_failed':
-#         print('failed is run')
-#         payment_intent = event['data']['object']
-#         payment_intent_id = payment_intent['id']
-        
-#         payment = Service_payment.objects.get(stripe_payment_intent_id=payment_intent_id)
-#         payment.status = 'failed'
-#         payment.save()
+        elif request.method == 'POST':
+            with transaction.atomic():
+                data = json.loads(request.body)
 
-#     return JsonResponse({'status': 'success'})
+                # ----------------User combo limit table entry----------------
+                
+                user_combo_object = UserComboPackage.objects.get(id=data[0]['combo_id'])
+                user_combo_object.remaining_combo_usage = user_combo_object.combo.usage_limit-1
+                user_combo_object.save()
+
+                print('data', data)
+
+                for combo_service_data in data:
+
+                    # ----------------User booking table entry----------------
+
+                    combo_booking = BookingAndQuote.objects.create(
+                        user = CustomUser.objects.get(user_id=request.user.user_id),
+                        service_location = Location.objects.get(id=combo_service_data['location']),
+                        car_brand = CarBrand.objects.get(id=user_combo_object.car_id.car_brand.id),
+                        car_year = CarYear.objects.get(id=user_combo_object.car_id.car_year.id),
+                        car_model = CarModel.objects.get(id=user_combo_object.car_id.car_model.id),
+                        car_trim = CarTrim.objects.get(id=user_combo_object.car_id.car_trim.id),
+                        car_vno = user_combo_object.car_id.vin_number,
+                        car_service_type = ServiceType.objects.get(id=combo_service_data['service_type']),
+                        car_service_category = ServiceCategory.objects.get(id=combo_service_data['service_category']),
+                        car_services = combo_service_data['service'],
+                    )
+
+                    # ----------------User booking table entry----------------
+                    comboTracking = UserComboTracking.objects.create(
+                        user_combo_id = user_combo_object,
+                        service = Services.objects.get(id=combo_service_data['service']),
+                        service_type = ServiceType.objects.get(id=combo_service_data['service_type']),
+                        service_category = ServiceCategory.objects.get(id=combo_service_data['service_category']),
+                        sub_service = combo_service_data['sub_service'][:-1],
+                        sub_service_option = combo_service_data['sub_service_options'][:-1],
+                    )
+
+            message = ('Booked a service with this combo successfully  completed!')
+            message_data = {'messages': message, 'status': 'success'}
+            return JsonResponse(message_data)
+
+    except ObjectDoesNotExist:
+        messages.error(request, f"Object does not exist.")
+        return redirect('user_combo_data_handler')
+
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('user_dashboard')
+
+    except Exception as e:
+        print(e)
+        return redirect('user_combo_data_handler')
+
+

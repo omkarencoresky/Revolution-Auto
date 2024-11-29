@@ -5,11 +5,11 @@
 
 {% block content %}
 <div class="container-fluid container-p-y">
-    <h4 class="font-weight-bold py-3 mb-0">MY Combos</h4>
+    <h4 class="font-weight-bold py-3 mb-0">Available Combos</h4>
     <div class="d-flex justify-content-between">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'user_dashboard' %}"><i class="feather icon-home"></i> User Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'user_combo' %}">My Combos</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'user_combo_data_handler' %}">My Combos</a></li>
         </ol>
     </div>
     
@@ -30,29 +30,112 @@
             <div class="card h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
-                        <h5 class="card-title">{{ combo.name }}</h5>
-                        <h5 class="card-title">$<span class="h5 mb-0" style="text-decoration: line-through; color: #999;">{{ combo.price }}</span> {{ combo.discount_price }}</h5>
+                        <div>
+                            <h5 class="card-title">{{ combo.name }}</h5>
+                            <h5 class="card-title">
+                                Total Price:-  $ <span class="h5 mb-0" style="text-decoration: line-through; color: #999;"> {{ combo.price }} </span>
+                            </h5>
+                            <h5 style="color: red;"><span style="color: #4E5155;">Offer price:-  $</span>  {{ combo.discount_price }} 
+                                <!-- <i class="feather icon-star navbar-icon align-middle"></i></h5> -->
+                        </div>
+                        <div>
+                            <label for="card-title">Duration</label>
+                            <h5 class="card-title my-2">{{ combo.start_date }} - {{ combo.end_date }}</h5>
+                        </div>
                     </div>
-                    <div class="card-text">
-                        <p>{{ combo.description }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <!-- <span class="h5 mb-0">₹{{ combo.price }}</span> -->
-                            <div>
-                                <a href="" class="btn btn-primary btn-sm">View Details</a>
-                                <a href="" class="btn btn-success btn-sm">Book Now</a>
-                            </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <button onclick="combo_detail('descriptionForm','{{ combo.id }}')" class="btn btn-dark btn-sm"
+                                style="color: #c5c6ce; font-size: 12px; padding-top: 6.5px; font-weight: 600;">View Details
+                            </button>
+                            
+                            <button  onclick="combo_car_selection('addForm','{{ combo.id }}')" class="btn btn-dark btn-sm"
+                                style="color: #c5c6ce; font-size: 12px; padding-top: 6.5px; font-weight: 600;">Buy Combo
+                            </button>"
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <script>
+            function combo_car_selection(formId, id){
+                const modal = document.getElementById(formId);
+
+                const Form = modal.querySelector('#car_selection')
+                var url = `http://127.0.0.1:8000/combo/operation/${id}`;
+                Form.setAttribute('action', url);
+
+                modal.style.display = 'flex';
+            }
+        </script>
+        
         {% empty %}
-        <div class="col-12">
-            <div class="alert alert-info">
-                No combos available at the moment.
+            <div class="col-12">
+                <div class="alert alert-info">
+                    No combos available at the moment.
+                </div>
+            </div>
+        {% endfor %}
+        
+        <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+            <div class="modal-content" style="max-width: 500px; height: auto;">
+                <form  id="car_selection" method="post">
+                    {% csrf_token %}
+                    <div class="modal-header p-0 m-0 justify-content-center">
+                        <h3 class="modal-title">Select Car </h3>
+                        <button type="button" class="close" onclick="closeModal('addForm')">×</button>
+                    </div>
+                    <div class="modal-body" id="modal-body">
+                        <label for="car_id">Select Your car:- </label>
+                        <div id="car_select">
+                            <select class="car_select w-100" name="car_id" id="">
+                                <option value="" disabled selected>Your Cars</option>
+                                {% for car in user_car %}
+                                    <option value="{{ car.id }}">
+                                        {{ car.car_brand.brand }} - {{ car.car_model.model_name }} - 
+                                            {{ car.car_year.year }} - VIN: {{ car.vin_number }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>                    
+                    </div>
+                    <div class="modal-footer p-0 m-0">
+                        <div class="row w-100">
+                            <div class="w-100 modal_btn d-flex justify-content-around">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                    onclick="closeModal('addForm')">Close</button>
+                                <button type="submit" class="btn btn-dark" data-dismiss="modal">Submit</button>
+                            </div>
+                            <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
+                                style="display: none;">
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-        {% endfor %}
+
+
+        <div id="descriptionForm" class="modal-form" onclick="closeModalIfOutside(event, 'descriptionForm')">
+            <div class="modal-content" style="max-width: 800px; height: auto;">
+                <div class="modal-header p-0 m-0 justify-content-center">
+                    <h3 class="modal-title">Combo pack Services </h3>
+                    <button type="button" class="close" onclick="closeModal('descriptionForm')">×</button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <div id="combo-details-container"></div>                    
+                </div>
+                <div class="modal-footer p-0 m-0">
+                    <div class="row w-100">
+                        <div class="w-100 modal_btn d-flex justify-content-around">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal"
+                                onclick="closeModal('descriptionForm')">Close</button>
+                        </div>
+                        <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
+                            style="display: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

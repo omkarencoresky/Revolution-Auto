@@ -2,7 +2,7 @@ from admin_app.models import *
 from django.http import HttpRequest
 from django.core.paginator import Page
 from django.core.paginator import Paginator
-from user_app.models import CustomUser, BookingAndQuote, Service_payment
+from user_app.models import CustomUser, BookingAndQuote, ServicePayment
 
 
 
@@ -371,7 +371,7 @@ def Service_payment_pagination(request: HttpRequest) -> Page:
     Returns:
     -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
     """
-    payments = Service_payment.objects.all().order_by('-created_at')
+    payments = ServicePayment.objects.all().order_by('-created_at')
     
     # Pagination setup
     paginator = Paginator(payments, 10)

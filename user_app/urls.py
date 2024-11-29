@@ -25,7 +25,6 @@ urlpatterns = [
     path('about/', user_app_views.about, name='About'),
     path('login/', user_app_views.login, name='login'),
     path('service/', user_app_views.service, name='Service'),
-    path('booking/', user_app_views.booking, name='Booking'),
     path('logout/', user_app_views.logout_view, name='logout'),
     re_path(r'^register/$', user_app_views.register, name='register'),
 
@@ -75,6 +74,8 @@ urlpatterns = [
     path('payment/cancel/', user_views.payment_cancel, name='payment_cancel'),
     path('payments/', user_views.user_payment, name='user_payment'),
 
-    path('combos/', user_views.user_combo, name='user_combo'),
+    path('combos/', user_views.user_combo_data_handler, name='user_combo_data_handler'),
+    path('combo/operation/<int:id>', user_views.combo_action_handler, name='combo_action_handler'),
+    path('combo/booking/', user_views.user_combo_handler, name='user_combo_handler'),
 
 ]
