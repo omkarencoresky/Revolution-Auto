@@ -2691,7 +2691,7 @@ function combo_detail(formId, id, is_combo_selection, user_combo_id) {
     container.innerHTML = '';
 
     
-    fetch(`/combo/operation/${id}`)
+    fetch(`/combo/operation/${id}?user_combo_id=${user_combo_id}`)
 
         .then(response => response.json())
         .then(data => {            
@@ -2734,30 +2734,34 @@ function renderComboDetails(services) {
 // Used to show the Combo data to user's
 
 function renderComboD(services, user_combo_id) {
+    
     const container = document.getElementById('combo-details-container');
     
     const existingServicesMap = new Map();
     services.forEach(service => {
+        
         const serviceKey = `${service.service}-${service.service_type}`;
 
         if (existingServicesMap.has(serviceKey)) {
             const existingServiceElement = existingServicesMap.get(serviceKey);
             
             const existingOptionsContainer = existingServiceElement.querySelector('.options-container');
-            const optionsHTML = service.sub_service_option_id
-                .map((option, index) => 
-                    `<div data-value="${option.id}" class="option">
-                        ${index + 1}. ${option.title}
-                    </div>`
-                )
-                .join('');
-            
-            existingOptionsContainer.innerHTML += `
-                <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
-                    Sub Service Question:- ${service.sub_service_title}
-                </p>
-                ${optionsHTML}
-            `;
+            if (service.sub_service_option_id && service.sub_service_id){
+                const optionsHTML = service.sub_service_option_id
+                    .map((option, index) => 
+                        `<div data-value="${option.id}" class="option">
+                            ${index + 1}. ${option.title}
+                        </div>`
+                    )
+                    .join('');
+                
+                existingOptionsContainer.innerHTML += `
+                    <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
+                        Sub Service Question:- ${service.sub_service_title}
+                    </p>
+                    ${optionsHTML}
+                `;
+            }
         } else {
             const serviceElement = document.createElement('div');
             serviceElement.classList.add('combo-item');

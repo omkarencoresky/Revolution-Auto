@@ -9,7 +9,7 @@ service_type_schema = {
             "type": "string",
             "minLength": 3,
             "maxLength": 50,
-            "pattern": "^[a-zA-Z& ]+$",
+            "pattern": "^[a-zA-Z/()& ]+$",
             "description": "Service Type Name should be have 3-50 characters and allowed only alphabets."
             },
     },
@@ -31,7 +31,7 @@ service_category_schema = {
             "type": "string",
             "minLength": 4,
             "maxLength": 150,
-            "pattern": "^[a-zA-Z& ]+$",
+            "pattern": "^[a-zA-Z/()& ]+$",
             "description": "Service Category Name should be have 3-50 characters and allowed only alphabets."
             },
     },
@@ -54,7 +54,7 @@ services_schema = {
             "type": "string",
             "minLength": 4,
             "maxLength": 150,
-            "pattern": "^[a-zA-Z& ]+$",
+            "pattern": "^[a-zA-Z/()& ]+$",
             "description": "Service title Name should be have 3-50 characters and allowed only alphabets."
             },
         # "description": {
@@ -81,7 +81,7 @@ sub_services_schema = {
         },
        "display_text": {
             "type": "string",
-            "minLength": 4,
+            "minLength": 0,
             "maxLength": 150,
             "pattern":  "^[a-zA-Z @~`!@#%^&*()_=+\\\\';:\\\"/?>.<,-]*$",
             "description": "Display text should contains at least 4 characters and not allowed the blanks."

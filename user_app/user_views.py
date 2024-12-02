@@ -28,11 +28,12 @@ from schemas.car_schema import validate_users_car_details
 from user_app.forms import AddCarRecord, UserReferralForm
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_update_profile_details_schema
-from user_app.models import CustomUser, UserCarRecord, ServicePayment, UserComboPackage, UserComboTracking
+from user_app.models import CustomUser, UserCarRecord, ServicePayment, UserComboPackage, UserComboTracking, SubServiceAndOption, SubServiceBasedOption
 from user_app.utils.utils import User_Car_Record_pagination, User_booking_pagination, User_payments_pagination, Combos_pagination, User_combos_pagination
 
 
-curl = settings.CURRENT_URL+'/'
+curl = settings.CURRENT_URL
+curl += '/'
 context = {'curl' : curl}
 
 media_path = f'{settings.MEDIA_URL}'
@@ -909,30 +910,36 @@ def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponse
 def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     try:
         if request.method == 'GET':
+            user_combo_id = request.GET.get('user_combo_id')
+            # print('used_combo_services', request.GET.get('user_combo_id'))
+
             combo_detail = ComboDetails.objects.get(id=id)
             combo_service_detail = ComboServiceDetails.objects.filter(combo=combo_detail.id)
 
             services_list = []
             for service in combo_service_detail:
-                
-                sub_services = ComboSubServiceDetails.objects.filter(combo_service_id=service.id)
-                for sub_service in sub_services:
-                    service_dict = {
-                            'service_type': service.service_type.id,
-                            'service_type_name': service.service_type.service_type_name,
-                            'service_category': service.service_category.id,
-                            'service_category_name': service.service_category.service_category_name,
-                            'service': service.service.id,
-                            'service_title': service.service.service_title,
-                        }
-                
-                    service_dict['sub_service_id'] =  sub_service.sub_service_id.id
-                    service_dict['sub_service_title'] =  sub_service.sub_service_id.title
-                    # service_dict['sub_service_option_id'] =  sub_service.sub_service_option_id
-                    if len(sub_service.sub_service_option_id) != 0:
-                        service_dict['sub_service_option_id'] = list(SubServiceOption.objects.filter(id__in=sub_service.sub_service_option_id.split(',')).values('id', 'title'))
+                used_combo_services = UserComboTracking.objects.filter(user_combo_id=user_combo_id, service=service.service, service_type=service.service_type
+                                                                       , service_category=service.service_category)
+                print('used_combo_services', len(used_combo_services))
+                if len(used_combo_services) == 0:
+                    sub_services = ComboSubServiceDetails.objects.filter(combo_service_id=service.id)
+                    for sub_service in sub_services:
+                        service_dict = {
+                                'service_type': service.service_type.id,
+                                'service_type_name': service.service_type.service_type_name,
+                                'service_category': service.service_category.id,
+                                'service_category_name': service.service_category.service_category_name,
+                                'service': service.service.id,
+                                'service_title': service.service.service_title,
+                            }
+                    
+                        service_dict['sub_service_id'] =  sub_service.sub_service_id.id
+                        service_dict['sub_service_title'] =  sub_service.sub_service_id.title
+                        # service_dict['sub_service_option_id'] =  sub_service.sub_service_option_id
+                        if len(sub_service.sub_service_option_id) != 0:
+                            service_dict['sub_service_option_id'] = list(SubServiceOption.objects.filter(id__in=sub_service.sub_service_option_id.split(',')).values('id', 'title'))
 
-                    services_list.append(service_dict)
+                        services_list.append(service_dict)
             return JsonResponse({'services': services_list})
         
         elif request.method == 'POST':
@@ -982,18 +989,17 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
             return render(request, 'user/user_combo.html', context)
         
         elif request.method == 'POST':
+
             with transaction.atomic():
                 data = json.loads(request.body)
 
                 # ----------------User combo limit table entry----------------
-                
-                user_combo_object = UserComboPackage.objects.get(id=data[0]['combo_id'])
-                user_combo_object.remaining_combo_usage = user_combo_object.combo.usage_limit-1
-                user_combo_object.save()
-
-                print('data', data)
-
                 for combo_service_data in data:
+                    print('combo_service_data',combo_service_data)
+
+                    user_combo_object = UserComboPackage.objects.get(id=combo_service_data['combo_id'])
+                    user_combo_object.remaining_combo_usage = user_combo_object.combo.usage_limit-1
+                    user_combo_object.save()
 
                     # ----------------User booking table entry----------------
 
@@ -1010,6 +1016,31 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
                         car_services = combo_service_data['service'],
                     )
 
+                    booking_sub_service = SubServiceAndOption(booking_id=combo_booking, service_id_id=combo_service_data['service'])
+
+                    sub_service_data = {}
+                    print('combo_service_data sub_service', combo_service_data['sub_service'].split(',')[:-1])
+
+                    for option in combo_service_data['sub_service'].split(',')[:-1]:
+                        if option in sub_service_data:
+                            sub_service_data[option].append(option)   
+                        else:
+                            sub_service_data[option] = [option]
+                        print('1st combo_service_data sub_service', combo_service_data['sub_service'])
+                    for sub_service_options_object in sub_service_data:
+                        sub_service_id = SubService.objects.get(id=sub_service_options_object)
+                        print('2nd combo_service_data sub_service', combo_service_data['sub_service'])
+                        if sub_service_id:
+                            booking_sub_service.save()
+                            
+                            SubServiceBasedOption.objects.create(
+                                subServiceAndOptionId=booking_sub_service,
+                                sub_service=sub_service_id,
+                                sub_service_option=','.join(map(str, sub_service_data[sub_service_options_object]))
+                            )
+                            print('3rd combo_service_data sub_service', combo_service_data['sub_service'])
+
+                    print('Into loop but after combo_booking')
                     # ----------------User booking table entry----------------
                     comboTracking = UserComboTracking.objects.create(
                         user_combo_id = user_combo_object,
@@ -1019,7 +1050,7 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
                         sub_service = combo_service_data['sub_service'][:-1],
                         sub_service_option = combo_service_data['sub_service_options'][:-1],
                     )
-
+                print('After comboTracking')
             message = ('Booked a service with this combo successfully  completed!')
             message_data = {'messages': message, 'status': 'success'}
             return JsonResponse(message_data)
