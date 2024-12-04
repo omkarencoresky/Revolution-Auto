@@ -23,7 +23,7 @@ from django.views.decorators.cache import never_cache
 from schemas.registration_schema import validate_registration
 from django.contrib.auth import authenticate, login as auth_login 
 from user_app.forms import CustomUserCreationForm, BookingAndQuoteForm
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
 from user_app.models import CustomUser, SubServiceAndOption, UserCarRecord, SubServiceBasedOption
 
 
@@ -268,7 +268,16 @@ def login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 
 # @login_required
 @require_GET
-def get_service_category(request):
+def get_service_category(request) -> JsonResponse:
+    """
+    This method is used the get the service category data based on the service type.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for get the service category data based on the service type.
+    """
     try:
         service_type = request.GET.get('service_type')
         options = ServiceCategory.objects.filter(service_type=service_type).values('id', 'service_category_name')
@@ -287,7 +296,16 @@ def get_service_category(request):
 
 # @login_required
 @require_GET
-def get_services(request):
+def get_services(request) -> JsonResponse:
+    """
+    This method is used the get the service data based on the service type.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for get the service data based on the service type.
+    """
     try:
         service_category = request.GET.get('service_category')
         options = Services.objects.filter(service_category=service_category).values('id', 'service_title')
@@ -305,8 +323,16 @@ def get_services(request):
 
 # @login_required
 @require_GET
-def get_sub_service(request):
-    
+def get_sub_service(request) -> JsonResponse:
+    """
+    This method is used the get the sub service data based on the service type.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for get the sub service data based on the service type.
+    """
     try:
         service = request.GET.get('service')
         options = SubService.objects.filter(service=service).values('id', 'title', 'selection_type')
@@ -324,7 +350,16 @@ def get_sub_service(request):
 
 # @login_required
 @require_GET
-def get_sub_service_option(request):
+def get_sub_service_option(request) -> JsonResponse:
+    """
+    This method is used the get the sub service option data based on the service type.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for get the sub service option data based on the service type.
+    """
     try:
         sub_service = request.GET.get('sub_service')
         options = SubServiceOption.objects.filter(sub_service=sub_service).values('id', 'title')
@@ -341,14 +376,19 @@ def get_sub_service_option(request):
 
 
 
-def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect | JsonResponse:
     """
-    Handles both GET and POST requests for service quotes.
-    GET: Renders the service quote form
-    POST: Processes the quote request with validation and saves booking details
+    This method is used for process the request a quote data and show the main page.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for process the quote request.
     """
     try:
         if request.method == "GET":
+
             brands = CarBrand.objects.all().order_by('id').filter(status=1)
             locations = Location.objects.all().order_by('id').filter(status=1)
             service_type = ServiceType.objects.all().order_by('id').filter(status=1)
@@ -363,7 +403,7 @@ def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
             return render(request, 'service_quote.html', context, status=200)
 
         elif request.method == "POST":
-            # Get user information
+            
             user_id = request.user.user_id
             user = CustomUser.objects.get(user_id=user_id)
 
@@ -373,8 +413,10 @@ def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
             # Iterating over the services_dict and extracting subServiceOptions
             sub_service = []
             sub_service_option = []
+            
             for service_id, service_data in services_dict.items():
                 if 'subServiceOptions' in service_data:
+
                     for x in service_data['subServiceOptions']:
                         sub_service.append(x['subServiceId'])
                         sub_service_option.append(x['id'])
@@ -400,7 +442,7 @@ def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
             form = BookingAndQuoteForm(form_data)
 
             if form.is_valid():
-                # Save the booking
+                
                 booking = form.save(commit=False)
                 booking.user = user
                 booking.status = 'pending for quote'
@@ -422,8 +464,10 @@ def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
                         sub_service_data = {}
 
                         for option in service_data['subServiceOptions']:
+
                             if option['subServiceId'] in sub_service_data:
                                 sub_service_data[option['subServiceId']].append(option['id'])   
+
                             else:
                                 sub_service_data[option['subServiceId']] = [option['id']]
                         
@@ -473,7 +517,16 @@ def request_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
 
 
 
-def booking_service_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+def booking_service_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect | JsonResponse:
+    """
+    This method is used for handle the service data on local storage and save a booking.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for service data on local storage and save a booking.
+    """
     try:
         if request.method == 'GET':
 
@@ -502,7 +555,6 @@ def booking_service_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                         sub_service.append(x['subServiceId'])
                         sub_service_option.append(x['id'])
             
-            # Prepare quote data
             validate_data = {
                 'service_location': data['service_location'],
                 'car_brand': data['car_brand'],
@@ -516,7 +568,6 @@ def booking_service_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                 'sub_service_option_list': sub_service_option,
             }
 
-            # Validate quote data using schema
             validate = fastjsonschema.compile(quote_data_schema)
             validate(validate_data)
             
@@ -535,13 +586,13 @@ def booking_service_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                 )
             booking.save()
             
-            # Process and save each service
             for service_id, service_data in data['car_services'].items():
                 bookingSubService=SubServiceAndOption(booking_id=booking, service_id_id=int(service_id))
                 bookingSubService.save()
 
                 if 'subServiceOptions' in service_data:
                     sub_service_data = {}
+
                     for option in service_data['subServiceOptions']:
 
                         if option['subServiceId']in sub_service_data:
@@ -551,6 +602,7 @@ def booking_service_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
 
                     for subServiceOptionsObject in sub_service_data:
                         if subServiceOptionsObject:
+
                             sub_service_id = SubService.objects.get(id=subServiceOptionsObject)
                             SubServiceBasedOption.objects.create(subServiceAndOptionId=bookingSubService, sub_service=sub_service_id,
                                                             sub_service_option=','.join(sub_service_data[subServiceOptionsObject])
@@ -590,6 +642,15 @@ def booking_service_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
 
 
 def check_login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for check the user already login or not for process the service booking data.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for the user already login or not for process the service booking data.
+    """
     try:
         if request.method == 'GET':
             user = request.user
@@ -600,6 +661,7 @@ def check_login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
                 return render(request, 'service_quote_confirmation.html', context)  
             
             elif user.role == 'user':
+                
                 notifications = specific_account_notification(request, request.user.user_id)
                 unread_notification = Notification.get_unread_count(request.user.user_id)
                 

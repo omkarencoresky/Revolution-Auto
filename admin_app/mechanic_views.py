@@ -12,6 +12,7 @@ from mechanic_app.forms import AddMechanicForm
 from django.template import TemplateDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
 from mechanic_app.utils.utils import mechanic_pagination
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_mechanic_register_detail_schema, validate_mechanic_update_detail_schema
 
@@ -19,7 +20,7 @@ curl = settings.CURRENT_URL
 admincurl = f"{curl}/admin/"
 media_path = f'{settings.MEDIA_URL}' 
 
-
+@login_required
 def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 
     """
@@ -109,7 +110,7 @@ def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     except Exception as e:
         return redirect('mechanic_data_handler')
     
-
+@login_required
 def mechanic_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     
     """

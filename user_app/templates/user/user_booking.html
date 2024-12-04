@@ -11,8 +11,8 @@
             <li class="breadcrumb-item"><a href="{% url 'location_data_handler' %}">My Bookings</a></li>
         </ol>
 
-        <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-            onclick="addopenModal('addForm')">Add Booking</button>
+        <!-- <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
+            onclick="addopenModal('addForm')">Add Booking</button> -->
 
     </div>
     <div>
@@ -211,93 +211,6 @@
                                 <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
                                     style="display: none;">
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="updateForm" class="modal-form" onclick="closeModalIfOutside(event, 'updateForm')">
-                    <div class="modal-content" style="max-width: 800px; height: 50%; ">
-                        <div class="modal-header">
-                            <h4 class="modal-title w-100"
-                                style="text-align: center; font-size: 30px; font-weight: bold;">Update Car
-                                Detail</h4>
-                            <button type="button" class="close" onclick="closeModal('updateForm')"
-                                style="font-size: 30px; font-weight: bolder;">×</button>
-                        </div>
-                        <div class="modal-body" id="modal-body">
-                            <form class="update-form" method="post">
-                                {% csrf_token %}
-
-                                <div class="form-group brand">
-                                    <label class="control-label" for="brand">Select Car :</label>
-                                    <div>
-                                        <select class="form-control" name="car_brand" id="brand">
-                                            <option value="">Select from here</option>
-                                            {% for brand in model1_options %}
-                                            <option value="{{brand.id}}">{{ brand.brand }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <span id="brand1"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group brand">
-                                    <label class="control-label" for="year">Select Year :</label>
-                                    <div>
-                                        <select class="form-control" name="car_year" id="year">
-                                            <option value="">Select from here</option>
-                                            {% for years in caryears %}
-                                            <option value="{{years}}">{{ years.year }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <span id="year2"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group brand">
-                                    <label class="control-label" for="model">Select Model :</label>
-                                    <div>
-                                        <select class="form-control" name="car_model" id="model">
-                                            <option value="">Select from here</option>
-                                            {% for model in carmodels %}
-                                            <option value="{{model}}">{{ model.model_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <span id="model1"></span>
-                                    </div>
-                                </div>
-
-                                <div class="form-group brand">
-                                    <label class="control-label" for="trim">Select Car Trim :</label>
-                                    <div>
-                                        <select class="form-control" name="car_trim" id="trim">
-                                            <option value="">Select from here</option>
-                                            {% for trims in cartrims %}
-                                            <option value="{{trims}}">{{ trims.car_trim_name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                        <span id="trim1"></span>
-                                    </div>
-                                </div>
-                                
-                                <div class="form-group brand">
-                                    <label class="control-label" for="password">VIN Number :</label>
-                                    <div>
-                                        <input type="text" id="vin" class="form-control" name="vin_number" >
-                                        <span id="text1"></span>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer justify-content-center">
-                                    <div class="modal_btn" style="gap: 254px;">
-                                        <button type="button" class="btn btn-danger"
-                                            onclick="closeModal('updateForm')">Close</button>
-                                        <button type="submit" class="btn btn-dark">Submit</button>
-                                        <img src="http://unclefitter.encoreskydev.com/images/spin.webp"
-                                            class="spinner ms-3" style="display: none;">
-                                    </div>
-                                </div>
-                            </form>
                         </div>
                     </div>
                 </div>

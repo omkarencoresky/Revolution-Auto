@@ -9,7 +9,7 @@ from .forms import AddLocationForm
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from admin_app.utils.utils import locations_pagination
 from django.contrib.auth.decorators import login_required
@@ -19,7 +19,7 @@ curl = settings.CURRENT_URL
 admin_curl = f"{curl}/admin/"
 
 @login_required
-def location_data_handler(request: HttpRequest) -> HttpResponse:
+def location_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """This method is use to render the main page for locations and show the all location's list and status.
 
     Args:
@@ -95,7 +95,7 @@ def location_data_handler(request: HttpRequest) -> HttpResponse:
 
 
 @login_required
-def location_action_handler(request: HttpRequest, id: int) -> HttpResponse:
+def location_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     """
     Updates the details of a location based on the provided form data.
     

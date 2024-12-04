@@ -117,7 +117,7 @@ def user_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedire
         return redirect('user_data_handler')    
     
 @login_required
-def user_action_handler(request: HttpRequest, id: int, role=None) -> HttpResponse | HttpResponseRedirect:
+def user_action_handler(request: HttpRequest, id: int, role = None) -> HttpResponse | HttpResponseRedirect:
     """
     This method handles updating user item when the request type is POST with an ID, and deleting user item when the request type is DELETE with an ID.
 

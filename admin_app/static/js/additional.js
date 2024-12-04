@@ -702,8 +702,9 @@ function userCarDetailsUpdate(formId, id, brand, brand_instance, year, year_inst
     const updateForm = modal.querySelector('.update-form');
     var url = '/user-cars/id/'.replace('id', parseInt(id));
     updateForm.setAttribute('action', url);
-
-    const brandInput = modal.querySelector('#brand');
+    console.log('modal', modal);
+    
+    const brandInput = modal.querySelector('#brand');    
     const brandptions = brandInput.querySelectorAll('option');
     const brandopt = brandptions[0];
     brandopt.text = brand;
@@ -1834,6 +1835,8 @@ function submitStoredForm(user) {
         }
         
         formData.append('user', user);
+        console.log('formData', formData);
+        
         const csrftoken = getCookie('csrftoken');
     
         fetch('/user/request-a-quote', {
@@ -1950,6 +1953,7 @@ function scheduleBookingPopup(formId, date) {
 }
 
 function bookingCalendar(unavailable_dates, selected_loc) {
+    console.log('unavailable_dates', unavailable_dates);
     
     var calendarEl = document.getElementById('calendar');
     if (!calendarEl) {
@@ -2032,6 +2036,7 @@ function bookingCalendar(unavailable_dates, selected_loc) {
         console.warn('Error creating or rendering calendar:', error.message);
     }
 }
+
 
 
 // Booking schedule functions
@@ -2694,7 +2699,9 @@ function combo_detail(formId, id, is_combo_selection, user_combo_id) {
     fetch(`/combo/operation/${id}?user_combo_id=${user_combo_id}`)
 
         .then(response => response.json())
-        .then(data => {            
+        .then(data => {  
+            console.log('data', data);
+                      
             addopenModal(formId)
             
             if (is_combo_selection){
@@ -2714,68 +2721,199 @@ function renderComboDetails(services) {
     services.forEach(service => {
         const serviceElement = document.createElement('div');
         serviceElement.classList.add('combo-item');
-
-        serviceElement.innerHTML = `
+        
+        // Create the basic service information HTML
+        let serviceHTML = `
             <h3>${service.service_title}</h3>
             <p><strong>Service Type:</strong> ${service.service_type_name}</p>
             <p><strong>Service Category:</strong> ${service.service_category_name}</p>
-            <h4>${service.sub_service_title}</h4>
-            <ul>
-                ${service.sub_service_option_id
-                    .map(option => `<li>${option.title}</li>`)
-                    .join('')}
-            </ul>   
         `;
+
+        // Add sub-services if they exist
+        if (service.sub_services && service.sub_services.length > 0) {
+            service.sub_services.forEach(subService => {
+                // Add sub-service title only if it exists and is not empty
+                if (subService.sub_service_title && subService.sub_service_title.trim() !== '') {
+                    serviceHTML += `<h4>${subService.sub_service_title}</h4>`;
+                    
+                    // Add options if they exist
+                    if (subService.sub_service_options && subService.sub_service_options.length > 0) {
+                        serviceHTML += '<ul>';
+                        serviceHTML += subService.sub_service_options
+                            .map(option => `<li>${option.title}</li>`)
+                            .join('');
+                        serviceHTML += '</ul>';
+                    }
+                }
+            });
+        }
+
+        // Set the complete HTML for the service element
+        serviceElement.innerHTML = serviceHTML;
+        
         container.appendChild(serviceElement);
     });
 }
 
 
+// function renderComboDetails(services) {
+//     const container = document.getElementById('combo-details-container');
+//     container.innerHTML = '';
+
+//     services.forEach(service => {
+//         const serviceElement = document.createElement('div');
+//         serviceElement.classList.add('combo-item');
+//         const options = ''
+//         console.log('service.sub_service_option_id', service.sub_service_option_id,service.sub_service_title);
+        
+//         if (service.sub_service_title != undefined ){
+//              options = service.sub_service_option_id
+//             .map(option => `<li>${option.title}</li>`)
+//             .join('')
+//         }
+//         serviceElement.innerHTML = `
+//             <h3>${service.service_title}</h3>
+//             <p><strong>Service Type:</strong> ${service.service_type_name}</p>
+//             <p><strong>Service Category:</strong> ${service.service_category_name}</p>
+//             <h4>${service.sub_service_title}</h4>
+//             <ul>
+//                 ${options}
+//             </ul>   
+//         `;
+//         container.appendChild(serviceElement);
+//     });
+// }
+
+
 // Used to show the Combo data to user's
+
+// function renderComboD(services, user_combo_id) {
+//     const container = document.getElementById('combo-details-container');
+    
+//     const existingServicesMap = new Map();
+//     services.forEach(service => {
+//         const serviceKey = `${service.service}-${service.service_type}`;
+
+//         if (existingServicesMap.has(serviceKey)) {
+//             console.log('Check if');
+            
+//             const existingServiceElement = existingServicesMap.get(serviceKey);
+            
+//             const existingOptionsContainer = existingServiceElement.querySelector('.options-container');
+//             let optionsHTML = ''
+//             if (service.sub_service_option_id){
+//                 optionsHTML = service.sub_service_option_id
+//                     .map((option, index) => 
+//                         `<div data-value="${option.id}" class="option-${service.sub_service_id}">
+//                             ${index + 1}. ${option.title}
+//                         </div>`
+//                     )
+//                     .join('');
+//                 }
+            
+//                 existingOptionsContainer.innerHTML += `
+//                     <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
+//                         Sub Service Question:- ${service.sub_service_title}
+//                     </p>
+//                     ${optionsHTML}
+//             `;
+//         } else {
+//             console.log('Check else');
+//             const serviceElement = document.createElement('div');
+//             serviceElement.classList.add('combo-item');
+//             serviceElement.classList.add('clickable-service');
+//             let optionsHTML = ''
+//             if (service.sub_service_option_id){
+//                 optionsHTML = service.sub_service_option_id
+//                     .map((option, index) => 
+//                         `<div data-value="${option.id}" class="option-${service.sub_service_id}">
+//                             ${index + 1}. ${option.title}
+//                         </div>`
+//                     )
+//                     .join('');
+//                 } else{
+//                 const optionsHTML = ''
+//                 }
+                
+
+//             serviceElement.innerHTML = `
+//                 <div class="service-header">
+//                     <input value="${user_combo_id}" id="combo_id" name="combo_id" hidden>
+//                     <h3 id="service" data-value="${service.service}">${service.service_title}</h3>
+//                     <p id="service_type" data-value="${service.service_type}" class="my-0">
+//                         Service Type:- ${service.service_type_name}
+//                     </p>
+//                     <p id="service_category" data-value="${service.service_category}" class="my-0">
+//                         Service Category:- ${service.service_category_name}
+//                     </p>
+//                     <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
+//                         Sub Service Question:- ${service.sub_service_title}
+//                     </p>
+//                 </div>
+//                 <div class="options-container">
+//                     ${optionsHTML}
+//                 </div>
+//             `;
+
+//             serviceElement.addEventListener('click', function() {
+//                 const isSelected = serviceElement.classList.toggle('selected');
+//             });
+
+//             container.appendChild(serviceElement);
+//             existingServicesMap.set(serviceKey, serviceElement);
+//         }
+//     });
+// }
 
 function renderComboD(services, user_combo_id) {
     
     const container = document.getElementById('combo-details-container');
+    container.innerHTML = ''; // Clear previous content
     
     const existingServicesMap = new Map();
+    
     services.forEach(service => {
-        
-        const serviceKey = `${service.service}-${service.service_type}`;
+        // Create a unique key that combines service type, category, and service
+        const serviceKey = `${service.service_type}-${service.service_category}-${service.service}`;
 
         if (existingServicesMap.has(serviceKey)) {
             const existingServiceElement = existingServicesMap.get(serviceKey);
-            
             const existingOptionsContainer = existingServiceElement.querySelector('.options-container');
-            if (service.sub_service_option_id && service.sub_service_id){
-                const optionsHTML = service.sub_service_option_id
-                    .map((option, index) => 
-                        `<div data-value="${option.id}" class="option">
-                            ${index + 1}. ${option.title}
-                        </div>`
-                    )
-                    .join('');
-                
-                existingOptionsContainer.innerHTML += `
-                    <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
-                        Sub Service Question:- ${service.sub_service_title}
-                    </p>
-                    ${optionsHTML}
-                `;
+            
+            // Add sub-services if they exist
+            if (service.sub_services && service.sub_services.length > 0) {
+                service.sub_services.forEach(subService => {
+                    if (subService.sub_service_title && subService.sub_service_title.trim() !== '') {
+                        // Create sub-service HTML
+                        let subServiceHTML = `
+                            <p class="sub_service" data-value="${subService.sub_service_id}" class="my-0">
+                                Sub Service Question:- ${subService.sub_service_title}
+                            </p>
+                        `;
+                        
+                        // Add options if they exist
+                        let optionsHTML = '';
+                        if (subService.sub_service_options && subService.sub_service_options.length > 0) {
+                            optionsHTML = subService.sub_service_options
+                                .map((option, index) => 
+                                    `<div data-value="${option.id}" class="option-${subService.sub_service_id}">
+                                        ${index + 1}. ${option.title}
+                                    </div>`
+                                )
+                                .join('');
+                        }
+                        
+                        // Append new sub-service and options
+                        existingOptionsContainer.innerHTML += subServiceHTML + optionsHTML;
+                    }
+                });
             }
         } else {
             const serviceElement = document.createElement('div');
-            serviceElement.classList.add('combo-item');
-            serviceElement.classList.add('clickable-service');
-
-            const optionsHTML = service.sub_service_option_id
-                .map((option, index) => 
-                    `<div data-value="${option.id}" class="option">
-                        ${index + 1}. ${option.title}
-                    </div>`
-                )
-                .join('');
-
-            serviceElement.innerHTML = `
+            serviceElement.classList.add('combo-item', 'clickable-service');
+            
+            // Prepare service header HTML
+            let serviceHTML = `
                 <div class="service-header">
                     <input value="${user_combo_id}" id="combo_id" name="combo_id" hidden>
                     <h3 id="service" data-value="${service.service}">${service.service_title}</h3>
@@ -2785,19 +2923,46 @@ function renderComboD(services, user_combo_id) {
                     <p id="service_category" data-value="${service.service_category}" class="my-0">
                         Service Category:- ${service.service_category_name}
                     </p>
-                    <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
-                        Sub Service Question:- ${service.sub_service_title}
-                    </p>
                 </div>
                 <div class="options-container">
-                    ${optionsHTML}
-                </div>
             `;
 
+            // Add sub-services if they exist
+            if (service.sub_services && service.sub_services.length > 0) {
+                service.sub_services.forEach(subService => {
+                    if (subService.sub_service_title && subService.sub_service_title.trim() !== '') {
+                        serviceHTML += `
+                            <p class="sub_service" data-value="${subService.sub_service_id}" class="my-0">
+                                Sub Service Question:- ${subService.sub_service_title}
+                            </p>
+                        `;
+                        
+                        // Add options if they exist
+                        if (subService.sub_service_options && subService.sub_service_options.length > 0) {
+                            serviceHTML += subService.sub_service_options
+                                .map((option, index) => 
+                                    `<div data-value="${option.id}" class="option-${subService.sub_service_id}">
+                                        ${index + 1}. ${option.title}
+                                    </div>`
+                                )
+                                .join('');
+                        }
+                    }
+                });
+            }
+
+            // Close options container
+            serviceHTML += `</div>`;
+
+            // Set inner HTML for the service element
+            serviceElement.innerHTML = serviceHTML;
+
+            // Add click event listener
             serviceElement.addEventListener('click', function() {
-                const isSelected = serviceElement.classList.toggle('selected');
+                this.classList.toggle('selected');
             });
 
+            // Append to container and add to map
             container.appendChild(serviceElement);
             existingServicesMap.set(serviceKey, serviceElement);
         }
@@ -2813,18 +2978,22 @@ function collectSelectedOptions(test){
         if (el.classList.contains('selected')){
             const serviceHeader = el.querySelector('.service-header')
             const optionsContainer = el.querySelector('.options-container')
-            let sub_services = ''
-            console.log('sub_service', document.querySelectorAll('.sub_service'));            
+            let sub_services_details = {}
+
             document.querySelectorAll('.sub_service').forEach(sub_service => {
-                sub_services += sub_service.getAttribute('data-value') + ','
+                let sub_services = ''
+                sub_services = sub_service.getAttribute('data-value')
                 console.log('sub_servicesss', sub_services);
                 
+                let options = ''
+                optionsContainer.querySelectorAll(`.option-${sub_service.getAttribute('data-value')}`).forEach(option =>{                  
+                    options += option.getAttribute('data-value') + ','
+                });
+                if (options){
+                    sub_services_details[sub_services] = options.trimEnd(',')
+                }
+                
             })
-            
-            let options = ''
-            optionsContainer.querySelectorAll('.option').forEach(option =>{
-                options += option.getAttribute('data-value') + ','
-            });
             
             const service = serviceHeader.querySelector('#service').getAttribute('data-value')
             const service_type = serviceHeader.querySelector('#service_type').getAttribute('data-value')
@@ -2835,8 +3004,7 @@ function collectSelectedOptions(test){
             backendData["service"] = service
             backendData["service_type"] = service_type
             backendData["service_category"] = service_category
-            backendData["sub_service"] = sub_services
-            backendData["sub_service_options"] = options
+            backendData["sub_service"] = sub_services_details
             backendData["combo_id"] = combo_id
             backendData["location"] = location
         }
@@ -2866,7 +3034,7 @@ function collectSelectedOptions(test){
     .then(data => {
         if (data.status === 'success') {
             alert(data.messages);
-            redirectToNotification('http://127.0.0.1:8000/admin/combo-management/')
+            redirectToNotification('http://127.0.0.1:8000/combo/booking/')
         } else {
             alert(data.message || 'Update failed');
         }

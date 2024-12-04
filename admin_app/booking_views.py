@@ -29,8 +29,16 @@ media_path = f'{settings.MEDIA_URL}'
 context = {'curl': curl}
 
 
+@login_required
+def booking_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to render the booking page and filter bookings data.
 
-def booking_data_handler(request: HttpRequest,) -> HttpResponse | HttpResponseRedirect:
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use to render the booking page.
+    """
     try:
         if request.method == 'GET':
             status = request.GET.get('status')
@@ -60,12 +68,19 @@ def booking_data_handler(request: HttpRequest,) -> HttpResponse | HttpResponseRe
         return redirect('booking_data_handler')
     
 
+@login_required
+def mechanic_data_filter(request:HttpRequest) -> HttpResponse | HttpResponseRedirect:  
+    """This method is use to filter the mechanic's data according to there leaves.
 
-def mechanic_data_filter(request:HttpRequest):  
-    
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use to filter the mechanic's data.
+    """
     try:
         date = request.GET.get('date')
-        unavailable_mechanic = Mechanic_leaves.objects.filter(start_date__lte=date, end_date__gte=date)
+        unavailable_mechanic = MechanicLeaves.objects.filter(start_date__lte=date, end_date__gte=date)
 
         unavailable_mechanic_id = []
         for mechanic in unavailable_mechanic:
@@ -85,8 +100,16 @@ def mechanic_data_filter(request:HttpRequest):
         return JsonResponse({'status': 'error', 'message': f'Error processing request: {str(e)}'}, status=400)
 
 
-
+@login_required
 def handle_service_quote_and_mechanic_assignment(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to handle the service data and the mechanic assignment.
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use to parse service data and the mechanic assignment.
+    """
     try:
         if request.method == 'POST':
             quote_object = BookingAndQuote.objects.get(id=id)
@@ -156,8 +179,16 @@ def handle_service_quote_and_mechanic_assignment(request: HttpRequest, id: int) 
         return redirect('booking_data_handler')
     
 
-
+@login_required
 def handle_service_status_and_car_details(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to handle the service status and handle car details.
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use to parse service status and handle car details.
+    """
     try:
         if request.method == 'POST':
             quote_object = BookingAndQuote.objects.get(id=id)
@@ -231,8 +262,16 @@ def handle_service_status_and_car_details(request: HttpRequest, id: int) -> Http
         return redirect('booking_data_handler')
 
 
-
+@login_required
 def service_update_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to handle or update the service details.
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use to update the services details.
+    """
     try:
         if request.method == 'GET':
             booking_object = BookingAndQuote.objects.get(id=id)
@@ -389,8 +428,15 @@ def service_update_handler(request: HttpRequest, id: int) -> HttpResponse | Http
         return redirect('admin_dashboard')
 
 
-
+@login_required
 def booking_report_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to handle or show the service report data.
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use to handle or show the service report data.
+    """
     try:
         if request.method == 'GET':
             booking = BookingAndQuote.objects.get(id=id)
@@ -442,8 +488,15 @@ def booking_report_handler(request: HttpRequest, id: int) -> HttpResponse | Http
         return redirect('booking_data_handler')
 
 
-
+@login_required
 def service_payment_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to handle the payment process of the booking.
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use to handle the payment process of the booking.
+    """
     try:
         if request.method == 'GET':
             all_payment = Service_payment_pagination(request)

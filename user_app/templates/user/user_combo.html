@@ -49,11 +49,21 @@
                             <td>{{ combo.car_id.car_brand.brand }}, {{ combo.car_id.vin_number }}</td>
                             <td>{{ combo.combo.usage_limit }}</td>
                             <td>{{ combo.remaining_combo_usage }}</td>
-                            
-                            <td>
+                            <td>    
                                 <button class="btn btn-dark car-detail-button" onclick="combo_detail('comboForm', '{{combo.combo.id}}', is_combo_selection=true, '{{combo.id}}')" 
-                                    style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
+                                style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
                             </td>
+                            
+                        <!-- {% if combo.combo.usage_limit >= combo.remaining_combo_usage %}
+                            <td>    
+                                <button class="btn btn-dark car-detail-button" onclick="combo_detail('comboForm', '{{combo.combo.id}}', is_combo_selection=true, '{{combo.id}}')" 
+                                style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
+                            </td>
+                        {% elif combo.combo.usage_limit < combo.remaining_combo_usage %}
+                            <td> 
+                                <button class="btn btn-dark car-detail-button" style="color: #c4c1c1; padding-right: 10px; width: 50.5%;">Limit Over</button>
+                            </td>
+                        {% endif %} -->
                             
                         </tr>
                         {% endfor %}

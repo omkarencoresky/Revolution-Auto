@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
-from django.http import HttpResponse, HttpRequest
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from admin_app.utils.utils import Service_combo_pagination
@@ -19,14 +19,14 @@ curl = settings.CURRENT_URL
 admin_curl = f"{curl}/admin/"
 
 @login_required
-def combo_data_handler(request: HttpRequest) -> HttpResponse:
-    """This method is use to render the main page for locations and show the all location's list and status.
+def combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to render the combo_management page and all operations related to the combo.
 
     Args:
-    -  request: The incoming HTTP request containing all data for show the list of al the saved locations.
+    -  request: The incoming HTTP request.
 
     Returns:
-    -  Httprequest: This method is use for render the location page with containing all the saved locations.
+    -  Httprequest: This method is use for render combo_management page and all operations related to the combo.
     """
     try:
         if request.method == 'GET':
@@ -61,6 +61,7 @@ def combo_data_handler(request: HttpRequest) -> HttpResponse:
                     discount_price = discountPrice,
                 )
                 for service  in data['services']:
+                    print('service[serviceId]', service['serviceId'])
                     serviceId = Services.objects.get(id=service['serviceId'])
                     serviceType = ServiceType.objects.get(id=service['serviceType'])
                     service_category_id = ServiceCategory.objects.get(id=service['service_category_id'])
@@ -87,7 +88,6 @@ def combo_data_handler(request: HttpRequest) -> HttpResponse:
             message = ('Combo Created successfully !')
             data = {'messages': message, 'status': 'success'}
             return JsonResponse(data)
-            # return redirect('combo_data_handler') 
     
     except ObjectDoesNotExist:
         messages.error(request, f'Object not found, Try again')

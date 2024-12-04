@@ -323,10 +323,9 @@ def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                 year.year = data.get('year', year.year)
                 year.remember_token = year.remember_token
                 year.status = request.POST.get('status', 1)
-                
                 year.save()
+
                 messages.success(request, 'Updated successfully!')
-                return redirect('car_year_data_handler')
             
             else:
                 messages.error(request, "Similar details is already available")
@@ -478,7 +477,6 @@ def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                 'model_name': request.POST.get('model_name'),
             }
             car_schema.validate_car_model_details(data)
-
             unique_model = CarModel.objects.filter(car_id=data.get('car_id'), year_id=data.get('year_id'), model_name=data.get('model_name'))
 
             if not unique_model:
@@ -492,8 +490,8 @@ def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                 model.status = request.POST.get('status', 1)
                 model.remember_token = model.remember_token
                 model.model_name = request.POST.get('model_name', old_model)
-
                 model.save()
+
                 messages.success(request, 'Updated successfully!')
             
             else:
@@ -585,7 +583,6 @@ def car_trim_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
                 'car_trim_name': trim_name   
                 }
             car_schema.validate_car_trim_details(data)
-
             unique_trim = CarTrim.objects.filter(car_id=data.get('car_id'), year_id=data.get('year_id'), model_id=data.get('model_id'), car_trim_name=data.get('car_trim_name'),)
 
             if not unique_trim:
@@ -594,8 +591,8 @@ def car_trim_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
                     trim = form.save(commit=False)
                     token = hashlib.sha256(trim_name.encode()).hexdigest()
                     trim.remember_token = token
-
                     form.save()
+
                     messages.success(request, "Added successfully!")
                     return redirect('car_trim_data_handler')
                 
@@ -631,7 +628,6 @@ def car_trim_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
 
 
 @login_required
-
 def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     """This method is allow to Delete trim record with the confirmation popup
 
@@ -650,6 +646,7 @@ def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
             car_id = request.POST.get('car_id')
             year_id = request.POST.get('year_id')
             model_id = request.POST.get('model_id')
+
             data = {
                 'car_id': car_id,
                 'year_id': year_id,

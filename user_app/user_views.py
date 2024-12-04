@@ -28,8 +28,11 @@ from schemas.car_schema import validate_users_car_details
 from user_app.forms import AddCarRecord, UserReferralForm
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_update_profile_details_schema
-from user_app.models import CustomUser, UserCarRecord, ServicePayment, UserComboPackage, UserComboTracking, SubServiceAndOption, SubServiceBasedOption
-from user_app.utils.utils import User_Car_Record_pagination, User_booking_pagination, User_payments_pagination, Combos_pagination, User_combos_pagination
+from user_app.utils.utils import (User_Car_Record_pagination, User_booking_pagination, 
+                                  User_payments_pagination, Combos_pagination, User_combos_pagination)
+from user_app.models import (CustomUser, UserCarRecord, ServicePayment, UserComboPackage, 
+                             UserComboTracking, SubServiceBasedOption, SubServiceAndOption
+                             )
 
 
 curl = settings.CURRENT_URL
@@ -56,13 +59,22 @@ def user_dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     try:
         if request.method == 'GET':
-            notifications = specific_account_notification(request, request.user.user_id)
+            status_data = ['pending for quote', 'complete', 'quoted', 'progressing', 'scheduled', 'pending', ]
             unread_notification = Notification.get_unread_count(request.user.user_id)
-            
+            notifications = specific_account_notification(request, request.user.user_id)
+            user_cars = UserCarRecord.objects.all().filter(user_id=request.user.user_id)
+            bookings = BookingAndQuote.objects.all().filter(user=request.user.user_id).count()
+            complete_bookings = BookingAndQuote.objects.all().filter(user=request.user.user_id, status='complete').count()
+            pending_bookings = BookingAndQuote.objects.all().filter(user=request.user.user_id, status='pending for quote').count()
+
             context = {
                 'curl' : curl,
                 'user': request.user,
+                'bookings': bookings,
+                'user_cars': user_cars,
                 'notifications': notifications,
+                'pending_bookings':pending_bookings,
+                'complete_bookings':complete_bookings,
                 'unread_notification': unread_notification,
             }
             return render(request, 'user/user_dashboard.html', context)
@@ -113,17 +125,20 @@ def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse |
             user_object.first_name = data.get('first_name')
 
             if uploaded_file:
+
                 image_url = f"{media_path}profile_images/{uploaded_file.name}"
                 media_directory = os.path.join(settings.BASE_DIR, 'media/profile_images')
                 user_object.profile_image = image_url
-                os.makedirs(media_directory, exist_ok=True)
 
+                os.makedirs(media_directory, exist_ok=True)
                 file_path = os.path.join(media_directory, uploaded_file.name)
+
                 with open (file_path,'wb') as data:
                     for chunks in uploaded_file.chunks():
                         data.write(chunks)
 
             user_object.save()
+
             messages.success(request, "Updated successfully!")
             return redirect("user_dashboard")
         
@@ -163,8 +178,16 @@ def user_userapp_action_handler(request: HttpRequest, id: int) -> HttpResponse |
 
 # @login_required
 @require_GET
-def get_caryear_options(request):
-    
+def get_caryear_options(request) -> JsonResponse:
+    """
+    This method is used for get car-year data based on the car_id.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for get car-year data based on the car_id.
+    """
     try:
         car_id = request.GET.get('car_id')
         options = CarYear.objects.filter(car_id=car_id).values('id', 'year')
@@ -182,7 +205,16 @@ def get_caryear_options(request):
 
 # @login_required
 @require_GET
-def get_carmodel_options(request):
+def get_carmodel_options(request) -> JsonResponse:
+    """
+    This method is used for get car-model data based on the car_year.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for get car-model data based on the car_year.
+    """
 
     try:
         car_id = request.GET.get('car_id')
@@ -200,9 +232,21 @@ def get_carmodel_options(request):
         return JsonResponse({'status': 'error', 'message': f'Error processing request: {str(e)}'}, status=400)
 
 
-# @login_required
+# @login_required:
+
 @require_GET
-def get_cartrim_options(request):
+def get_cartrim_options(request) -> JsonResponse:
+    """
+    This method is used for get car-trim data based on the car-model.
+
+    Args:
+        request
+
+    Returns::
+
+        HttpResponse: This method is used for get car-trim data based on the car-model.
+    """
+
     try:
         car_id = request.GET.get('car_id')
         year_id = request.GET.get('year_id')
@@ -251,8 +295,8 @@ def user_car_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
             return render(request, 'user/user_car.html', context)
         
         elif request.method == 'POST':
-            form = AddCarRecord(request.POST)
 
+            form = AddCarRecord(request.POST)
             vin_num = request.POST.get('vin_number')
             data = {key:request.POST.get(key) for key in ['car_brand', 'car_model', 'car_year', 'car_trim']}
 
@@ -262,6 +306,7 @@ def user_car_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
             unique_record = UserCarRecord.objects.filter(car_brand=data.get('car_brand'),car_model=data.get('car_model'),
                                                          car_year=data.get('car_year'),car_trim=data.get('car_trim'), vin_number=vin_num).exists()
             if not unique_record:
+
                 if form.is_valid():
 
                     carDetail = form.save(commit=False)
@@ -336,9 +381,10 @@ def user_car_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                                                         car_year=data.get('car_year'),car_trim=data.get('car_trim'),
                                                         vin_number=data.get('vin_number')).exists()
             if not unique_record:
-                if form.is_valid():
 
+                if form.is_valid():
                     form.save()
+
                     messages.success(request, "Update successfully !")
             else:
                 messages.error(request, "Similar car details already exist")
@@ -346,7 +392,7 @@ def user_car_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
         
         elif request.method == 'DELETE':
             user_car_instance = UserCarRecord.objects.get(id=id)
-            
+
             if user_car_instance:
                 user_car_instance.delete()
 
@@ -376,8 +422,18 @@ def user_car_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
     except Exception as e:
         return redirect('user_car_data_handler')
     
+@login_required
+def car_service_history(request: HttpRequest) -> HttpResponse | HttpResponseRedirect | JsonResponse:
+    """
+    This method is used for show the care previous services data.
 
-def car_service_history(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for for show the care previous services data.
+    """
+
     try:
         car_id = request.GET.get('car_id')
         user_id = request.GET.get('user_id')
@@ -390,6 +446,7 @@ def car_service_history(request: HttpRequest) -> HttpResponse | HttpResponseRedi
         
         for car_history in car_history_list:
             service_ids = car_history['car_services'].split(',')
+
             services_title = []
 
             for service_id in service_ids:
@@ -414,7 +471,7 @@ def car_service_history(request: HttpRequest) -> HttpResponse | HttpResponseRedi
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': f'Error processing request: {str(e)}'}, status=400)
 
-
+@login_required
 def user_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     This method handles show the messages list when the request type is GET.
@@ -458,10 +515,10 @@ def user_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpR
         return redirect('user_dashboard')
 
     except Exception as e:
-        print(e)
+        # print(e)
         return redirect('user_notification_data_handler')
     
-
+@login_required
 def user_notification_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     """
     This method handles update messages status like read or not when user the request type is GET with an ID, and 
@@ -482,10 +539,8 @@ def user_notification_action_handler(request: HttpRequest, id: int) -> HttpRespo
             
             notification_object.is_read = True
             notification_object.save()
-            
-            notification_read_status= {
-                'is_read': notification_object.is_read
-            }
+            notification_read_status= {'is_read': notification_object.is_read}
+
             messages.success(request, "This message mark as read")
             return JsonResponse(notification_read_status)
 
@@ -518,10 +573,11 @@ def user_notification_action_handler(request: HttpRequest, id: int) -> HttpRespo
         return redirect('user_dashboard')
 
     except Exception as e:
-        print(e)
+        # print(e)
         return redirect('user_notification_data_handler')
     
-
+    
+@login_required
 def referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     This method handles show the Users referral page for send a referral mail when the request type is GET and when the request type is POST
@@ -549,8 +605,8 @@ def referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
             return render(request, 'user/user_referral.html', context)
         
         elif request.method == 'POST':
-            referred_email = request.POST.get('referred_email').lower()
 
+            referred_email = request.POST.get('referred_email').lower()
             already_user = CustomUser.objects.filter(email=referred_email).exists()
             
             if already_user:
@@ -566,11 +622,9 @@ def referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
 
                 user = CustomUser.objects.get(email=request.user.email)
                 url = f"http://127.0.0.1:8000/register/{user.remember_token}"
-
                 
                 html_content = render_to_string('user/referral_mail.html', {'user': user, 'url': url})
                 plain_message = strip_tags(html_content)
-
                 refer_object.referrer_id = user
 
                 send_mail(
@@ -596,25 +650,36 @@ def referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
         return redirect('user_dashboard')
 
     except Exception as e:
-        print(e)
+        # print(e)
         return redirect('referral_data_handler')
         
 
+@login_required
 def user_booking_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for render the bookings page and show the user's bookings data.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the bookings page and show the user's bookings data.
+    """
     try:
         if request.method == 'GET':
+
             bookings = User_booking_pagination(request, request.user.user_id)
             context = {
                 'curl': curl,
                 'page_obj': bookings,
             }
-
+            return render(request, 'user/user_booking.html',context)
         else:
             context = {
                 'curl': curl,
             }
             messages.error(request, "error")
-        return render(request, 'user/user_booking.html',context)
+            return render(request, 'user/user_booking.html',context)
     
     except ObjectDoesNotExist:
         messages.error(request, f"Object does not exist.")
@@ -629,7 +694,17 @@ def user_booking_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
         return redirect('user_booking_data_handler', e)
     
 
+@login_required
 def book_appointment_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for render the calender for schedule the bookings and save the bookings data.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the calender for schedule the bookings and save the bookings data.
+    """
     try:
         if request.method == 'GET':
             
@@ -637,9 +712,10 @@ def book_appointment_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
             all_object =BookingAndQuote.objects.filter(user=booking_object.user.user_id)
 
             unavailable_dates = []
+
             for item in all_object:
                 if item.schedule_at != None:
-                    unavailable_dates.append( datetime.strptime(item.schedule_at, "%Y-%m-%d"))
+                    unavailable_dates.append( item.schedule_at)
 
             context = {
                 'curl': curl,
@@ -662,6 +738,7 @@ def book_appointment_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
             booking_object.save()
 
             if payment_mode == 'stripe':
+
                 context = {
                     'curl': curl,
                     'booking_object':booking_object,
@@ -679,6 +756,7 @@ def book_appointment_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                     status='pending',
                     stripe_payment_intent_id='Not available'
                 )
+
                 messages.success(request, f"Your Booking schedule successfully.")
                 return redirect('user_payment')
 
@@ -700,7 +778,16 @@ def book_appointment_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
     
 
 @csrf_exempt
-def create_checkout_session(request, id: int):
+def create_checkout_session(request: HttpResponse, id: int)-> HttpResponse | HttpResponseRedirect | JsonResponse:
+    """
+    This method is used for render the stripe payment checkout page with the payment or service details.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the stripe payment checkout page with the payment or service details.
+    """
     if request.method != 'POST':
         return JsonResponse({'success': False, 'error': 'Method not allowed'}, status=405)
     
@@ -741,6 +828,7 @@ def create_checkout_session(request, id: int):
             ) + '?session_id={CHECKOUT_SESSION_ID}',
             cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
         )
+        
         return JsonResponse({'success': True, 'checkout_url': checkout_session.url})
 
     except stripe.error.StripeError as e:
@@ -755,15 +843,27 @@ def create_checkout_session(request, id: int):
     except Exception as e:
         return JsonResponse({'success': False, 'error': f"An unexpected error occurred: {str(e)}"}, status=500)
 
+@login_required
+def payment_success(request) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for render the payment success page with the payment details.
 
-def payment_success(request):
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the payment success page with the payment details.
+    """
     session_id = request.GET.get('session_id')
+
     if not session_id:
+
         messages.error(request, "No session ID provided")
         return redirect('user_booking_data_handler')
 
     try:
         session = stripe.checkout.Session.retrieve(session_id)
+        
         if session.payment_status != 'paid':
             messages.error(request, "Payment has not been completed")
             return redirect('user_booking_data_handler')
@@ -774,6 +874,7 @@ def payment_success(request):
             
             # Check if payment already recorded
             if not ServicePayment.objects.filter(stripe_payment_intent_id=session.payment_intent).exists():
+
                 ServicePayment.objects.create(
                     user=booking_object.user,
                     booking=booking_object,
@@ -806,9 +907,20 @@ def payment_success(request):
     return redirect('user_booking_data_handler')
 
 
-def payment_cancel(request):
+@login_required
+def payment_cancel(request)-> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for render the payment cancel page with the payment details.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the payment cancel page with the payment details.
+    """
     session_id = request.GET.get('session_id')
     if not session_id:
+
         messages.error(request, "No session ID provided")
         return redirect('user_booking_data_handler')
 
@@ -820,6 +932,7 @@ def payment_cancel(request):
             
             # Only create payment record if it doesn't exist
             if not ServicePayment.objects.filter(stripe_payment_intent_id=session.payment_intent).exists():
+
                 ServicePayment.objects.create(
                     user=booking_object.user,
                     booking=booking_object,
@@ -853,7 +966,17 @@ def payment_cancel(request):
     return redirect('user_booking_data_handler')
 
 
+@login_required
 def user_payment(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for render the payment page along with all the payments data of user's.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the payment page along with all the payments data of user's.
+    """
     try:
         if request.method == 'GET':
             user_payments = User_payments_pagination(request, request.user.user_id)
@@ -881,9 +1004,11 @@ def user_payment(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         return redirect('user_dashboard')
 
 
+@login_required
 def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     try:
         if request.method == 'GET':
+
             combos = Combos_pagination(request)
             user_car = User_Car_Record_pagination(request, user_id=request.user.user_id)
 
@@ -903,10 +1028,11 @@ def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponse
         return redirect('user_dashboard')
                 
     except Exception as e:
-        print(e)
+        # print(e)
         return redirect('user_combo_data_handler')
-    
 
+
+@login_required
 def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     try:
         if request.method == 'GET':
@@ -914,34 +1040,101 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
             # print('used_combo_services', request.GET.get('user_combo_id'))
 
             combo_detail = ComboDetails.objects.get(id=id)
+            user_combo_id = request.GET.get('user_combo_id')
             combo_service_detail = ComboServiceDetails.objects.filter(combo=combo_detail.id)
-
             services_list = []
-            for service in combo_service_detail:
-                used_combo_services = UserComboTracking.objects.filter(user_combo_id=user_combo_id, service=service.service, service_type=service.service_type
-                                                                       , service_category=service.service_category)
-                print('used_combo_services', len(used_combo_services))
-                if len(used_combo_services) == 0:
+
+            if user_combo_id in [None, 'undefined']:
+                for service in combo_service_detail:
+                    service_dict = {
+                        'service_type': service.service_type.id,
+                        'service_type_name': service.service_type.service_type_name,
+                        'service_category': service.service_category.id,
+                        'service_category_name': service.service_category.service_category_name,
+                        'service': service.service.id,
+                        'service_title': service.service.service_title,
+                        'sub_services': []
+                    }
+                    
                     sub_services = ComboSubServiceDetails.objects.filter(combo_service_id=service.id)
                     for sub_service in sub_services:
-                        service_dict = {
-                                'service_type': service.service_type.id,
-                                'service_type_name': service.service_type.service_type_name,
-                                'service_category': service.service_category.id,
-                                'service_category_name': service.service_category.service_category_name,
-                                'service': service.service.id,
-                                'service_title': service.service.service_title,
-                            }
+                        sub_service_dict = {
+                            'sub_service_id': sub_service.sub_service_id.id,
+                            'sub_service_title': sub_service.sub_service_id.title,
+                        }
+                        
+                        if sub_service.sub_service_option_id:
+                            option_ids = sub_service.sub_service_option_id.split(',')
+                            sub_service_dict['sub_service_options'] = list(
+                                SubServiceOption.objects.filter(id__in=option_ids).values('id', 'title')
+                            )
+                        
+                        service_dict['sub_services'].append(sub_service_dict)
                     
-                        service_dict['sub_service_id'] =  sub_service.sub_service_id.id
-                        service_dict['sub_service_title'] =  sub_service.sub_service_id.title
-                        # service_dict['sub_service_option_id'] =  sub_service.sub_service_option_id
-                        if len(sub_service.sub_service_option_id) != 0:
-                            service_dict['sub_service_option_id'] = list(SubServiceOption.objects.filter(id__in=sub_service.sub_service_option_id.split(',')).values('id', 'title'))
-
+                    services_list.append(service_dict)
+                
+                return JsonResponse({'services': services_list})
+            else:
+                user_used_combo_object = UserComboTracking.objects.filter(user_combo_id=user_combo_id)
+                
+                for service in combo_service_detail:
+                    # Check if the entire service (including all its sub-services) is already used
+                    is_entire_service_used = any(
+                        used.service_type.id == service.service_type.id and
+                        used.service_category.id == service.service_category.id and
+                        used.service.id == service.service.id
+                        for used in user_used_combo_object
+                    )
+                    
+                    # Skip if the entire service is already used
+                    if is_entire_service_used:
+                        continue
+                    
+                    service_dict = {
+                        'service_type': service.service_type.id,
+                        'service_type_name': service.service_type.service_type_name,
+                        'service_category': service.service_category.id,
+                        'service_category_name': service.service_category.service_category_name,
+                        'service': service.service.id,
+                        'service_title': service.service.service_title,
+                        'sub_services': []
+                    }
+                    
+                    sub_services = ComboSubServiceDetails.objects.filter(combo_service_id=service.id)
+                    
+                    # If no sub-services, add the service directly
+                    if not sub_services:
                         services_list.append(service_dict)
-            return JsonResponse({'services': services_list})
-        
+                        continue
+                    
+                    for sub_service in sub_services:
+                        # Check if this specific sub-service has been used
+                        is_sub_service_used = any(
+                            str(sub_service.sub_service_id.id) in used.sub_service.split(',')
+                            for used in user_used_combo_object
+                        )
+                        
+                        if not is_sub_service_used:
+                            sub_service_dict = {
+                                'sub_service_id': sub_service.sub_service_id.id,
+                                'sub_service_title': sub_service.sub_service_id.title,
+                            }
+                            
+                            if sub_service.sub_service_option_id:
+                                option_ids = sub_service.sub_service_option_id.split(',')
+                                sub_service_dict['sub_service_options'] = list(
+                                    SubServiceOption.objects.filter(id__in=option_ids).values('id', 'title')
+                                )
+                            
+                            service_dict['sub_services'].append(sub_service_dict)
+                    
+                    # Add service only if it has sub-services or is entirely new
+                    if service_dict['sub_services'] or not sub_services:
+                        services_list.append(service_dict)
+                
+                return JsonResponse({'services': services_list})
+
+
         elif request.method == 'POST':
             user = request.user.user_id
             check_combo = UserComboPackage.objects.filter(user_id=user, combo=id).first()
@@ -953,6 +1146,7 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
                     car_id = UserCarRecord.objects.get(id=request.POST.get('car_id')),
                 )
                 messages.success(request, f'You have successfully purchase combo pack')
+                
             else:
                 messages.error(request, 'This Combo is already purchased')
                     
@@ -975,9 +1169,11 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
         return redirect('user_combo_data_handler')
 
 
-def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+@login_required
+def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect | JsonResponse:
     try:
         if request.method == 'GET':
+
             combos = User_combos_pagination(request, request.user.user_id)
             locations = Location.objects.all()
 
@@ -995,52 +1191,26 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
 
                 # ----------------User combo limit table entry----------------
                 for combo_service_data in data:
-                    print('combo_service_data',combo_service_data)
+                    if combo_service_data.keys():
+                        user_combo_object = UserComboPackage.objects.get(id=combo_service_data['combo_id'])
+                        user_combo_object.remaining_combo_usage = int(user_combo_object.remaining_combo_usage)+1
+                        user_combo_object.save()
 
-                    user_combo_object = UserComboPackage.objects.get(id=combo_service_data['combo_id'])
-                    user_combo_object.remaining_combo_usage = user_combo_object.combo.usage_limit-1
-                    user_combo_object.save()
+                        # ----------------User booking table entry----------------
 
-                    # ----------------User booking table entry----------------
+                        combo_booking = BookingAndQuote.objects.create(
+                            user = CustomUser.objects.get(user_id=request.user.user_id),
+                            service_location = Location.objects.get(id=combo_service_data['location']),
+                            car_brand = CarBrand.objects.get(id=user_combo_object.car_id.car_brand.id),
+                            car_year = CarYear.objects.get(id=user_combo_object.car_id.car_year.id),
+                            car_model = CarModel.objects.get(id=user_combo_object.car_id.car_model.id),
+                            car_trim = CarTrim.objects.get(id=user_combo_object.car_id.car_trim.id),
+                            car_vno = user_combo_object.car_id.vin_number,
+                            car_service_type = ServiceType.objects.get(id=combo_service_data['service_type']),
+                            car_service_category = ServiceCategory.objects.get(id=combo_service_data['service_category']),
+                            car_services = combo_service_data['service'],
+                        )
 
-                    combo_booking = BookingAndQuote.objects.create(
-                        user = CustomUser.objects.get(user_id=request.user.user_id),
-                        service_location = Location.objects.get(id=combo_service_data['location']),
-                        car_brand = CarBrand.objects.get(id=user_combo_object.car_id.car_brand.id),
-                        car_year = CarYear.objects.get(id=user_combo_object.car_id.car_year.id),
-                        car_model = CarModel.objects.get(id=user_combo_object.car_id.car_model.id),
-                        car_trim = CarTrim.objects.get(id=user_combo_object.car_id.car_trim.id),
-                        car_vno = user_combo_object.car_id.vin_number,
-                        car_service_type = ServiceType.objects.get(id=combo_service_data['service_type']),
-                        car_service_category = ServiceCategory.objects.get(id=combo_service_data['service_category']),
-                        car_services = combo_service_data['service'],
-                    )
-
-                    booking_sub_service = SubServiceAndOption(booking_id=combo_booking, service_id_id=combo_service_data['service'])
-
-                    sub_service_data = {}
-                    print('combo_service_data sub_service', combo_service_data['sub_service'].split(',')[:-1])
-
-                    for option in combo_service_data['sub_service'].split(',')[:-1]:
-                        if option in sub_service_data:
-                            sub_service_data[option].append(option)   
-                        else:
-                            sub_service_data[option] = [option]
-                        print('1st combo_service_data sub_service', combo_service_data['sub_service'])
-                    for sub_service_options_object in sub_service_data:
-                        sub_service_id = SubService.objects.get(id=sub_service_options_object)
-                        print('2nd combo_service_data sub_service', combo_service_data['sub_service'])
-                        if sub_service_id:
-                            booking_sub_service.save()
-                            
-                            SubServiceBasedOption.objects.create(
-                                subServiceAndOptionId=booking_sub_service,
-                                sub_service=sub_service_id,
-                                sub_service_option=','.join(map(str, sub_service_data[sub_service_options_object]))
-                            )
-                            print('3rd combo_service_data sub_service', combo_service_data['sub_service'])
-
-                    print('Into loop but after combo_booking')
                     # ----------------User booking table entry----------------
                     comboTracking = UserComboTracking.objects.create(
                         user_combo_id = user_combo_object,
@@ -1050,7 +1220,7 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
                         sub_service = combo_service_data['sub_service'][:-1],
                         sub_service_option = combo_service_data['sub_service_options'][:-1],
                     )
-                print('After comboTracking')
+
             message = ('Booked a service with this combo successfully  completed!')
             message_data = {'messages': message, 'status': 'success'}
             return JsonResponse(message_data)
@@ -1064,7 +1234,7 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
         return redirect('user_dashboard')
 
     except Exception as e:
-        print(e)
+        # print(e)
         return redirect('user_combo_data_handler')
 
 

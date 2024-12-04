@@ -26,7 +26,7 @@
     </div>
 
     <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
-        <div class="modal-content" style="max-width: 800px; height: 50%;">
+        <div class="modal-content" style="max-width: 800px; height: auto;">
             <div class="modal-header">
                 <h3 class="modal-title">Add User</h3>
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
@@ -171,7 +171,7 @@
                                     <i class="fa fa-trash"></i>
                                 </button>
                                 <button class="btn btn-dark car-detail-button" style="color: #c4c1c1; padding-right: 10px;"
-                                    onclick="userCarDetailsUpdate('updateForm', '{{ cardetails.id }}', '{{ cardetails.car_brand.brand }}', '{{ cardetails.car_brand.id }}',
+                                    onclick="userCarDetailsUpdate('updateCarForm', '{{ cardetails.id }}', '{{ cardetails.car_brand.brand }}', '{{ cardetails.car_brand.id }}',
                                     '{{ cardetails.car_year.year }}', '{{ cardetails.car_year.id }}', '{{ cardetails.car_model.model_name }}', '{{ cardetails.car_model.id }}',
                                      '{{ cardetails.car_trim.car_trim_name }}', '{{ cardetails.car_trim.id }}', '{{ cardetails.vin_number }}')">
                                     <i class="fa fa-edit"></i>
@@ -267,13 +267,13 @@
 
                 <!---------------------------Update Car details form ---------------------->
 
-                <div id="updateForm" class="modal-form" onclick="closeModalIfOutside(event, 'updateForm')">
-                    <div class="modal-content" style="max-width: 800px; height: 50%; ">
+                <div id="updateCarForm" class="modal-form" onclick="closeModalIfOutside(event, 'updateCarForm')">
+                    <div class="modal-content" style="max-width: 800px; height: auto; ">
                         <div class="modal-header">
                             <h4 class="modal-title w-100"
                                 style="text-align: center; font-size: 30px; font-weight: bold;">Update Car
                                 Detail</h4>
-                            <button type="button" class="close" onclick="closeModal('updateForm')"
+                            <button type="button" class="close" onclick="closeModal('updateCarForm')"
                                 style="font-size: 30px; font-weight: bolder;">×</button>
                         </div>
                         <div class="modal-body" id="modal-body">
@@ -343,7 +343,7 @@
                                 <div class="modal-footer justify-content-center">
                                     <div class="modal_btn" style="gap: 254px;">
                                         <button type="button" class="btn btn-danger"
-                                            onclick="closeModal('updateForm')">Close</button>
+                                            onclick="closeModal('updateCarForm')">Close</button>
                                         <button type="submit" class="btn btn-dark">Submit</button>
                                         <img src="http://unclefitter.encoreskydev.com/images/spin.webp"
                                             class="spinner ms-3" style="display: none;">

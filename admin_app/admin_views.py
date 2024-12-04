@@ -43,11 +43,16 @@ def dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     try:
         if request.method == 'GET':
             page_obj = brand_pagination(request)
-            notifications = specific_account_notification(request, request.user.user_id)
+            all_bookings = BookingAndQuote.objects.all().count()
+            all_users = CustomUser.objects.all().filter(role='user').count()
             unread_notification = Notification.get_unread_count(request.user.user_id)
-            all_users = CustomUser.objects.all().order_by('user_id').filter(role='user').count()
-            active_users = CustomUser.objects.all().order_by('user_id').filter(role='user', status='1').count()
-            approved_mechanics = CustomUser.objects.all().order_by('user_id').filter(role='mechanic', approved='1').count()
+            notifications = specific_account_notification(request, request.user.user_id)
+            active_users = CustomUser.objects.all().filter(role='user', status='1').count()
+            complete_bookings = BookingAndQuote.objects.all().filter(status='complete').count()
+            approved_mechanics = CustomUser.objects.all().filter(role='mechanic', approved='1').count()
+            unapproved_mechanics = CustomUser.objects.all().filter(role='mechanic', approved='0').count()
+            pending_bookings = BookingAndQuote.objects.all().filter(status='pending for quote').count()
+            scheduled_bookings = BookingAndQuote.objects.all().filter(status='progressing').count()
 
             context = {
                 'curl':admin_curl,
@@ -57,6 +62,11 @@ def dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
                 'notifications': notifications,
                 'approved_mechanics': approved_mechanics,
                 'unread_notification': unread_notification,
+                'all_bookings': all_bookings,
+                'pending_bookings': pending_bookings,
+                'complete_bookings': complete_bookings,
+                'scheduled_bookings': scheduled_bookings,
+                'unapproved_mechanics': unapproved_mechanics,
             }
             return render(request, 'admin/admin_dashboard.html', context)
         else:
@@ -70,8 +80,17 @@ def dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         messages.error(request, f"{e}")        
         return redirect('admin_dashboard')
 
-
+@login_required
 def admin_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to render the admin management page for Admin and allow the admin management.
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use for render the Admin management page.
+    """
+
     try:
         if request.method == 'GET':
             notifications = specific_account_notification(request, request.user.user_id)
@@ -156,8 +175,16 @@ def admin_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
         print(e)
         return redirect('admin_data_handler')
 
-
+@login_required
 def admin_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to update the admin detail and allow the admin management.
+
+    Args:
+        request
+
+    Returns:
+        Httprequest: This method is use for update the admin detail.
+    """
     try:
         if request.method == 'POST':
             admin_object = CustomUser.objects.get(user_id=id)
@@ -177,18 +204,20 @@ def admin_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
             admin_object.status = request.POST.get('status', admin_object.status)
 
             if uploaded_file:
+
                 image_url = f"{media_path}profile_images/{uploaded_file.name}"
                 media_directory = os.path.join(settings.BASE_DIR, 'media/profile_images')
                 
                 admin_object.profile_image = image_url
                 os.makedirs(media_directory, exist_ok=True)
-
                 file_path = os.path.join(media_directory, uploaded_file.name)
+
                 with open (file_path,'wb') as data:
                     for chunks in uploaded_file.chunks():
                         data.write(chunks)
 
             admin_object.save()
+            
             messages.success(request, "Updated successfully !!")
             return redirect('admin_data_handler')
         
@@ -235,7 +264,7 @@ def admin_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
         # messages.error(request, f"{e}")
         return redirect('admin_data_handler')
     
-
+@login_required
 def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     """
     This method handles show the messages list when the request type is GET and when the request type is POST it allow to send the email/message to the 
@@ -273,6 +302,7 @@ def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | Http
             recipient_type = request.POST.get('recipient_type')
 
             data = {key:request.POST.get(key) for key in  ['title', 'message', 'recipient_type',]}
+
             if sent_to == 'specific':
                 data['recipient_email'] = request.POST.get('recipient_email')
                 
@@ -285,19 +315,19 @@ def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | Http
                     recipient_email_list = all_data(request, recipient_type=recipient_type)
 
                     mail_content = []
-                    for x, recipient in enumerate(recipient_email_list):
+                    for content, recipient in enumerate(recipient_email_list):
 
-                        x =(
-                                data.get('title'),
-                                data.get('message'),
-                                request.user.email,
-                                [recipient.email]
-                            )
-                        mail_content.append(x)
+                        content =(
+                            data.get('title'),
+                            data.get('message'),
+                            request.user.email,
+                            [recipient.email]
+                        )
+                        mail_content.append(content)
+
                     send_mass_mail(tuple(mail_content))
 
                     for recipient in list(recipient_email_list):
-
                         Notification.objects.create(sender_id=sender_object, 
                                                 recipient_id=CustomUser.objects.get(email=recipient.email), recipient_type=recipient_type, 
                                                 title= data.get('title'), message=data.get('message'), email_status='Sent', is_read=False
@@ -363,6 +393,7 @@ def admin_notification_data_handler(request: HttpRequest) -> HttpResponse | Http
         print(e)
         return redirect('admin_notification_data_handler')
 
+@login_required
 def admin_notification_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
     """
     This method handles update messages status like read or not when user the request type is GET with an ID, and deleting message when the request type is DELETE with an ID.
@@ -382,10 +413,8 @@ def admin_notification_action_handler(request: HttpRequest, id: int) -> HttpResp
             
             notification_object.is_read = True
             notification_object.save()
-            
-            notification_read_status= {
-                'is_read': notification_object.is_read
-            }
+            notification_read_status= {'is_read': notification_object.is_read}
+
             messages.success(request, "This message mark as read")
             return JsonResponse(notification_read_status)
 

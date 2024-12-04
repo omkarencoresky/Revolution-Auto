@@ -14,26 +14,13 @@ from django.template import TemplateDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 
-from django.http import (HttpRequest, 
-                         HttpResponse, 
-                         HttpResponseRedirect)
+from django.http import (HttpRequest, HttpResponse, HttpResponseRedirect)
+from admin_app.models import (Services, SubService, ServiceType, ServiceCategory, SubServiceOption)
+from admin_app.forms import (AddServiceForm, AddSubServiceForm, AddServiceTypeForm, 
+                             AddServiceCategoryForm, AddSubServiceOptionForm)
 
-from admin_app.models import (Services, 
-                              SubService, 
-                              ServiceType,
-                              ServiceCategory,
-                              SubServiceOption)
-
-from admin_app.forms import (AddServiceForm,
-                             AddSubServiceForm,
-                             AddServiceTypeForm, 
-                             AddServiceCategoryForm, 
-                             AddSubServiceOptionForm)
-
-from schemas.service_schema import (validate_services_details,
-                                    validate_sub_service_details,
-                                    validate_service_type_details,
-                                    validate_service_category_details,
+from schemas.service_schema import (validate_services_details, validate_sub_service_details,
+                                    validate_service_type_details, validate_service_category_details,
                                     validate_sub_service_option_details)
 
 curl = settings.CURRENT_URL

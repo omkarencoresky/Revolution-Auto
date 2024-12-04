@@ -14,6 +14,14 @@ admin_curl = f"{curl}/admin/"
 
 @login_required
 def user_referral_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """This method is use to render the referral_management page and show the all referral's list.
+
+    Args:
+    -  request: The incoming HTTP request.
+
+    Returns:
+    -  Httprequest: This method is use to referral_management and show the all referral's list.
+    """
     try:
         if request.method == "GET":
             referral_pagination_object = referral_pagination(request)
