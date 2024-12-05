@@ -4,6 +4,7 @@
 {% block title %}Service Combos | Revolution Auto{% endblock %}
 
 {% block content %}
+<script src="https://js.stripe.com/v3/"></script>
 <div class="container-fluid container-p-y">
     <h4 class="font-weight-bold py-3 mb-0">Available Combos</h4>
     <div class="d-flex justify-content-between">
@@ -49,26 +50,14 @@
                                 style="color: #c5c6ce; font-size: 12px; padding-top: 6.5px; font-weight: 600;">View Details
                             </button>
                             
-                            <button  onclick="combo_car_selection('addForm','{{ combo.id }}')" class="btn btn-dark btn-sm"
+                            <button  onclick="combo_car_selection('addForm','{{ combo.id }}','{{ combo.discount_price }}','{{ combo.name }}')" class="btn btn-dark btn-sm"
                                 style="color: #c5c6ce; font-size: 12px; padding-top: 6.5px; font-weight: 600;">Buy Combo
                             </button>"
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <script>
-            function combo_car_selection(formId, id){
-                const modal = document.getElementById(formId);
-
-                const Form = modal.querySelector('#car_selection')
-                var url = `http://127.0.0.1:8000/combo/operation/${id}`;
-                Form.setAttribute('action', url);
-
-                modal.style.display = 'flex';
-            }
-        </script>
-        
+        </div>        
         {% empty %}
             <div class="col-12">
                 <div class="alert alert-info">
@@ -79,17 +68,18 @@
         
         <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
             <div class="modal-content" style="max-width: 500px; height: auto;">
-                <form  id="car_selection" method="post">
+                <form  id="combo_payment" method="post">
                     {% csrf_token %}
+                    
+                    <input type="hidden" id="booking_id">
                     <div class="modal-header p-0 m-0 justify-content-center">
                         <h3 class="modal-title">Select Car </h3>
                         <button type="button" class="close" onclick="closeModal('addForm')">×</button>
                     </div>
                     <div class="modal-body" id="modal-body">
-                        <label for="car_id">Select Your car:- </label>
                         <div id="car_select">
                             <select class="car_select w-100" name="car_id" id="">
-                                <option value="" disabled selected>Your Cars</option>
+                                <option value="" disabled selected>Select Your Cars</option>
                                 {% for car in user_car %}
                                     <option value="{{ car.id }}">
                                         {{ car.car_brand.brand }} - {{ car.car_model.model_name }} - 
@@ -97,6 +87,14 @@
                                     </option>
                                 {% endfor %}
                             </select>
+                        </div>  
+                        <div id="comboName" class="car_select my-2 py-0 px-1">
+                            <label  for="combo_name">Combo Name:- </label>
+                            <input class="car_select" id="combo_name" name="combo_name" type="text" readonly>
+                        </div>                    
+                        <div id="comboPrice" class="car_select my-2 py-0 px-1">
+                            <label for="combo_price">Offer Price:- </label>
+                            <input class="car_select" id="combo_price" name="combo_price" type="text" readonly>
                         </div>                    
                     </div>
                     <div class="modal-footer p-0 m-0">
@@ -104,7 +102,7 @@
                             <div class="w-100 modal_btn d-flex justify-content-around">
                                 <button type="button" class="btn btn-danger" data-dismiss="modal"
                                     onclick="closeModal('addForm')">Close</button>
-                                <button type="submit" class="btn btn-dark" data-dismiss="modal">Submit</button>
+                                <button id="submitPayment" type="submit" class="btn btn-dark" data-dismiss="modal">Submit</button>
                             </div>
                             <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
                                 style="display: none;">
@@ -124,6 +122,9 @@
                 <div class="modal-body" id="modal-body">
                     <div id="combo-details-container"></div>                    
                 </div>
+                <div id="error-message" class="alert alert-danger" role="alert">
+
+                </div>
                 <div class="modal-footer p-0 m-0">
                     <div class="row w-100">
                         <div class="w-100 modal_btn d-flex justify-content-around">
@@ -138,4 +139,58 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    
+    document.getElementById('combo_payment').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    
+    const bookingId = document.getElementById('booking_id').value;
+    const submitButton = document.getElementById('submitPayment');
+    const errorElement = document.getElementById('error-message');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const carId = document.querySelector('select[name="car_id"]').value;
+    const comboName = document.getElementById('combo_name').value;
+    const comboPrice = document.getElementById('combo_price').value;
+
+    try {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Processing...';
+        
+        // Create JSON data instead of FormData
+        const requestData = {
+            car_id: carId,
+            combo_name: comboName,
+            combo_price: comboPrice
+        };
+        
+        // Create checkout session
+        const response = await fetch(`/combo-create-checkout-session/${bookingId}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData),
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Redirect to Stripe Checkout
+            window.location.href = data.checkout_url;
+        } else {
+            throw new Error(data.error || 'Payment failed');
+        }
+    } catch (error) {
+        window.alert(error.message);
+        window.location.href = 'http://127.0.0.1:8000/combos/';
+        // errorElement.textContent = error.message;
+        // errorElement.classList.remove('d-none');
+        // submitButton.disabled = false;
+        // submitButton.textContent = 'Proceed to Payment';
+    }
+});
+
+</script>
 {% endblock %}

@@ -78,4 +78,8 @@ urlpatterns = [
     path('combo/operation/<int:id>', user_views.combo_action_handler, name='combo_action_handler'),
     path('combo/booking/', user_views.user_combo_handler, name='user_combo_handler'),
 
+    path('combo-create-checkout-session/<int:id>', user_views.combo_create_checkout_session, name='combo_create_checkout_session'),
+    path('combo-payment-success/', user_views.combo_payment_success, name='combo_payment_success'),
+    path('combo-payment-cancel/', user_views.combo_payment_cancel, name='combo_payment_cancel'),
+
 ]

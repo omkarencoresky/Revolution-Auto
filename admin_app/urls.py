@@ -107,6 +107,7 @@ urlpatterns = [
 
     # -------------------------------------Booking management urls--------------------- #
     path('combo-management/', combo_views.combo_data_handler, name = 'combo_data_handler'),
+    path('user-combo-management/', combo_views.users_combo_data_handler, name = 'users_combo_data_handler'),
 ]
 
 

@@ -2,7 +2,7 @@ from admin_app.models import *
 from django.http import HttpRequest
 from django.core.paginator import Page
 from django.core.paginator import Paginator
-from user_app.models import CustomUser, BookingAndQuote, ServicePayment
+from user_app.models import CustomUser, BookingAndQuote, ServicePayment, UserComboPackage
 
 
 
@@ -391,6 +391,25 @@ def Service_combo_pagination(request: HttpRequest) -> Page:
     -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
     """
     combos = ComboDetails.objects.all().order_by('-created_at')
+    
+    # Pagination setup
+    paginator = Paginator(combos, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return page_obj
+
+
+def Users_combo_pagination(request: HttpRequest) -> Page:
+    
+    """Paginate a list of all mechanics and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for mechanics pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
+    """
+    combos = UserComboPackage.objects.filter().order_by('created_at')
     
     # Pagination setup
     paginator = Paginator(combos, 10)

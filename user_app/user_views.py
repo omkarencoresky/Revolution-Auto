@@ -802,8 +802,6 @@ def create_checkout_session(request: HttpResponse, id: int)-> HttpResponse | Htt
 
         # Calculate amount in cents and ensure it's positive
         amount = int(float(booking_object.total_service_amount) * 100)
-        # if amount <= 0:
-        #     raise ValueError("Amount must be greater than 0")
 
         checkout_session = stripe.checkout.Session.create(
             payment_method_types=['card'],
@@ -889,7 +887,7 @@ def payment_success(request) -> HttpResponse | HttpResponseRedirect:
             'payment_method_types': session.payment_method_types[0],
         }
         
-        messages.success(request, 'Payment successful')
+        messages.success(request, 'Payment successfully completed')
         return render(request, 'booking_payment/success.html', context)
 
     except stripe.error.StripeError as e:
@@ -972,7 +970,7 @@ def user_payment(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
     This method is used for render the payment page along with all the payments data of user's.
 
     Args:
-        request
+        request (HttpRequest): The HTTP request object
 
     Returns:
         HttpResponse: This method is used for render the payment page along with all the payments data of user's.
@@ -1006,6 +1004,15 @@ def user_payment(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
 
 @login_required
 def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    """
+    This function is show the all available combo list.
+    
+    Args:
+        request (HttpRequest): The HTTP request object
+    
+    Returns:
+        HttpResponse: for get show the combo list. 
+    """
     try:
         if request.method == 'GET':
 
@@ -1033,18 +1040,27 @@ def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponse
 
 
 @login_required
-def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect | JsonResponse:
+    """
+    This function is create a list of the service for get create all service list and for post create a not used service list or filtered.
+    
+    Args:
+        request (HttpRequest): The HTTP request object
+        id (int): The ID of the combo package
+    
+    Returns:
+        HttpResponse: for get create all service list and for post create a not used service list or filtered. 
+    """
     try:
         if request.method == 'GET':
-            user_combo_id = request.GET.get('user_combo_id')
-            # print('used_combo_services', request.GET.get('user_combo_id'))
-
             combo_detail = ComboDetails.objects.get(id=id)
-            user_combo_id = request.GET.get('user_combo_id')
             combo_service_detail = ComboServiceDetails.objects.filter(combo=combo_detail.id)
+
+            user_combo_id = request.GET.get('user_combo_id')
             services_list = []
 
             if user_combo_id in [None, 'undefined']:
+
                 for service in combo_service_detail:
                     service_dict = {
                         'service_type': service.service_type.id,
@@ -1057,6 +1073,7 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
                     }
                     
                     sub_services = ComboSubServiceDetails.objects.filter(combo_service_id=service.id)
+
                     for sub_service in sub_services:
                         sub_service_dict = {
                             'sub_service_id': sub_service.sub_service_id.id,
@@ -1072,8 +1089,8 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
                         service_dict['sub_services'].append(sub_service_dict)
                     
                     services_list.append(service_dict)
-                
                 return JsonResponse({'services': services_list})
+            
             else:
                 user_used_combo_object = UserComboTracking.objects.filter(user_combo_id=user_combo_id)
                 
@@ -1134,43 +1151,30 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
                 
                 return JsonResponse({'services': services_list})
 
-
-        elif request.method == 'POST':
-            user = request.user.user_id
-            check_combo = UserComboPackage.objects.filter(user_id=user, combo=id).first()
-
-            if check_combo is None:
-                UserComboPackage.objects.create(
-                    user_id = request.user.user_id,
-                    combo = ComboDetails.objects.get(id=id),
-                    car_id = UserCarRecord.objects.get(id=request.POST.get('car_id')),
-                )
-                messages.success(request, f'You have successfully purchase combo pack')
-                
-            else:
-                messages.error(request, 'This Combo is already purchased')
-                    
-            return redirect('user_combo_data_handler')
-        
         else:
             messages.error(request, 'In-valid method, try again')
             return redirect('user_combo_data_handler')
-    
+        
     except ObjectDoesNotExist:
-        messages.error(request, f"Object does not exist.")
-        return redirect('user_combo_data_handler')
+        return JsonResponse({'message': 'Object does not exist'})
     
-    except TemplateDoesNotExist:
-        messages.error(request, f"An unexpected error occurred. Please try again later.")
-        return redirect('user_dashboard')
-
     except Exception as e:
         # print(e)
-        return redirect('user_combo_data_handler')
+        return JsonResponse({'message': f'Object does not exist {e}'})
+    
 
 
 @login_required
 def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect | JsonResponse:
+    """
+    This function is show the user purchased combo list and when the post request than create a booking with the purchased combo.
+    
+    Args:
+        request (HttpRequest): The HTTP request object
+    
+    Returns:
+        HttpResponse: for get request show combo list and for post allow to book a service with the purchased combo offer. 
+    """
     try:
         if request.method == 'GET':
 
@@ -1190,6 +1194,7 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
                 data = json.loads(request.body)
 
                 # ----------------User combo limit table entry----------------
+
                 for combo_service_data in data:
                     if combo_service_data.keys():
                         user_combo_object = UserComboPackage.objects.get(id=combo_service_data['combo_id'])
@@ -1206,6 +1211,7 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
                             car_model = CarModel.objects.get(id=user_combo_object.car_id.car_model.id),
                             car_trim = CarTrim.objects.get(id=user_combo_object.car_id.car_trim.id),
                             car_vno = user_combo_object.car_id.vin_number,
+                            booking_type = 'combo',
                             car_service_type = ServiceType.objects.get(id=combo_service_data['service_type']),
                             car_service_category = ServiceCategory.objects.get(id=combo_service_data['service_category']),
                             car_services = combo_service_data['service'],
@@ -1221,7 +1227,7 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
                         sub_service_option = combo_service_data['sub_service_options'][:-1],
                     )
 
-            message = ('Booked a service with this combo successfully  completed!')
+            message = ('Booking with this combo successfully completed!')
             message_data = {'messages': message, 'status': 'success'}
             return JsonResponse(message_data)
 
@@ -1238,3 +1244,179 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
         return redirect('user_combo_data_handler')
 
 
+@login_required
+def combo_create_checkout_session(request: HttpRequest, id: int) -> HttpResponse | HttpResponseRedirect:
+    """
+    Create a Stripe checkout session for purchasing a combo package.
+    
+    Args:
+        request (HttpRequest): The HTTP request object
+        id (int): The ID of the combo package
+    
+    Returns:
+        JsonResponse: Checkout session details or error information
+    """
+    try:
+        if request.method == 'POST':
+            user = request.user.user_id
+            
+            try:
+                data = json.loads(request.body)
+            except json.JSONDecodeError:
+                data = request.POST
+            
+            # Extract data
+            combo_name = data.get('combo_name')
+            combo_price = data.get('combo_price')
+            car_id = data.get('car_id')
+            
+            # Validate input
+            if not combo_name or not combo_price:
+                return JsonResponse({ 'success': False, 'error': 'Missing combo details'}, status=400)
+            
+            try:
+                combo_price = int(float(combo_price) * 100)
+            except (ValueError, TypeError):
+                return JsonResponse({'success': False, 'error': 'Invalid price format' }, status=400)
+            
+            check_combo = UserComboPackage.objects.filter(user_id=user, combo=id).first()
+            
+            if check_combo is None:
+                # Create Stripe checkout session
+                checkout_session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price_data': {
+                            'currency': 'usd',
+                            'unit_amount': combo_price,
+                            'product_data': {
+                                'name': combo_name,
+                            },
+                        },
+                        'quantity': 1,
+                    }],
+                    metadata={
+                        'combo_id': id,
+                        'user_id': user,
+                        'car_id': car_id,
+                    },
+                    mode='payment',
+                    success_url=request.build_absolute_uri(reverse('combo_payment_success')) + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url=request.build_absolute_uri(reverse('combo_payment_cancel')),
+                )
+                return JsonResponse({'success': True, 'checkout_url': checkout_session.url})
+            
+            else:
+                return JsonResponse({ 'success': False, 'error': 'This Combo is already purchased'}, status=400)
+        
+        else:
+            return JsonResponse({ 'success': False, 'error': 'Invalid request method' }, status=405)
+        
+    except stripe.StripeError as stripe_err:
+            return JsonResponse({'success': False, 'error': f'Payment processing error {stripe_err}'}, status=500)
+    
+    except Exception as e:
+        # print(f"Unexpected error: {str(e)}")
+        return JsonResponse({ 'success': False,  'error': 'An unexpected error occurred' }, status=500)
+    
+
+
+@login_required
+def combo_payment_success(request) -> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for render the payment success page with the payment details.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the payment success page with the payment details.
+    """
+    session_id = request.GET.get('session_id')
+
+    if not session_id:
+
+        messages.error(request, "No session ID provided")
+        return redirect('user_booking_data_handler')
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+
+        if session.payment_status != 'paid':
+            messages.error(request, "Payment has not been completed")
+            return redirect('user_booking_data_handler')
+
+        # Use transaction to ensure database consistency
+        with transaction.atomic():
+
+            UserComboPackage.objects.create(
+                user_id = request.user.user_id,
+                combo = ComboDetails.objects.get(id=session.metadata.get('combo_id')),
+                car_id = UserCarRecord.objects.get(id=session.metadata.get('car_id')),
+            )
+
+        context = {
+            'session_id': session.id, 'amount_total': session.amount_total / 100,
+            'payment_method_types': session.payment_method_types[0],
+        }
+        
+        # messages.success(request, 'Payment successfully completed')
+        return render(request, 'booking_payment/success.html', context)
+
+    except stripe.error.StripeError as e:
+        messages.error(request, f"Stripe error: {str(e)}")
+
+    except ObjectDoesNotExist:
+        messages.error(request, "Booking not found")
+
+    except TemplateDoesNotExist:
+        messages.error(request, "Template error")
+
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+    
+    return redirect('user_booking_data_handler')
+
+
+
+@login_required
+def combo_payment_cancel(request)-> HttpResponse | HttpResponseRedirect:
+    """
+    This method is used for render the payment cancel page with the payment details.
+
+    Args:
+        request
+
+    Returns:
+        HttpResponse: This method is used for render the payment cancel page with the payment details.
+    """
+    session_id = request.GET.get('session_id')
+    if not session_id:
+
+        messages.error(request, "No session ID provided")
+        return redirect('user_booking_data_handler')
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+        context = {
+            'session_id': session.id,
+            'amount_total': session.amount_total / 100,
+            'payment_method_types': session.payment_method_types[0],
+        }
+        
+        # messages.warning(request, 'Payment cancelled')
+        return render(request, 'booking_payment/failed.html', context)
+
+    except stripe.error.StripeError as e:
+        messages.error(request, f"Stripe error: {str(e)}")
+
+    except ObjectDoesNotExist:
+        messages.error(request, "Booking not found")
+
+    except TemplateDoesNotExist:
+        messages.error(request, "Template error")
+
+    except Exception as e:
+        messages.error(request, f"An unexpected error occurred: {str(e)}")
+    
+    return redirect('user_booking_data_handler')

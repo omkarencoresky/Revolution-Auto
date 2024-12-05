@@ -35,7 +35,7 @@
                             <th scope="col">Combo Name</th>
                             <th scope="col">Car Details</th>
                             <th scope="col">Max Usage Limit</th>
-                            <th scope="col">Remaining Usage Limit</th>
+                            <th scope="col">Combo Service Used</th>
                             <!--<th scope="col">Request Date</th> -->
                             <th scope="col">Action</th>
                         </tr>
@@ -49,83 +49,23 @@
                             <td>{{ combo.car_id.car_brand.brand }}, {{ combo.car_id.vin_number }}</td>
                             <td>{{ combo.combo.usage_limit }}</td>
                             <td>{{ combo.remaining_combo_usage }}</td>
-                            <td>    
-                                <button class="btn btn-dark car-detail-button" onclick="combo_detail('comboForm', '{{combo.combo.id}}', is_combo_selection=true, '{{combo.id}}')" 
-                                style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
-                            </td>
-                            
-                        <!-- {% if combo.combo.usage_limit >= combo.remaining_combo_usage %}
-                            <td>    
-                                <button class="btn btn-dark car-detail-button" onclick="combo_detail('comboForm', '{{combo.combo.id}}', is_combo_selection=true, '{{combo.id}}')" 
-                                style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
-                            </td>
-                        {% elif combo.combo.usage_limit < combo.remaining_combo_usage %}
-                            <td> 
-                                <button class="btn btn-dark car-detail-button" style="color: #c4c1c1; padding-right: 10px; width: 50.5%;">Limit Over</button>
-                            </td>
-                        {% endif %} -->
+
+                            {% if combo.combo.usage_limit >= combo.remaining_combo_usage %}
+                                <td>    
+                                    <button class="btn btn-dark car-detail-button" onclick="combo_detail('comboForm', '{{combo.combo.id}}', is_combo_selection=true, '{{combo.id}}')" 
+                                    style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
+                                </td>
+                            {% elif combo.combo.usage_limit < combo.remaining_combo_usage %}
+                                <td> 
+                                    <button class="btn btn-dark car-detail-button" style="color: #c4c1c1; padding-right: 10px; width: 50.5%;">Limit Over</button>
+                                </td>
+                            {% endif %}
                             
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-
-                <!-- <div id="viewForm" class="modal-form" onclick="closeModalIfOutside(event, 'viewForm')"> 
-                    <div class="modal-content" style="max-width: 800px; height: 43%; width: 30%;">
-                        <div class="modal-header">
-                            <h4 class="modal-title w-100"
-                                style="text-align: center; font-size: 30px; font-weight: bold;">Car
-                                Detail</h4>
-                            <button type="button" class="close" onclick="closeModal('viewForm')"
-                                style="font-size: 30px; font-weight: bolder;">×</button>
-                        </div>
-                        <div class="modal-body" id="modal-body">
-                            <div class="update-form ">
-                                <div style="text-align: center; margin-bottom: 20px;">
-                                    <img style="height: 100px; width: 200px;" id="image_url" alt="Brand_image">
-                                </div>
-                                <div>
-                                    <div style="font-size: larger; font-weight: 600; border: none;">
-                                        <label for="car_year_detail" style="font-size: larger;">Year : </label>
-                                        <input style="font-weight: 500;" id="car_year_detail" class="border-0"
-                                            disabled></input>
-                                    </div>
-
-                                    <div style="font-size: larger; font-weight: 600; border: none;">
-                                        <label for="car_trim" style="font-size: larger;">Car Trim : </label>
-                                        <input style="font-weight: 500;" id="car_trim_name" class="border-0"
-                                            disabled></input>
-                                    </div>
-                                    <div style="font-size: larger; font-weight: 600; border: none;">
-                                        <label for="car_model" style="font-size: larger;">Car Model : </label>
-                                        <input style="font-weight: 500;" id="car_model_name" class="border-0"
-                                            disabled></input>
-                                    </div>
-                                    <div style="font-size: larger; font-weight: 600; border: none;">
-                                        <label for="car_brand_name" style="font-size: larger;">Brand Name : </label>
-                                        <input style="font-weight: 500;" id="car_brand_name" class="border-0"
-                                            disabled></input>
-                                    </div>
-                                    <div style="font-size: larger; font-weight: 600; border: none;">
-                                        <label for="vin_number" style="font-size: larger;">Vehicle Identification Number
-                                            : </label>
-                                        <input style="font-weight: 500;" id="vin_number" class="border-0"
-                                            disabled></input>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row w-100">
-                                <div class="w-100 modal_btn d-flex justify-content-around mt-3">
-                                    <button type="button" class="btn btn-danger" data-dismiss="modal"
-                                        onclick="closeModal('viewForm')">Close</button>
-                                </div>
-                                <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner"
-                                    style="display: none;">
-                            </div>
-                        </div>
-                    </div>
-                </div> -->
-
+                
                 <div id="comboForm" class="modal-form" onclick="closeModalIfOutside(event, 'comboForm')">
                     <div class="modal-content" style="max-width: 800px; height: auto; max-height: 1000px; ">
                         <div class="modal-header">

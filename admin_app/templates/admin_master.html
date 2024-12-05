@@ -198,12 +198,33 @@
                             </a>
                         </li>
 
+
                         <li class="sidenav-item">
+                            <a href="javascript:" class="sidenav-link sidenav-toggle" 
+                            onclick="toggleMenu('sidenav-dropdown-menu-combo-Management')" id="sidenav-dropdown-User-Management">
+                                <i class="sidenav-icon fa fa-gift"></i>
+                                <div>Combo Management</div>
+                            </a>
+                            <ul class="sidenav-menu" id="sidenav-dropdown-menu-combo-Management">
+                                <li class="sidenav-item">
+                                    <a href="{% url 'combo_data_handler' %}" class="sidenav-link">
+                                        <div class="sidenav-item-padding">Combo List</div>
+                                    </a>
+                                </li>
+                                <li class="sidenav-item">
+                                    <a href="{% url 'users_combo_data_handler' %}" class="sidenav-link">
+                                        <div class="sidenav-item-padding">Users Combo</div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <!-- <li class="sidenav-item">
                             <a href="{% url 'combo_data_handler' %}" class="sidenav-link">
                                 <i class="sidenav-icon fa fa-shopping-bag"></i>
                                 <div>Combo Management</div>
                             </a>
-                        </li>
+                        </li> -->
 
                         <li class="sidenav-item">
                             <a href="{% url 'user_referral_data_handler' %}" class="sidenav-link">

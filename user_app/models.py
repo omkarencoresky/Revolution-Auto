@@ -140,6 +140,7 @@ class BookingAndQuote(models.Model):
     total_service_amount = models.FloatField(blank=False, null=True)
     parts_amount = models.FloatField(blank=False, null=True)
     labour_amount = models.FloatField(blank=False, null=True)
+    booking_type = models.CharField(default='booking')
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     schedule_at = models.CharField(blank=True, null=True)

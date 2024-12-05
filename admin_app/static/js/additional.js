@@ -2691,10 +2691,34 @@ try {
 }
 
 
+
+function combo_car_selection(formId, id, combo_price, combo_name){
+    
+    const modal = document.getElementById(formId);
+
+    const comboPrice = modal.querySelector('#combo_price')
+    comboPrice.value = combo_price
+
+    const comboName = modal.querySelector('#combo_name')
+    comboName.value = combo_name
+
+    const booking_id = modal.querySelector('#booking_id')
+    booking_id.value = id
+
+    // const Form = modal.querySelector('#car_selection')
+    // var url = `http://127.0.0.1:8000/combo/operation/${id}`;
+    // Form.setAttribute('action', url);
+
+    modal.style.display = 'flex';
+}
+
+
+
+
 function combo_detail(formId, id, is_combo_selection, user_combo_id) {
     const container = document.getElementById('combo-details-container');
     container.innerHTML = '';
-
+    console.log('formId', formId);    
     
     fetch(`/combo/operation/${id}?user_combo_id=${user_combo_id}`)
 
@@ -2755,115 +2779,6 @@ function renderComboDetails(services) {
     });
 }
 
-
-// function renderComboDetails(services) {
-//     const container = document.getElementById('combo-details-container');
-//     container.innerHTML = '';
-
-//     services.forEach(service => {
-//         const serviceElement = document.createElement('div');
-//         serviceElement.classList.add('combo-item');
-//         const options = ''
-//         console.log('service.sub_service_option_id', service.sub_service_option_id,service.sub_service_title);
-        
-//         if (service.sub_service_title != undefined ){
-//              options = service.sub_service_option_id
-//             .map(option => `<li>${option.title}</li>`)
-//             .join('')
-//         }
-//         serviceElement.innerHTML = `
-//             <h3>${service.service_title}</h3>
-//             <p><strong>Service Type:</strong> ${service.service_type_name}</p>
-//             <p><strong>Service Category:</strong> ${service.service_category_name}</p>
-//             <h4>${service.sub_service_title}</h4>
-//             <ul>
-//                 ${options}
-//             </ul>   
-//         `;
-//         container.appendChild(serviceElement);
-//     });
-// }
-
-
-// Used to show the Combo data to user's
-
-// function renderComboD(services, user_combo_id) {
-//     const container = document.getElementById('combo-details-container');
-    
-//     const existingServicesMap = new Map();
-//     services.forEach(service => {
-//         const serviceKey = `${service.service}-${service.service_type}`;
-
-//         if (existingServicesMap.has(serviceKey)) {
-//             console.log('Check if');
-            
-//             const existingServiceElement = existingServicesMap.get(serviceKey);
-            
-//             const existingOptionsContainer = existingServiceElement.querySelector('.options-container');
-//             let optionsHTML = ''
-//             if (service.sub_service_option_id){
-//                 optionsHTML = service.sub_service_option_id
-//                     .map((option, index) => 
-//                         `<div data-value="${option.id}" class="option-${service.sub_service_id}">
-//                             ${index + 1}. ${option.title}
-//                         </div>`
-//                     )
-//                     .join('');
-//                 }
-            
-//                 existingOptionsContainer.innerHTML += `
-//                     <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
-//                         Sub Service Question:- ${service.sub_service_title}
-//                     </p>
-//                     ${optionsHTML}
-//             `;
-//         } else {
-//             console.log('Check else');
-//             const serviceElement = document.createElement('div');
-//             serviceElement.classList.add('combo-item');
-//             serviceElement.classList.add('clickable-service');
-//             let optionsHTML = ''
-//             if (service.sub_service_option_id){
-//                 optionsHTML = service.sub_service_option_id
-//                     .map((option, index) => 
-//                         `<div data-value="${option.id}" class="option-${service.sub_service_id}">
-//                             ${index + 1}. ${option.title}
-//                         </div>`
-//                     )
-//                     .join('');
-//                 } else{
-//                 const optionsHTML = ''
-//                 }
-                
-
-//             serviceElement.innerHTML = `
-//                 <div class="service-header">
-//                     <input value="${user_combo_id}" id="combo_id" name="combo_id" hidden>
-//                     <h3 id="service" data-value="${service.service}">${service.service_title}</h3>
-//                     <p id="service_type" data-value="${service.service_type}" class="my-0">
-//                         Service Type:- ${service.service_type_name}
-//                     </p>
-//                     <p id="service_category" data-value="${service.service_category}" class="my-0">
-//                         Service Category:- ${service.service_category_name}
-//                     </p>
-//                     <p class="sub_service" data-value="${service.sub_service_id}" class="my-0">
-//                         Sub Service Question:- ${service.sub_service_title}
-//                     </p>
-//                 </div>
-//                 <div class="options-container">
-//                     ${optionsHTML}
-//                 </div>
-//             `;
-
-//             serviceElement.addEventListener('click', function() {
-//                 const isSelected = serviceElement.classList.toggle('selected');
-//             });
-
-//             container.appendChild(serviceElement);
-//             existingServicesMap.set(serviceKey, serviceElement);
-//         }
-//     });
-// }
 
 function renderComboD(services, user_combo_id) {
     
@@ -3046,15 +2961,3 @@ function collectSelectedOptions(test){
     
 }
 
-
-
-
-// function combo_car_selection(formId, id){
-//     const modal = document.getElementById(formId);
-
-//     const Form = modal.querySelector('#car_selection')
-//     var url = `http://127.0.0.1:8000/combo/operation/${id}`;
-//     Form.setAttribute('action', url);
-
-//     modal.style.display = 'flex';
-// }
