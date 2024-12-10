@@ -30,29 +30,35 @@
         <div class="col-md-6 mb-4">
             <div class="card h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between">
+                    <h4>Combo Details</h4>
+                    <div class="d-flex justify-content-between">    
                         <div>
-                            <h5 class="card-title">{{ combo.name }}</h5>
+                            <h5 class="card-title">{{ combo.combo_name }}</h5>
                             <h5 class="card-title">
-                                Total Price:-  $ <span class="h5 mb-0" style="text-decoration: line-through; color: #999;"> {{ combo.price }} </span>
+                                Total Price:-  $ <span class="h5 mb-0" style="text-decoration: line-through; color: #999;"> {{ combo.combo_price }} </span>
                             </h5>
-                            <h5 style="color: red;"><span style="color: #4E5155;">Offer price:-  $</span>  {{ combo.discount_price }} 
-                                <!-- <i class="feather icon-star navbar-icon align-middle"></i></h5> -->
+                            <h5 style="color: red;"><span style="color: #4E5155;">Offer price:-  $</span>  {{ combo.combo_discount_price }} 
+                                </h5>
                         </div>
                         <div>
-                            <label for="card-title">Duration</label>
-                            <h5 class="card-title my-2">{{ combo.start_date }} - {{ combo.end_date }}</h5>
+                            <label class="card-title" for="card-title">DURATION</label>
+                            <h5 class="card-title">{{ combo.combo_start_date }} - {{ combo.combo_end_date }}</h5>
+                            <h5 class="card-title my-2">Discount % {{combo.discount_percentage}}</h5>
                         </div>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
+                    
+                    <div class="d-flex justify-content-between align-items-center combo-card" data-end-date="{{ combo.combo_end_date }}">
                         <div>
                             <button onclick="combo_detail('descriptionForm','{{ combo.id }}')" class="btn btn-dark btn-sm"
                                 style="color: #c5c6ce; font-size: 12px; padding-top: 6.5px; font-weight: 600;">View Details
                             </button>
                             
-                            <button  onclick="combo_car_selection('addForm','{{ combo.id }}','{{ combo.discount_price }}','{{ combo.name }}')" class="btn btn-dark btn-sm"
+                        </div>
+                        <div>
+                            <button  onclick="combo_car_selection('addForm','{{ combo.id }}','{{ combo.combo_discount_price }}','{{ combo.combo_name }}')" 
+                                class="btn btn-dark btn-sm btn-buy-combo"
                                 style="color: #c5c6ce; font-size: 12px; padding-top: 6.5px; font-weight: 600;">Buy Combo
-                            </button>"
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -114,7 +120,7 @@
 
 
         <div id="descriptionForm" class="modal-form" onclick="closeModalIfOutside(event, 'descriptionForm')">
-            <div class="modal-content" style="max-width: 800px; height: auto;">
+            <div class="modal-content" style="max-width: 800px; height: auto; max-height: 850px;">
                 <div class="modal-header p-0 m-0 justify-content-center">
                     <h3 class="modal-title">Combo pack Services </h3>
                     <button type="button" class="close" onclick="closeModal('descriptionForm')">×</button>
@@ -122,7 +128,7 @@
                 <div class="modal-body" id="modal-body">
                     <div id="combo-details-container"></div>                    
                 </div>
-                <div id="error-message" class="alert alert-danger" role="alert">
+                <div id="error-message" class="alert alert-danger hidden" role="alert">
 
                 </div>
                 <div class="modal-footer p-0 m-0">
@@ -185,12 +191,43 @@
     } catch (error) {
         window.alert(error.message);
         window.location.href = 'http://127.0.0.1:8000/combos/';
-        // errorElement.textContent = error.message;
-        // errorElement.classList.remove('d-none');
-        // submitButton.disabled = false;
-        // submitButton.textContent = 'Proceed to Payment';
     }
 });
+
+    function isExpired(endDate) {
+        // Parse the endDate string into a Date object
+        
+        const parsedEndDate = new Date(endDate);
+        const currentDate = new Date();
+
+        // Compare dates
+        return parsedEndDate < currentDate;
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const comboCards = document.querySelectorAll(".combo-card");
+        comboCards.forEach((card) => {
+            const endDate = card.getAttribute("data-end-date");
+            
+            if (isExpired(endDate)) {
+                // Add the "expired" class for styling
+
+                // Create the "Expired" tag element
+                const expiredTag = document.createElement("div");
+                expiredTag.classList.add("expired-tag");
+                expiredTag.innerText = "Expired";
+
+                // Append the tag to the card
+                card.appendChild(expiredTag);
+
+                card.querySelector(".btn-buy-combo").setAttribute('onclick', '')
+                card.querySelector(".btn-buy-combo").style.cursor = "not-allowed";
+                card.querySelector(".btn-buy-combo").textContent = "Unavailable";
+            }
+        });
+    });
+
+
 
 </script>
 {% endblock %}

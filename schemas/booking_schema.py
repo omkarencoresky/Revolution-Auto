@@ -211,53 +211,9 @@ car_detail_schema = {
 
 
 
-# card_data_schema = {
-#     "type": "object",
-#     "properties": {
-#         "customer_name": {
-#             "type": "string",
-#             "minLength": 1,
-#             "maxLength": 100,
-#             "pattern": "^[a-zA-Z .-]+$",
-#             "description": "Customer name must contain only letters, spaces, dots, and hyphens"
-#         },
-#         "customer_address": {
-#             "type": "string",
-#             "minLength": 1,
-#             "maxLength": 200,
-#             "pattern": "^[a-zA-Z0-9 ,.-]+$",
-#             "description": "Address must contain only alphanumeric characters, spaces, commas, dots, and hyphens"
-#         },
-#         "card_no": {
-#             "type": "string",
-#             "minLength": 16,
-#             "maxLength": 16,
-#             "pattern": "^[0-9]{16}$",
-#             "description": "Card number must be exactly 16 digits"
-#         },
-#         "expiry_date": {
-#             "type": "string",
-#             "pattern": "^(0[1-9]|1[0-2])\/([0-9]{2})$",
-#             "description": "Expiry date must be in MM/YY format"
-#         },
-#         "cvv": {
-#             "type": "string",
-#             "minLength": 3,
-#             "maxLength": 3,
-#             "pattern": "^[0-9]{3}$",
-#             "description": "CVV must be exactly 3 digits"
-#         }
-#     },
-#     "required": ["customer_name", "customer_address", "card_no", "expiry_date", "cvv"],
-#     "additionalProperties": True
-# }
-
-
-
 
 # Compile the schemas
 validate_quote_price = fastjsonschema.compile(quote_price_schema)
 validate_car_detail = fastjsonschema.compile(car_detail_schema)
 validate_quote_data = fastjsonschema.compile(quote_data_schema)
-# validate_card_data = fastjsonschema.compile(card_data_schema)
 validate_quote_sub_service_option_data_schema = fastjsonschema.compile(quote_sub_service_option_data_schema)

@@ -2074,16 +2074,20 @@ function selectPaymentMethod(event) {
 }
 
 
-function submitForm(event) {
+function submitForm(event, bookingType) {
     event.preventDefault();
-
-    // Ensure that payment method is selected
-    const paymentSelected = document.querySelector('input[name="payment_mode"]:checked');
+    if (bookingType == 'booking'){
     
-    if (!paymentSelected) {
-        isValid = false;
-        alert("Please select a payment method before submitting.");
-    } else{
+        // Ensure that payment method is selected
+        const paymentSelected = document.querySelector('input[name="payment_mode"]:checked');
+        
+        if (!paymentSelected) {
+            isValid = false;
+            alert("Please select a payment method before submitting.");
+        } else{
+            document.getElementById('myFrom').submit();
+        }
+    } else if (bookingType == 'combo'){
         document.getElementById('myFrom').submit();
     }
 }
@@ -2631,64 +2635,97 @@ function resetSelection() {
 }
 
 
+
 function updateLocalStorage() {
-try {
-    const csrftoken = getCookie('csrftoken');
-    comboName = document.getElementById('combo_name').value
-    price = document.getElementById('price').value
-    discountPrice = document.getElementById('discount_price').value
-    start_date = document.getElementById('start_date').value
-    end_date = document.getElementById('end_date').value
-    usage_limit = document.getElementById('usage_limit').value
-    
-    // Format the data for the backend
-    const backendData = {
-        services: Object.values(selectedServices)
-    };
-    backendData["price"] = price
-    backendData["end_date"] = end_date
-    backendData["comboName"] = comboName
-    backendData["start_date"] = start_date
-    backendData["discountPrice"] = discountPrice
-    backendData["usage_limit"] = usage_limit
-    
-    fetch(`/admin/combo-management/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': csrftoken,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(backendData)
-    })
-    .then(response => {
-        console.log('response', response);
+    const serviceElement = document.getElementById('selected_services_container');
+
+    if (!serviceElement) {
+        alert('No service is selected for this combo');
+        // window.location.href = 'http://127.0.0.1:8000/admin/combo-management/';
+        return;
+    }
+
+    const usageLimit = parseInt(document.getElementById('usage_limit').value, 10);
+    const selectedServicesLength = serviceElement.children?.length || 0;
+
+    if (selectedServicesLength === 0) {
+        alert('No service is selected for this combo');
+        // window.location.href = 'http://127.0.0.1:8000/admin/combo-management/';
+        return;
+    }
+
+    if (selectedServicesLength !== usageLimit) {
+        alert(`Selected services (${selectedServicesLength}) do not match the usage limit (${usageLimit}).`);
+        return;
+    }
+    const price = document.getElementById('price').value;
+    const discountPrice = document.getElementById('discount_price').value;
+
+    if (price < discountPrice){
+        alert('Here all service price should be grater than the discount price');
+        return
+    }
+
+    try {
+        const csrftoken = getCookie('csrftoken');
+        const comboName = document.getElementById('combo_name').value;
+        const startDate = document.getElementById('start_date').value;
+        const endDate = document.getElementById('end_date').value;
+
+        const discountPercentage = parseFloat(((price-discountPrice)/price)*100)
         
-        if (!response.ok) {
-            return response.text().then(text => {
-                console.error(`Network response was not ok: ${text}`);
-                throw new Error(`Network response was not ok: ${text}`);
+        // Prepare data for the backend
+        const backendData = {
+            services: Object.values(selectedServices),
+            combo_name: comboName,
+            price,
+            discount_price: discountPrice,
+            start_date: startDate,
+            end_date: endDate,
+            usage_limit: usageLimit,
+            discount_percentage : discountPercentage,
+        };
+
+        // Send data to the backend using fetch
+        fetch('/admin/combo-management/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(backendData),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    return response.text().then((text) => {
+                        console.error(`Network response was not ok: ${text}`);
+                        throw new Error(`Network response was not ok: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then((data) => {
+
+                if (data.status === true) {
+                    alert(data.messages || 'Update successful');
+                    window.location.href = 'http://127.0.0.1:8000/admin/combo-management/';
+                } else if (data.status === false) {
+                    alert(data.messages || 'An error occurred while updating');
+                    // window.location.href = 'http://127.0.0.1:8000/admin/combo-management/';
+                } else {
+                    alert(data.message || 'Update failed');
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                alert('Failed to update services. Please try again.');
             });
-        }
-        return response.json();
-    })  
-    .then(data => {
-        console.log('data', data);
-        if (data.status === 'success') {
-            alert(data.messages);
-            redirectToNotification('http://127.0.0.1:8000/admin/combo-management/')
-        } else {
-            alert(data.message || 'Update failed');
-        }
-    })
-    .catch(error => {
-        console.log('Error:', error);
-        // alert(`Failed to update services. Please try again.`);   
-    });
-} catch (error) {
-    console.error('Error:', error);
-    alert('An unexpected error occurred');
+    } catch (error) {
+        console.error('Unexpected Error:', error);
+        alert('An unexpected error occurred');
+    }
 }
-}
+
 
 
 
@@ -2705,10 +2742,6 @@ function combo_car_selection(formId, id, combo_price, combo_name){
     const booking_id = modal.querySelector('#booking_id')
     booking_id.value = id
 
-    // const Form = modal.querySelector('#car_selection')
-    // var url = `http://127.0.0.1:8000/combo/operation/${id}`;
-    // Form.setAttribute('action', url);
-
     modal.style.display = 'flex';
 }
 
@@ -2718,19 +2751,18 @@ function combo_car_selection(formId, id, combo_price, combo_name){
 function combo_detail(formId, id, is_combo_selection, user_combo_id) {
     const container = document.getElementById('combo-details-container');
     container.innerHTML = '';
-    console.log('formId', formId);    
-    
+        
     fetch(`/combo/operation/${id}?user_combo_id=${user_combo_id}`)
 
         .then(response => response.json())
-        .then(data => {  
-            console.log('data', data);
-                      
+        .then(data => {                
             addopenModal(formId)
             
             if (is_combo_selection){
+                // console.log('formId1');
                 renderComboD(data.services, user_combo_id)
             } else{
+                // console.log('formId2');
                 renderComboDetails(data.services);
             }
         })
@@ -2738,7 +2770,9 @@ function combo_detail(formId, id, is_combo_selection, user_combo_id) {
 }
 
 
+
 function renderComboDetails(services) {
+    
     const container = document.getElementById('combo-details-container');
     container.innerHTML = '';
 
@@ -2781,6 +2815,7 @@ function renderComboDetails(services) {
 
 
 function renderComboD(services, user_combo_id) {
+    console.log(services);
     
     const container = document.getElementById('combo-details-container');
     container.innerHTML = ''; // Clear previous content
@@ -2902,7 +2937,7 @@ function collectSelectedOptions(test){
                 
                 let options = ''
                 optionsContainer.querySelectorAll(`.option-${sub_service.getAttribute('data-value')}`).forEach(option =>{                  
-                    options += option.getAttribute('data-value') + ','
+                    options += option.getAttribute('data-value')
                 });
                 if (options){
                     sub_services_details[sub_services] = options.trimEnd(',')
@@ -2922,8 +2957,10 @@ function collectSelectedOptions(test){
             backendData["sub_service"] = sub_services_details
             backendData["combo_id"] = combo_id
             backendData["location"] = location
+        } 
+        if (Object.keys(backendData).length >= 1){
+            backendFinalData.push(backendData)
         }
-        backendFinalData.push(backendData)
         
     })
     
@@ -2947,11 +2984,12 @@ function collectSelectedOptions(test){
         return response.json();
     })  
     .then(data => {
-        if (data.status === 'success') {
+        
+        if (data.status === true) {
             alert(data.messages);
             redirectToNotification('http://127.0.0.1:8000/combo/booking/')
-        } else {
-            alert(data.message || 'Update failed');
+        } else if(data.status === false) {
+            alert(data.message);
         }
     })
     .catch(error => {

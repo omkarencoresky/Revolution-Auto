@@ -1,5 +1,7 @@
 from django.db import models
+from datetime import datetime
 from django.utils import timezone
+from django.utils.timezone import now
 from  user_app.models import CustomUser
 
 
@@ -251,12 +253,14 @@ class UserReferral(models.Model):
 class ComboDetails(models.Model):
     
     id=models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100)
-    start_date = models.DateField()
-    end_date = models.DateField()
-    usage_limit = models.SmallIntegerField(blank=True, null=True)
-    price = models.CharField(max_length=20, default=0)
-    discount_price = models.CharField(max_length=20, default=0)
+    combo_name = models.CharField(max_length=100)
+    combo_start_date = models.DateField()
+    combo_end_date = models.DateField()
+    combo_usage_limit = models.SmallIntegerField(blank=True, null=True)
+    combo_price = models.CharField(max_length=20, default=0)
+    combo_discount_price = models.CharField(max_length=20, default=0)
+    discount_percentage = models.DecimalField(max_digits=10, decimal_places=3, null=True, blank=True)
+    status = models.CharField(null=True, blank=True, default='active')
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -267,10 +271,10 @@ class ComboDetails(models.Model):
 class  ComboServiceDetails(models.Model):
     
     id=models.AutoField(primary_key=True)
-    combo = models.ForeignKey(ComboDetails, on_delete=models.CASCADE, related_name="combo_id")
-    service_type = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name="combo_service_Type_id")
-    service_category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name="combo_service_category_id")
-    service = models.ForeignKey(Services, on_delete=models.CASCADE, related_name="combo_service_id")
+    combo_id = models.ForeignKey(ComboDetails, on_delete=models.CASCADE, related_name="combo_id")
+    service_type_id = models.ForeignKey(ServiceType, on_delete=models.CASCADE, related_name="combo_service_Type_id")
+    service_category_id = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name="combo_service_category_id")
+    service_id = models.ForeignKey(Services, on_delete=models.CASCADE, related_name="combo_service_id")
     updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     

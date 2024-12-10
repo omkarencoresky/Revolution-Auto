@@ -17,7 +17,7 @@
             <li class="breadcrumb-item"> <a href="{% url 'combo_data_handler' %}">COMBOS</a></li>
         </ol>
         <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1;" id="showFormButton"
-            onclick="addopenModal('addForm')">Add Combo</button>
+            onclick="addopenModal('addComboForm')">Add Combo</button>
     </div>
     <div>
         {% if messages %}
@@ -28,11 +28,11 @@
         </ul>
         {% endif %}
     </div>
-    <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
+    <div id="addComboForm" class="modal-form" onclick="closeModalIfOutside(event, 'addComboForm')">
         <div class="modal-content form-scroll" >
             <div class="modal-header">
                 <h4 class="modal-title">Add Combo</h4>
-                <button type="button" class="close" onclick="closeModal('addForm')">×</button>
+                <button type="button" class="close" onclick="closeModal('addComboForm')">×</button>
             </div>
             <div class="modal-body">
                 <form method="post">
@@ -113,7 +113,8 @@
                     <div class="modal-footer">
                         <div class="row w-100">
                             <div class="w-100 modal_btn d-flex justify-content-around" id="button-container">
-                                <button type="button" class="btn btn-danger" style="background-color: #D81324;" data-dismiss="modal" onclick="closeModal()">Close</button>
+                                <button type="button" class="btn btn-danger" style="background-color: #D81324;" 
+                                    data-dismiss="modal" onclick="closeModal('addComboForm')">Close</button>
                                 <button type="button" class="btn btn-dark" onclick="updateLocalStorage()">Submit</button>
                                 <button type="button" class="btn btn-dark" onclick="resetSelection()">Reset Selection</button>
                             </div>
@@ -139,6 +140,8 @@
                             <th scope="col">Combo Name</th>
                             <th scope="col">Without Offer Price</th>
                             <th scope="col">Offer Price</th>
+                            <th scope="col">Discount Percentage</th>
+                            <th scope="col">Status</th>
                             <th scope="col">Start Date</th>
                             <th scope="col">End Date</th>
                             <th scope="col">Usage Limit</th>
@@ -149,12 +152,14 @@
                         {% for combo in page_obj %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ combo.name }}</td>
-                            <td>{{ combo.price }}</td>
-                            <td>{{ combo.discount_price }}</td>
-                            <td>{{ combo.start_date }}</td>
-                            <td>{{ combo.end_date }}</td>
-                            <td>{{ combo.usage_limit }}</td>
+                            <td>{{ combo.combo_name }}</td>
+                            <td>{{ combo.combo_price }}</td>
+                            <td>{{ combo.combo_discount_price }}</td>
+                            <td>{{ combo.discount_percentage }} %</td>
+                            <td>{{ combo.status }}</td>
+                            <td>{{ combo.combo_start_date }}</td>
+                            <td id="combo_end_date">{{ combo.combo_end_date }}</td>
+                            <td>{{ combo.combo_usage_limit }}</td>
                             <!-- <td>
                                 <button style="border: none; font-size: small; padding: 0px 9px;" 
                                     onclick="updateStatusModal('updateStatusForm', '{{ combo.id }}', '{{ combo.status }}')">

@@ -67,10 +67,12 @@
                             <th scope="col">Combo Name</th>
                             <th scope="col">Offer Price</th>
                             <th scope="col">Official Price</th>
+                            <th scope="col">discount</th>
                             <th scope="col">Usage Limit</th>
                             <th scope="col">Combo Service Used</th>
                             <th scope="col">Combo Start Date</th>
                             <th scope="col">Combo End Date</th>
+                            <th scope="col">Status</th> 
                             <th scope="col">Actions</th>
                         </tr>
                     </thead>
@@ -79,25 +81,35 @@
                         {% for combo in page_obj %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ combo.user.first_name }} {{ combo.user.last_name }}</td>
-                            <td>{{ combo.combo.name }}</td>
-                            <td>{{ combo.combo.discount_price }}</td>
-                            <td>{{ combo.combo.price }}</td>
-                            <td>{{ combo.combo.usage_limit }}</td>
+                            <td>{{ combo.user_id.first_name }} {{ combo.user_id.last_name }}</td>
+                            <td>{{ combo.combo_id.combo_name }}</td>
+                            <td>{{ combo.combo_id.combo_discount_price }}</td>
+                            <td>{{ combo.combo_id.combo_price }}</td>
+                            <td>{{ combo.combo_id.discount_percentage }} %</td>
+                            <td>{{ combo.combo_id.combo_usage_limit }}</td>
                             <td>{{ combo.remaining_combo_usage }}</td>
-                            <td>{{ combo.combo.start_date }}</td>
-                            <td>{{ combo.combo.end_date }}</td>
+                            <td>{{ combo.combo_id.combo_start_date }}</td>
+                            <td>{{ combo.combo_id.combo_end_date }}</td>
+                            
+                            <td>{{ combo.combo_id.status }} </td>
+                            {% if combo.combo_id.combo_usage_limit > combo.remaining_combo_usage %}
                             <td>
-                                <button class="btn btn-dark rounded font-weight-bold" style=" color:#c4c1c1; border: none; font-size: small; padding: 5px 10px;" 
-                                    onclick="combo_detail('remainingComboForm', '{{ combo.combo.id }}', is_combo_selection=true, '{{combo.id}}')">
-                                    Remaining Services
-                                </button>
+                                <button class="btn btn-dark rounded font-weight-bold" style="color:#c4c1c1; width: auto; border: none; font-size: small; padding: 5px 10px;" 
+                                        onclick="combo_detail('remainingComboForm', '{{ combo.combo_id.id }}', is_combo_selection=true, '{{combo.id}}')">
+                                        Remaining Services
+                                    </button>
+                                </td>
+                                {% else %}
+                            <td> 
+                                <button class="btn btn-dark " style="color: #c4c1c1; 
+                                            width: auto; cursor: not-allowed; font-size: small; padding: 5px 8px; opacity: 0.8;">Combo's Limit Reach</button>
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
-                
+               
                 <!-- Pagination Controls -->
                 <div class="pagination">
                     <span class="step-links">

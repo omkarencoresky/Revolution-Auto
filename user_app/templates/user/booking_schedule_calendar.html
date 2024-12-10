@@ -87,28 +87,30 @@
                         <hr style="color: black">
                     </div>
 
-                    <div class="">  
-                        <h4>Select Payment Mode</h4> 
-                        <div class="modal_btn justify-content-start" style="gap: 20px;">
-    
-                            <div class="paymentMethod" onclick="selectPaymentMethod(event)">
-                                <input type="radio" name="payment_mode" value="stripe" id="stripe">
-                                <label class="remove_bottom_margin required" for="stripe">Pay via Stripe</label>
+                    {% if booking_object.booking_type == 'booking' %}
+                        <div class="">  
+                            <h4>Select Payment Mode</h4> 
+                            <div class="modal_btn justify-content-start" style="gap: 20px;">
+                                
+                                <div class="paymentMethod" onclick="selectPaymentMethod(event)">
+                                    <input type="radio" name="payment_mode" value="stripe" id="stripe">
+                                    <label class="remove_bottom_margin required" for="stripe">Pay via Stripe</label>
+                                </div>
+                                
+                                <div class="paymentMethod" onclick="selectPaymentMethod(event)">
+                                    <input type="radio" name="payment_mode" value="cash" id="cash">
+                                    <label class="remove_bottom_margin required" for="cash">Cash on Site</label>
+                                </div>
+                                
                             </div>
-    
-                            <div class="paymentMethod" onclick="selectPaymentMethod(event)">
-                                <input type="radio" name="payment_mode" value="cash" id="cash">
-                                <label class="remove_bottom_margin required" for="cash">Cash on Site</label>
-                            </div>
-    
                         </div>
-                    </div>
+                    {% endif %}
 
                     <div class="modal-footer justify-content-end">
                         <div class="modal_btn" style="gap: 20px;">
                             <button type="button" class="btn btn-danger" style="background-color: #D81324; font-weight: bold;" 
                             onclick="closeModal('addForm')">Cancel</button>
-                            <button id="saveSchedule" type="submit" onclick="submitForm(event)" class="btn btn-dark">Save Schedule</button>
+                            <button id="saveSchedule" type="submit" onclick="submitForm(event, '{{booking_object.booking_type}}')" class="btn btn-dark">Save Schedule</button>
                             <img src="http://unclefitter.encoreskydev.com/images/spin.webp" class="spinner ms-3"
                                 style="display: none;">
                         </div>

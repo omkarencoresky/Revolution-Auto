@@ -41,7 +41,7 @@
                             <select class="form-control" name="car_brand" id="car_brand">
                                 <option value="">Select from here</option>
                                 {% for brand in model1_options %}
-                                <option value="{{brand.id}}">{{ brand.brand }}</option>
+                                <option value="{{ brand.id }}">{{ brand.brand }}</option>
                                 {% endfor %}
                             </select>
                             <span id="car_brand1"></span>
@@ -122,7 +122,8 @@
                             <th scope="col">Service Price</th>
                             <th scope="col">Quote Number</th>
                             <th scope="col">Your Car</th>
-                            <th scope="col">Booked Service</th>
+                            <th scope="col">Booking Type</th>
+                            <!-- <th scope="col">Booked Service</th> -->
                             <th scope="col">Request Date</th>
                             <th scope="col">Action</th>
                         </tr>
@@ -140,7 +141,8 @@
                                 {{ booking.car_model.model_name }}
                                 {{ booking.car_trim.car_trim_name }}
                            </td>
-                           <td>{{booking.car_services.service_title}}</td>
+                           <!-- <td>{{booking.car_services.service_title}}</td> -->
+                           <td>{{booking.booking_type}}</td>
                            <td>{{booking.created_at}}</td>
                             
                             {% if booking.total_service_amount == None %}

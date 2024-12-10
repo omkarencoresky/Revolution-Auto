@@ -8,7 +8,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'user_dashboard' %}"><i class="feather icon-home"></i> User
                     Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'location_data_handler' %}">My Combos</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'user_combo_handler' %}">My Combos</a></li>
         </ol>
     </div>
     <div>
@@ -34,9 +34,14 @@
                             <th scope="col">SR.No</th>
                             <th scope="col">Combo Name</th>
                             <th scope="col">Car Details</th>
+                            <th scope="col">Offer Price</th>
+                            <th scope="col">Official Price</th>
+                            <th scope="col">Combo Discount</th>
                             <th scope="col">Max Usage Limit</th>
                             <th scope="col">Combo Service Used</th>
-                            <!--<th scope="col">Request Date</th> -->
+                            <th scope="col">Combo Status</th>
+                            <th scope="col">Start Date</th>
+                            <th scope="col">End Date</th>
                             <th scope="col">Action</th>
                         </tr>
                     </thead>
@@ -45,19 +50,29 @@
                         {% for combo in page_obj %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td>{{ combo.combo.name }}</td>
+                            <td>{{ combo.combo_id.combo_name }}</td>
                             <td>{{ combo.car_id.car_brand.brand }}, {{ combo.car_id.vin_number }}</td>
-                            <td>{{ combo.combo.usage_limit }}</td>
+                            <td>{{ combo.combo_id.combo_discount_price }}</td>
+                            <td>{{ combo.combo_id.combo_price }}</td>
+                            <td>{{ combo.combo_id.discount_percentage }} %</td>
+                            <td>{{ combo.combo_id.combo_usage_limit }}</td>
                             <td>{{ combo.remaining_combo_usage }}</td>
+                            <td>{{ combo.combo_id.status }}</td>
+                            <td class="start-date">{{ combo.combo_id.combo_start_date }}</td>
+                            <td class="end-date">{{ combo.combo_id.combo_end_date }}</td>
 
-                            {% if combo.combo.usage_limit >= combo.remaining_combo_usage %}
+                            {% if combo.combo_id.combo_usage_limit > combo.remaining_combo_usage %}
                                 <td>    
-                                    <button class="btn btn-dark car-detail-button" onclick="combo_detail('comboForm', '{{combo.combo.id}}', is_combo_selection=true, '{{combo.id}}')" 
-                                    style="color: #c4c1c1; padding-right: 10px;">Book Appointment</button>
+                                    <button class="btn btn-dark car-detail-button book-appointment" 
+                                        onclick="combo_detail('comboForm', '{{combo.combo_id.id}}', is_combo_selection=true, '{{combo.id}}')" 
+                                        style="color: #c4c1c1; width: auto; padding-right: 10px;">Book Appointment
+                                    </button>
                                 </td>
-                            {% elif combo.combo.usage_limit < combo.remaining_combo_usage %}
+                            {% else %}
                                 <td> 
-                                    <button class="btn btn-dark car-detail-button" style="color: #c4c1c1; padding-right: 10px; width: 50.5%;">Limit Over</button>
+                                    <button class="btn btn-dark car-detail-button" style="opacity: 0.65; padding-right: 10px; 
+                                        width: auto; cursor: not-allowed;">Combo's Limit over
+                                    </button>
                                 </td>
                             {% endif %}
                             
@@ -65,13 +80,13 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
                 
                 <div id="comboForm" class="modal-form" onclick="closeModalIfOutside(event, 'comboForm')">
                     <div class="modal-content" style="max-width: 800px; height: auto; max-height: 1000px; ">
                         <div class="modal-header">
                             <h4 class="modal-title w-100"
-                                style="text-align: center; font-size: 30px; font-weight: bold;">Update Car
-                                Detail</h4>
+                                style="text-align: center; font-size: 30px; font-weight: bold;">Appointment Booking</h4>
                             <button type="button" class="close" onclick="closeModal('comboForm')"
                                 style="font-size: 30px; font-weight: bolder;">×</button>
                         </div>
@@ -99,7 +114,8 @@
                                     <div class="modal_btn" style="gap: 254px;">
                                         <button type="button" class="btn btn-danger"
                                             onclick="closeModal('comboForm')">Close</button>
-                                        <button type="button" onclick="collectSelectedOptions('combo-details-container', )" class="btn btn-dark">Submit</button>
+                                        <button type="button" onclick="collectSelectedOptions('combo-details-container')" 
+                                            class="btn btn-dark">Submit</button>
                                         <img src="http://unclefitter.encoreskydev.com/images/spin.webp"
                                             class="spinner ms-3" style="display: none;">
                                     </div>
@@ -109,6 +125,38 @@
                     </div>
                 </div>
             </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    // Get the current date
+                    const currentDate = new Date();
+
+                    // Helper function to parse date in "Dec. 3, 2024" format
+                    const parseDate = (dateText) => {
+                        // Remove the period after the month abbreviation
+                        const sanitizedDateText = dateText.replace('.', '');
+                        return new Date(sanitizedDateText);
+                    };
+
+                    // Loop through all rows in the table
+                    document.querySelectorAll('tbody tr').forEach(row => {
+                        const startDateText = row.querySelector('.start-date').textContent.trim();
+                        const endDateText = row.querySelector('.end-date').textContent.trim();
+
+                        const startDate = parseDate(startDateText);
+                        const endDate = parseDate(endDateText);
+
+                        // Check if current date is not between start and end date
+                        if (currentDate < startDate || currentDate > endDate) {
+                            const button = row.querySelector('.book-appointment');
+                            button.disabled = true;
+                            button.textContent = "Not available now "; 
+                            button.style.cursor = "not-allowed";
+                        }
+                    });
+                });
+
+            </script>
 
             <!-- Pagination Controls -->
             <div class="pagination">

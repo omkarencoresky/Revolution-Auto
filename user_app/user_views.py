@@ -3,9 +3,10 @@ import json
 import stripe
 import fastjsonschema
 import schemas.car_schema
+import schemas.combo_schema
 import schemas.booking_schema
 import schemas.registration_schema
-
+from datetime import date
 from datetime import datetime
 from admin_app.models import *
 from django.urls import reverse
@@ -26,6 +27,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from schemas.car_schema import validate_users_car_details
 from user_app.forms import AddCarRecord, UserReferralForm
+from schemas.combo_schema import validate_purchased_combo_schema
+from schemas.combo_schema import validate_booking_appointment_schema
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_update_profile_details_schema
 from user_app.utils.utils import (User_Car_Record_pagination, User_booking_pagination, 
@@ -759,6 +762,20 @@ def book_appointment_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
 
                 messages.success(request, f"Your Booking schedule successfully.")
                 return redirect('user_payment')
+            
+            elif booking_object.booking_type == 'combo':
+
+                ServicePayment.objects.create(
+                    user=booking_object.user,
+                    booking=booking_object,
+                    service_amount=booking_object.total_service_amount,
+                    payment_mode='combo',
+                    status='Done',
+                    stripe_payment_intent_id='combo'
+                )
+
+                messages.success(request, f"Your Booking schedule successfully.")
+                return redirect('user_payment')
 
         else:
             messages.error(request, "In-valid request type")
@@ -840,6 +857,7 @@ def create_checkout_session(request: HttpResponse, id: int)-> HttpResponse | Htt
     
     except Exception as e:
         return JsonResponse({'success': False, 'error': f"An unexpected error occurred: {str(e)}"}, status=500)
+
 
 @login_required
 def payment_success(request) -> HttpResponse | HttpResponseRedirect:
@@ -1020,9 +1038,10 @@ def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponse
             user_car = User_Car_Record_pagination(request, user_id=request.user.user_id)
 
             context = {
-                'page_obj': combos,
                 'curl': curl,
+                'page_obj': combos,
                 'user_car' : user_car,
+                'current_date' : date.today()
             }
             return render(request, 'user/combo.html', context)
         
@@ -1035,7 +1054,7 @@ def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponse
         return redirect('user_dashboard')
                 
     except Exception as e:
-        # print(e)
+        messages.error(request, f"Something went wrong, try again.")
         return redirect('user_combo_data_handler')
 
 
@@ -1054,7 +1073,7 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
     try:
         if request.method == 'GET':
             combo_detail = ComboDetails.objects.get(id=id)
-            combo_service_detail = ComboServiceDetails.objects.filter(combo=combo_detail.id)
+            combo_service_detail = ComboServiceDetails.objects.filter(combo_id=combo_detail.id)
 
             user_combo_id = request.GET.get('user_combo_id')
             services_list = []
@@ -1063,12 +1082,12 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
 
                 for service in combo_service_detail:
                     service_dict = {
-                        'service_type': service.service_type.id,
-                        'service_type_name': service.service_type.service_type_name,
-                        'service_category': service.service_category.id,
-                        'service_category_name': service.service_category.service_category_name,
-                        'service': service.service.id,
-                        'service_title': service.service.service_title,
+                        'service_type': service.service_type_id.id,
+                        'service_type_name': service.service_type_id.service_type_name,
+                        'service_category': service.service_category_id.id,
+                        'service_category_name': service.service_category_id.service_category_name,
+                        'service': service.service_id.id,
+                        'service_title': service.service_id.service_title,
                         'sub_services': []
                     }
                     
@@ -1095,11 +1114,12 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
                 user_used_combo_object = UserComboTracking.objects.filter(user_combo_id=user_combo_id)
                 
                 for service in combo_service_detail:
-                    # Check if the entire service (including all its sub-services) is already used
+                    
+                    # Check if the entire service (including all its sub-services) is already use
                     is_entire_service_used = any(
-                        used.service_type.id == service.service_type.id and
-                        used.service_category.id == service.service_category.id and
-                        used.service.id == service.service.id
+                        used.service_type_id.id == service.service_type_id.id and
+                        used.service_category_id.id == service.service_category_id.id and
+                        used.service_id.id == service.service_id.id
                         for used in user_used_combo_object
                     )
                     
@@ -1108,12 +1128,12 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
                         continue
                     
                     service_dict = {
-                        'service_type': service.service_type.id,
-                        'service_type_name': service.service_type.service_type_name,
-                        'service_category': service.service_category.id,
-                        'service_category_name': service.service_category.service_category_name,
-                        'service': service.service.id,
-                        'service_title': service.service.service_title,
+                        'service_type': service.service_type_id.id,
+                        'service_type_name': service.service_type_id.service_type_name,
+                        'service_category': service.service_category_id.id,
+                        'service_category_name': service.service_category_id.service_category_name,
+                        'service': service.service_id.id,
+                        'service_title': service.service_id.service_title,
                         'sub_services': []
                     }
                     
@@ -1148,18 +1168,17 @@ def combo_action_handler(request: HttpRequest, id: int) -> HttpResponse | HttpRe
                     # Add service only if it has sub-services or is entirely new
                     if service_dict['sub_services'] or not sub_services:
                         services_list.append(service_dict)
-                
                 return JsonResponse({'services': services_list})
 
         else:
-            messages.error(request, 'In-valid method, try again')
+            messages.error(request, 'Something went wrong, try again')
             return redirect('user_combo_data_handler')
         
     except ObjectDoesNotExist:
         return JsonResponse({'message': 'Object does not exist'})
     
     except Exception as e:
-        # print(e)
+        messages.error(request, 'Something went wrong, try again')
         return JsonResponse({'message': f'Object does not exist {e}'})
     
 
@@ -1193,9 +1212,15 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
             with transaction.atomic():
                 data = json.loads(request.body)
 
+                if len(data) <= 0:
+                    message = 'No service selected for the booking'
+                    return JsonResponse({'messages': message, 'status': True})
+
                 # ----------------User combo limit table entry----------------
 
                 for combo_service_data in data:
+                    print('combo_service_data', combo_service_data)
+                    validate_booking_appointment_schema(combo_service_data)
                     if combo_service_data.keys():
                         user_combo_object = UserComboPackage.objects.get(id=combo_service_data['combo_id'])
                         user_combo_object.remaining_combo_usage = int(user_combo_object.remaining_combo_usage)+1
@@ -1216,20 +1241,42 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
                             car_service_category = ServiceCategory.objects.get(id=combo_service_data['service_category']),
                             car_services = combo_service_data['service'],
                         )
+                        
+                        sub_services = ''
+                        for service in combo_service_data['service']:   
+                            service_object = SubServiceAndOption.objects.create(
+                                booking_id = combo_booking,
+                                service_id = Services.objects.get(id=service)
+                            )
+                            for sub_service in combo_service_data['sub_service']:
+                                sub_service_object = SubServiceBasedOption.objects.create(
+                                    subServiceAndOptionId = service_object,
+                                    sub_service = SubService.objects.get(id=sub_service),
+                                    sub_service_option = (combo_service_data['sub_service'][sub_service][:-1])
+                                )
+                                sub_services += combo_service_data['sub_service'][sub_service][:-1] + ','
 
-                    # ----------------User booking table entry----------------
-                    comboTracking = UserComboTracking.objects.create(
-                        user_combo_id = user_combo_object,
-                        service = Services.objects.get(id=combo_service_data['service']),
-                        service_type = ServiceType.objects.get(id=combo_service_data['service_type']),
-                        service_category = ServiceCategory.objects.get(id=combo_service_data['service_category']),
-                        sub_service = combo_service_data['sub_service'][:-1],
-                        sub_service_option = combo_service_data['sub_service_options'][:-1],
-                    )
+                        # ----------------User booking table entry----------------
+                        comboTracking = UserComboTracking.objects.create(
+                            user_combo_id = user_combo_object,
+                            service_id = Services.objects.get(id=combo_service_data['service']),
+                            service_type_id = ServiceType.objects.get(id=combo_service_data['service_type']),
+                            service_category_id = ServiceCategory.objects.get(id=combo_service_data['service_category']),
+                            sub_service = ','.join(combo_service_data['sub_service'].keys()),
+                            sub_service_option = sub_services[:-1]
+                        )
 
             message = ('Booking with this combo successfully completed!')
-            message_data = {'messages': message, 'status': 'success'}
-            return JsonResponse(message_data)
+            return JsonResponse({'messages': message, 'status': True})
+        
+        else:
+            return JsonResponse({'messages': 'Something went wrong, try again', 'status': False})
+        
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        message = schemas.combo_schema.booking_appointment_schema.get('properties', 
+                                                                      {}).get(e.path[-1], {}).get('description', 'please enter the valid data')
+        print('message', message)
+        return JsonResponse({'message': message, 'status': False})
 
     except ObjectDoesNotExist:
         messages.error(request, f"Object does not exist.")
@@ -1240,7 +1287,7 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
         return redirect('user_dashboard')
 
     except Exception as e:
-        # print(e)
+        messages.error(request, 'Something went wrong, try again')
         return redirect('user_combo_data_handler')
 
 
@@ -1265,21 +1312,14 @@ def combo_create_checkout_session(request: HttpRequest, id: int) -> HttpResponse
             except json.JSONDecodeError:
                 data = request.POST
             
+
             # Extract data
             combo_name = data.get('combo_name')
-            combo_price = data.get('combo_price')
+            combo_price = int(float(data.get('combo_price'))*100)
             car_id = data.get('car_id')
-            
-            # Validate input
-            if not combo_name or not combo_price:
-                return JsonResponse({ 'success': False, 'error': 'Missing combo details'}, status=400)
-            
-            try:
-                combo_price = int(float(combo_price) * 100)
-            except (ValueError, TypeError):
-                return JsonResponse({'success': False, 'error': 'Invalid price format' }, status=400)
-            
-            check_combo = UserComboPackage.objects.filter(user_id=user, combo=id).first()
+
+            validate_purchased_combo_schema(data)
+            check_combo = UserComboPackage.objects.filter(user_id=user, combo_id=id, car_id=car_id).first()
             
             if check_combo is None:
                 # Create Stripe checkout session
@@ -1291,6 +1331,7 @@ def combo_create_checkout_session(request: HttpRequest, id: int) -> HttpResponse
                             'unit_amount': combo_price,
                             'product_data': {
                                 'name': combo_name,
+                                'description': f"Combo Purchase Payment:- {id}",
                             },
                         },
                         'quantity': 1,
@@ -1307,24 +1348,28 @@ def combo_create_checkout_session(request: HttpRequest, id: int) -> HttpResponse
                 return JsonResponse({'success': True, 'checkout_url': checkout_session.url})
             
             else:
-                return JsonResponse({ 'success': False, 'error': 'This Combo is already purchased'}, status=400)
+                return JsonResponse({ 'success': False, 'error': 'This Combo is already purchased'}, status=200)
         
         else:
             return JsonResponse({ 'success': False, 'error': 'Invalid request method' }, status=405)
+        
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        message = schemas.combo_schema.purchased_combo_schema.get('properties', {}).get(e.path[-1], {}).get('description', 'please enter the valid data')
+        print('message', message)
+        return JsonResponse({ 'success': False, 'error': message}, status=200)
         
     except stripe.StripeError as stripe_err:
             return JsonResponse({'success': False, 'error': f'Payment processing error {stripe_err}'}, status=500)
     
     except Exception as e:
-        # print(f"Unexpected error: {str(e)}")
+        messages.error(request, 'Something went wrong, try again')
         return JsonResponse({ 'success': False,  'error': 'An unexpected error occurred' }, status=500)
     
-
 
 @login_required
 def combo_payment_success(request) -> HttpResponse | HttpResponseRedirect:
     """
-    This method is used for render the payment success page with the payment details.
+    This method is used for render the payment success page with the payment details and add a user combo in data-base.
 
     Args:
         request
@@ -1350,8 +1395,8 @@ def combo_payment_success(request) -> HttpResponse | HttpResponseRedirect:
         with transaction.atomic():
 
             UserComboPackage.objects.create(
-                user_id = request.user.user_id,
-                combo = ComboDetails.objects.get(id=session.metadata.get('combo_id')),
+                user_id = CustomUser.objects.get(user_id=request.user.user_id),
+                combo_id = ComboDetails.objects.get(id=session.metadata.get('combo_id')),
                 car_id = UserCarRecord.objects.get(id=session.metadata.get('car_id')),
             )
 
@@ -1376,7 +1421,6 @@ def combo_payment_success(request) -> HttpResponse | HttpResponseRedirect:
         messages.error(request, f"An unexpected error occurred: {str(e)}")
     
     return redirect('user_booking_data_handler')
-
 
 
 @login_required
