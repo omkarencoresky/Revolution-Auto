@@ -82,6 +82,7 @@ urlpatterns = [
     path('combo-payment-success/', user_views.combo_payment_success, name='combo_payment_success'),
     path('combo-payment-cancel/', user_views.combo_payment_cancel, name='combo_payment_cancel'),
 
-    
+    path('forget-password/', user_app_views.forget_password_handler, name='forget_password_handler'),
+    path('reset-password/<str:token>/', user_app_views.reset_password_handler, name='reset_password_handler'),
 
 ]

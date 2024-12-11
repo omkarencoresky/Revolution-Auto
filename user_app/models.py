@@ -237,3 +237,16 @@ class UserComboTracking(models.Model):
 
     class Meta:
         db_table = 'user_combo_tracking'
+
+class ForgetPasswordTracking(models.Model):
+    id = models.AutoField(primary_key=True)
+    email = models.EmailField(max_length=100, unique=True, blank=False)
+    token = models.CharField(max_length=255, unique=True, blank=False)
+    expiration_time = models.DateTimeField(blank=False, null=False)
+    attempt_number = models.IntegerField(default=0, blank=False)
+
+    def is_valid(self):
+        return timezone.now() < self.expiration_time
+    
+    class Meta:
+        db_table = 'forget_password_tracking'

@@ -1,5 +1,6 @@
 import os
 import json
+import secrets
 import hashlib
 import fastjsonschema
 import schemas.login_schema
@@ -12,19 +13,22 @@ from admin_app.utils.utils import *
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth import logout
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from schemas.login_schema import validate_login
+from django.utils.timezone import now, timedelta
 from django.template import TemplateDoesNotExist 
 from schemas.booking_schema import quote_data_schema
 from django.views.decorators.http import require_GET
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import never_cache 
+from django.contrib.auth.hashers import make_password
 from schemas.registration_schema import validate_registration
 from django.contrib.auth import authenticate, login as auth_login 
 from user_app.forms import CustomUserCreationForm, BookingAndQuoteForm
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect, JsonResponse
-from user_app.models import CustomUser, SubServiceAndOption, UserCarRecord, SubServiceBasedOption
+from user_app.models import CustomUser, SubServiceAndOption, UserCarRecord, SubServiceBasedOption, ForgetPasswordTracking
 
 
 curl = settings.CURRENT_URL
@@ -44,7 +48,7 @@ def index(request: HttpRequest) -> HttpResponse:
         request 
 
     Returns:
-        HttpResponse: Home page of our apllication.
+        HttpResponse: Home page of our application.
     """
     context = {
         'curl': curl
@@ -59,7 +63,7 @@ def about(request: HttpRequest) -> HttpResponse:
         request 
 
     Returns:
-        HttpResponse: About page of our apllication.
+        HttpResponse: About page of our application.
     """
     context = {
         'curl': curl
@@ -74,7 +78,7 @@ def service(request: HttpRequest) -> HttpResponse:
         request 
 
     Returns:
-        HttpResponse: service page of our apllication.
+        HttpResponse: service page of our application.
     """
     context = {
         'curl': curl
@@ -89,7 +93,8 @@ def team(request: HttpRequest) -> HttpResponse:
         request 
 
     Returns:
-        HttpResponse: team list or details of our apllication.
+        HttpResponse: team list or details of our application
+        .
     """
     context = {
         'curl': curl
@@ -686,20 +691,129 @@ def check_login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         return redirect('Home')
     
     except Exception as e :
-        messages.error(request, f"{e}")
+        messages.error(request, f"Something went wrong, try again")
         return redirect('request_data_handler')
+    
 
+
+# @login_required
+def forget_password_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    try:
+        if request.method == 'GET':
+            context = {
+                'curl' : curl, 
+            }
+            return render(request, 'forget_password.html', context)
+        
+        elif request.method == 'POST':
+            email = request.POST.get('email')
+            user = CustomUser.objects.filter(email=email).first() if email else None
+
+            if user:
+                token = secrets.token_urlsafe(32)
+                expiration_time = now() + timedelta(hours=1)
+                forgetPasswordTracking = ForgetPasswordTracking.objects.filter(email=email).first()
+
+                forgetPasswordTracking = forgetPasswordTracking if forgetPasswordTracking else ForgetPasswordTracking.objects.create(email=email, 
+                                                                                                    token=token, expiration_time=expiration_time)
+
+                if forgetPasswordTracking.attempt_number < 3:
+                    forgetPasswordTracking.expiration_time=expiration_time
+                    forgetPasswordTracking.attempt_number = forgetPasswordTracking.attempt_number + 1
+                    forgetPasswordTracking.save()
+
+                    link = request.build_absolute_uri(f'/reset-password/{token}')
+                    title = '[Revolution Auto] Your password was reset'
+                    message = f"""Hello {user.first_name},
+
+    We hope this message finds you well.
+
+    Your request to reset your password for Revolution Auto has been received. Please use the link below to reset your password:
+    NOTE:- This link is expire after 10 min.
+
+    {link}  
+    
+
+    If you did not request a password reset, please disregard this email or contact our support team immediately.
+
+    Best regards,   
+    The Revolution Auto Team
+    """
+
+                    send_mail(title, message, settings.EMAIL_HOST_USER, [email], fail_silently=False,)
+                    context = {'curl' : curl, 'user_email': email}
+
+                else:
+                    messages.error(request, f'To many attempts with {email} email id, try again after 24 hour later.')
+                    context = {'curl' : curl}
+                
+                return render(request, 'forget_password.html', context)
+            
+            else:
+                messages.error(request, "Please enter the register and correct email-id for forget the password")
+        else:
+            messages.error(request, 'Something went wrong, try again.')
+
+        return redirect('forget_password_handler')
+        
+    except ObjectDoesNotExist:
+        messages.error(request, 'test')
+        return redirect('forget_password_handler')
+
+    except Exception as e :
+        messages.error(request, f"{e} Something went wrong, try again")
+        return redirect('forget_password_handler')
+    
+
+def reset_password_handler(request: HttpRequest, token: str) -> HttpResponse | HttpResponseRedirect :
+    try:
+        if request.method == 'GET':
+            context = {
+                'curl' : curl, 
+                'token' : token,
+                }
+            return render (request, 'reset_password.html', context)
+        
+        elif request.method == 'POST':
+            password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if password == confirm_password:
+
+                user_email = ForgetPasswordTracking.objects.filter(token=token).last()
+                user = CustomUser.objects.filter(email=user_email.email).first()
+                user.set_password(password)
+
+                user.save()
+                user_email.delete()
+
+                context = {'curl' : curl}
+                messages.error(request, 'Your Password has been changed.')
+
+            else:
+                messages.error(request, 'Password and confirm Password did not matched, try again.')
+                context = {'curl' : curl}
+                    
+        else:
+            context = {'curl' : curl}
+            messages.error(request, 'Something went wrong, try again.')
+
+        return render (request, 'reset_password.html', context)
+
+    except Exception as e :
+        messages.error(request, f"{e} Something went wrong, try again")
+        return redirect('forget_password_handler')
 
 @never_cache
 def logout_view(request: HttpRequest) -> HttpResponseRedirect:
     """
-    This method is used the logout of user, admin, superadmin with the help of djnago authentication.
+    This method is used the logout of user, admin, super admin with the help of django authentication.
 
     Args:
         request
 
     Returns:
-        HttpResponse: This method is used for logout the user admin, superadmin.
+        HttpResponse: This method is used for logout the user admin, super admin.
     """
     logout(request)
     messages.success(request, f"logout successfully")
