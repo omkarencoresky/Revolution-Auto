@@ -1,5 +1,7 @@
 import os
+import pytz
 import json
+import base64
 import secrets
 import hashlib
 import fastjsonschema
@@ -19,11 +21,13 @@ from django.contrib.auth import get_user_model
 from schemas.login_schema import validate_login
 from django.utils.timezone import now, timedelta
 from django.template import TemplateDoesNotExist 
+from user_app.utils.utils import convert_to_hours
 from schemas.booking_schema import quote_data_schema
 from django.views.decorators.http import require_GET
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import never_cache 
 from django.contrib.auth.hashers import make_password
+from schemas.login_schema import validate_forget_password
 from schemas.registration_schema import validate_registration
 from django.contrib.auth import authenticate, login as auth_login 
 from user_app.forms import CustomUserCreationForm, BookingAndQuoteForm
@@ -695,6 +699,11 @@ def check_login(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
         return redirect('request_data_handler')
     
 
+def forget_password_action_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
+    context = {'curl' : curl}
+    return render(request, 'forget_password_success.html', context)    
+
+
 
 # @login_required
 def forget_password_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedirect:
@@ -711,44 +720,56 @@ def forget_password_handler(request: HttpRequest) -> HttpResponse | HttpResponse
 
             if user:
                 token = secrets.token_urlsafe(32)
-                expiration_time = now() + timedelta(hours=1)
+                expiration_time = datetime.now()+timedelta(minutes=10)
                 forgetPasswordTracking = ForgetPasswordTracking.objects.filter(email=email).first()
 
-                forgetPasswordTracking = forgetPasswordTracking if forgetPasswordTracking else ForgetPasswordTracking.objects.create(email=email, 
-                                                                                                    token=token, expiration_time=expiration_time)
+                if forgetPasswordTracking: 
+
+                    expiry_time_difference = now() - forgetPasswordTracking.created_at
+                    expiry_time_hours = convert_to_hours(expiry_time_difference)
+
+                    if expiry_time_hours >= 24:
+
+                        forgetPasswordTracking.token = token
+                        forgetPasswordTracking.attempt_number = 0
+                        forgetPasswordTracking.expiration_time = expiration_time
+                        forgetPasswordTracking.created_at = now()
+                        forgetPasswordTracking.save()
+                else:
+                    forgetPasswordTracking = ForgetPasswordTracking.objects.create(email=email, token=token, expiration_time=expiration_time, attempt_number = 0)
 
                 if forgetPasswordTracking.attempt_number < 3:
+
                     forgetPasswordTracking.expiration_time=expiration_time
+                    forgetPasswordTracking.token = token
                     forgetPasswordTracking.attempt_number = forgetPasswordTracking.attempt_number + 1
                     forgetPasswordTracking.save()
 
-                    link = request.build_absolute_uri(f'/reset-password/{token}')
+                    current_time = expiration_time.strftime('%Y-%m-%d %H:%M:%S')
+                    corrupted_time = base64.b64encode(current_time.encode()).decode()
+
+                    link = request.build_absolute_uri(f'/reset-password/{token}/{corrupted_time}')
                     title = '[Revolution Auto] Your password was reset'
                     message = f"""Hello {user.first_name},
 
-    We hope this message finds you well.
+We hope this message finds you well.
 
-    Your request to reset your password for Revolution Auto has been received. Please use the link below to reset your password:
-    NOTE:- This link is expire after 10 min.
+Your request to reset your password for Revolution Auto has been received. Please use the link below to reset your password:
+NOTE:- This link is expire after 10 min.
 
-    {link}  
-    
+{link}
 
-    If you did not request a password reset, please disregard this email or contact our support team immediately.
 
-    Best regards,   
-    The Revolution Auto Team
-    """
+If you did not request a password reset, please disregard this email or contact our support team immediately.
 
+Best regards,   
+The Revolution Auto Team
+"""
                     send_mail(title, message, settings.EMAIL_HOST_USER, [email], fail_silently=False,)
-                    context = {'curl' : curl, 'user_email': email}
+                    return redirect('forget_password_action_handler')
 
                 else:
-                    messages.error(request, f'To many attempts with {email} email id, try again after 24 hour later.')
-                    context = {'curl' : curl}
-                
-                return render(request, 'forget_password.html', context)
-            
+                    messages.error(request, f'To many attempts with {email} email id, try again after 24 hour later.')            
             else:
                 messages.error(request, "Please enter the register and correct email-id for forget the password")
         else:
@@ -757,52 +778,78 @@ def forget_password_handler(request: HttpRequest) -> HttpResponse | HttpResponse
         return redirect('forget_password_handler')
         
     except ObjectDoesNotExist:
-        messages.error(request, 'test')
+        messages.error(request, f"Something went wrong, try again")
         return redirect('forget_password_handler')
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('Home')
 
     except Exception as e :
-        messages.error(request, f"{e} Something went wrong, try again")
+        messages.error(request, f"Something went wrong, try again")
         return redirect('forget_password_handler')
     
 
-def reset_password_handler(request: HttpRequest, token: str) -> HttpResponse | HttpResponseRedirect :
+def reset_password_handler(request: HttpRequest, token: str, corrupted_time: str) -> HttpResponse | HttpResponseRedirect :
     try:
-        if request.method == 'GET':
-            context = {
-                'curl' : curl, 
-                'token' : token,
-                }
+        de_corrupted_time = base64.b64decode(corrupted_time.encode()).decode()
+        current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        if current_time <= de_corrupted_time:
+            if request.method == 'GET':
+                
+                    context = {'curl' : curl, 'token' : token, 'corrupted_time' : corrupted_time}
+                    return render (request, 'reset_password.html', context)
+                                
+            elif request.method == 'POST':
+                password = request.POST.get('password')
+                confirm_password = request.POST.get('confirm_password')
+                
+                validate_forget_password({'password' : password})
+                if password == confirm_password:
+
+                    user_email = ForgetPasswordTracking.objects.filter(token=token).last()
+                    user = CustomUser.objects.filter(email=user_email.email).first()
+
+                    user.set_password(password)
+                    user.save()
+                    messages.error(request, 'Your Password has been changed.')
+
+                    context = {'curl' : curl, 'token' : token, 'corrupted_time' : corrupted_time}
+                    return render (request, 'reset_password_success.html', context)
+
+                else:
+                    messages.error(request, 'Password and confirm Password did not matched, try again.')
+            else:
+                messages.error(request, 'Something went wrong, try again.')
+
+            context = {'curl' : curl, 'token' : token, 'corrupted_time' : corrupted_time}
             return render (request, 'reset_password.html', context)
         
-        elif request.method == 'POST':
-            password = request.POST.get('password')
-            confirm_password = request.POST.get('confirm_password')
-            
-            if password == confirm_password:
-
-                user_email = ForgetPasswordTracking.objects.filter(token=token).last()
-                user = CustomUser.objects.filter(email=user_email.email).first()
-                user.set_password(password)
-
-                user.save()
-                user_email.delete()
-
-                context = {'curl' : curl}
-                messages.error(request, 'Your Password has been changed.')
-
-            else:
-                messages.error(request, 'Password and confirm Password did not matched, try again.')
-                context = {'curl' : curl}
-                    
-        else:
-            context = {'curl' : curl}
-            messages.error(request, 'Something went wrong, try again.')
-
+        else:   
+            messages.error(request, 'This link is expire, try again.')
+            return redirect('forget_password_handler')
+    
+    except fastjsonschema.exceptions.JsonSchemaValueException as e:
+        messages.error(request, schemas.login_schema.forget_password_schema.get('properties', 
+            {}).get(e.path[-1], {}).get('description', f'please enter the valid data {e}'))
+        
+        context = {'curl' : curl, 'token' : token, 'corrupted_time' : corrupted_time}
         return render (request, 'reset_password.html', context)
-
+    
+    except ObjectDoesNotExist:
+        messages.error(request, 'test')
+        return redirect('forget_password_handler')
+    
+    except TemplateDoesNotExist:
+        messages.error(request, f"An unexpected error occurred. Please try again later.")
+        return redirect('Home')
+    
     except Exception as e :
         messages.error(request, f"{e} Something went wrong, try again")
         return redirect('forget_password_handler')
+
+
 
 @never_cache
 def logout_view(request: HttpRequest) -> HttpResponseRedirect:

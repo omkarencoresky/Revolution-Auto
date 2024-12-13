@@ -1,5 +1,6 @@
-from datetime import date
+import re
 from django.http import HttpRequest
+from datetime import date, timedelta
 from django.core.paginator import Page
 from admin_app.models import ComboDetails
 from django.core.paginator import Paginator
@@ -130,3 +131,36 @@ def User_combos_pagination(request: HttpRequest, user) -> Page:
     except ObjectDoesNotExist:
         return None
 
+
+def convert_to_hours(duration) -> int:
+    # If the input is a timedelta, calculate total hours directly
+    if isinstance(duration, timedelta):
+        return round(duration.total_seconds() / 3600)
+
+    # Otherwise, assume the input is a string
+    if isinstance(duration, str):
+        # Parse the duration string using a regular expression
+        pattern = r"""
+            (?:(?P<days>\d+)\s*day[s]?\s*,?\s*)?  # Match 'days' (optional)
+            (?P<hours>\d+)\s*:\s*                 # Match 'hours'
+            (?P<minutes>\d+)\s*:\s*               # Match 'minutes'
+            (?P<seconds>\d+(?:\.\d+)?)            # Match 'seconds'
+        """
+        match = re.match(pattern, duration, re.VERBOSE)
+        
+        if not match:
+            raise ValueError("Invalid duration format")
+        
+        # Extract components
+        days = int(match.group('days') or 0)
+        hours = int(match.group('hours') or 0)
+        minutes = int(match.group('minutes') or 0)
+        seconds = float(match.group('seconds') or 0)
+        
+        # Create a timedelta object
+        time_diff = timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
+        
+        # Calculate total hours
+        return round(time_diff.total_seconds() / 3600)
+    
+    raise TypeError("Input must be a string or timedelta")

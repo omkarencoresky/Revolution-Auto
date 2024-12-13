@@ -243,7 +243,9 @@ class ForgetPasswordTracking(models.Model):
     email = models.EmailField(max_length=100, unique=True, blank=False)
     token = models.CharField(max_length=255, unique=True, blank=False)
     expiration_time = models.DateTimeField(blank=False, null=False)
-    attempt_number = models.IntegerField(default=0, blank=False)
+    attempt_number = models.IntegerField(blank=False)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def is_valid(self):
         return timezone.now() < self.expiration_time

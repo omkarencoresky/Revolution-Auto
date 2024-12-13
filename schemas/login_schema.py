@@ -15,12 +15,29 @@ login_schema = {
             "type": "string",
             "minLength": 8,
             "maxLength": 20,
-            "pattern":  "[A-Za-z\d!@#%^&*()_+\-=\[\]{};':\\|,.<>/?]",
-            "description": "Password should be 8 to 20 characters long, with at least 1 uppercase letter and 1 special character."
+            "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$",
+            "description": "Password must be 8-20 characters long, include at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character."
         }
     },
     "required": ["email", "password"],
     "additionalProperties": False
 }
 
+
+forget_password_schema = {
+  "type": "object",
+  "properties": {
+    "password": {
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 20,
+      "pattern": "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).+$",
+      "description": "Password must be 8-20 characters long, include at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character."
+    }
+  },
+  "required": ["password"],
+  "additionalProperties": False
+}
+
 validate_login = fastjsonschema.compile(login_schema)
+validate_forget_password = fastjsonschema.compile(forget_password_schema)
