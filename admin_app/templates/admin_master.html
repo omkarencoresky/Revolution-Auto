@@ -219,13 +219,6 @@
                             </ul>
                         </li>
 
-                        <!-- <li class="sidenav-item">
-                            <a href="{% url 'combo_data_handler' %}" class="sidenav-link">
-                                <i class="sidenav-icon fa fa-shopping-bag"></i>
-                                <div>Combo Management</div>
-                            </a>
-                        </li> -->
-
                         <li class="sidenav-item">
                             <a href="{% url 'user_referral_data_handler' %}" class="sidenav-link">
                                 <i class="sidenav-icon fa fa-user-friends"></i>
@@ -233,11 +226,18 @@
                             </a>
                         </li>
                         <li class="sidenav-item">
+                            <a href="{% url 'membership_handler' %}" class="sidenav-link">
+                                <i class="sidenav-icon fa fa-user"></i>
+                                <div>Membership Palns</div>
+                            </a>
+                        </li>
+                        
+                        <!-- <li class="sidenav-item">
                             <a href="pages_authentication_register-v1.html" class="sidenav-link">
                                 <i class="sidenav-icon fa fa-cogs"></i>
                                 <div>Settings</div>
                             </a>
-                        </li>
+                        </li> -->
                         <li class="sidenav-item">
                             <a href="{% url 'admin_notification_data_handler' %}" class="sidenav-link"
                             onclick="toggleMenu('sidenav-dropdown-menu-notification-Management')" id="sidenav-dropdown-Notification-Management">
@@ -304,35 +304,47 @@
                             </div>
 
                             <div class="navbar-nav align-items-lg-center ml-auto">
-                                <div class="demo-navbar-notifications nav-item dropdown mr-lg-3" onclick="hideShowDropdown(event, 'notificationLayer', 'dropdown_menu')">
-                                    <a class="nav-link dropdown-toggle hide-arrow" href="#" >
-                                        <i class="feather icon-bell navbar-icon align-middle"></i>
-                                        <sup style="color: red;">{{unread_notification}}</sup>
-                                        <span class="badge badge-danger badge-dot indicator"></span>
-                                        <span class="d-lg-none align-middle">&nbsp; Notifications</span>
-                                    </a>
-                                    <div onclick="hideShowDropdown(event, 'notificationLayer', 'dropdown_menu')" id="notificationLayer" 
-                                    style="position: fixed; height: 100%; width: 100%; left: 0; top: 0; display: none;">
-                                        <div class="dropdown-menu dropdown-menu-right" id="dropdown_menu" style="right: 9.5%; top: 58px;">
-                                            <div class="bg-primary text-center text-white font-weight-bold p-3">
-                                                {% if unread_notification|length > 0 %}
-                                                You Have {{unread_notification|length}} Unread Notifications!"
-                                                {% else %}
+                                <div class="navbar-nav align-items-lg-center ml-auto">
+                                    <div class="demo-navbar-notifications nav-item dropdown mr-lg-3" id="navbar_notifications"
+                                        onclick="hideShowDropdown(event, 'notificationLayer', 'dropdown_menu')">
+                                        <a class="nav-link dropdown-toggle hide-arrow" href="#" 
+                                            id="nav_link_toggel">
+                                            <i class="feather icon-bell navbar-icon align-middle"></i>
+                                            <sup style="color: red;">{{unread_notification}}</sup>
+                                            <span class="badge badge-danger badge-dot indicator"></span>
+                                            <span class="d-lg-none align-middle">&nbsp; Notifications</span>
+                                        </a>
+                                        <div onclick="hideShowDropdown(event, 'notificationLayer', 'dropdown_menu')" id="notificationLayer" 
+                                            style="position: fixed; height: 100%; width: 100%; left: 0; top: 0; display: none;">
+                                            <div class="dropdown-menu dropdown-menu-right" id="dropdown_menu" style="right: 9.5%; top: 58px;">
+                                                <div class="bg-primary text-center text-white font-weight-bold p-3">
+                                                    {% if unread_notification|length > 0 %}
+                                                    You Have {{unread_notification|length}} Unread Notifications!"
+                                                    {% else %}
                                                     All messages have been marked as read.
-                                                {% endif %}
-                                            </div>
-                                            <div class="list-group list-group-flush">
-                                                {% for notification in notifications %}
-                                                    {% if forloop.counter <= 5%}
-                                                        <div class="media-body ml-3" style="margin: 8px; border: 1px solid rgb(218, 218, 218); padding: 5px; border-radius: 10px;">
-                                                            <div class="text-dark">{{notification.title}}</div>                                        
-                                                            <div class="text-dark">{{notification.message}}</div>
-                                                            <div class="text-dark">{{notification.sender_id.first_name}} {{notification.sender_id.last_name}}</div>
-                                                        </div>
                                                     {% endif %}
+                                                </div>
+                                                <div class="list-group list-group-flush ">
+                                                    {% for notification in notifications %}
+                                                    {% if forloop.counter <= 5%} 
+                                                    <div class="media-body ml-3 d-flex"
+                                                        style="margin: 8px; border: 1px solid rgb(218, 218, 218); padding: 5px; border-radius: 10px;">
+                                                        <i class="feather icon-mail navbar-icon align-middle"
+                                                            style="padding-top: 5px; width: 8%;"></i>
+                                                        <div style="margin-left: 8px; width: 90%;">
+                                                            <div style="font-weight: bold;" class="text-dark">{{notification.title}}</div>
+                                                            <div class="text-dark"> {{notification.message|slice:50}}</div>
+                                                            <div class="text-dark">{{notification.sender.email}}</div>
+                                                        </div>
+                                                    </div>
+                                                <lable style="width: 100%; text-align: right;">{{notification.created_at}}</lable>
+                                                {% endif %}
                                                 {% endfor %}
-                                            
-                                                <a href="{% url 'admin_notification_data_handler' %}" class="d-block text-center text-light small p-2 my-1">Show all notifications</a>
+    
+        
+                                                <a href="{% url 'user_notification_data_handler' %}"
+                                                    class="d-block text-center text-dark small p-2 my-1">Show all
+                                                    notifications</a>
                                             </div>
                                         </div>
                                     </div>
@@ -348,7 +360,7 @@
                                         </span>
                                     </a>
                                     <div onclick="hideShowDropdown(event, 'profileLayer', 'profileitem')" id="profileLayer" 
-                                    style="position: fixed; height: 100%; width: 100%; left: 0; top: 0; display: none;">
+                                        style="position: fixed; height: 100%; width: 100%; left: 0; top: 0; display: none;">
                                         <div class="dropdown-menu dropdown-menu-right" id="profileitem" style="right: 5%; top: 62px;">
                                             <button style="padding-left: 20px;" class="btn" onclick="updateAdminProfile('profileupdateForm', '{{ user.user_id }}', 
                                             '{{ user.first_name }}', '{{ user.last_name }}', '{{ user.email }}', 
@@ -357,8 +369,8 @@
                                         </button>
                                             <!-- <a href="{% url 'admin_notification_data_handler' %}" class="dropdown-item">
                                                 <i class="feather icon-mail text-muted"></i> &nbsp; Messages</a> -->
-                                            <a href="javascript:" class="dropdown-item">
-                                                <i class="feather icon-settings text-muted"></i> &nbsp; Account settings</a>
+                                            <!-- <a href="javascript:" class="dropdown-item">
+                                                <i class="feather icon-settings text-muted"></i> &nbsp; Account settings</a> -->
                                             <a href="{% url 'forget_password_handler' %}" class="dropdown-item">
                                                 <i class="feather icon-settings text-muted"></i> &nbsp; Forget Password</a>
                                             <div class="dropdown-divider"></div>
@@ -381,7 +393,7 @@
                                 <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
                                     <div id="profileupdateForm" style="padding-top: 100px;" class="modal-form h-100"
                                         onclick="closeModalIfOutside(event, 'profileupdateForm')">
-                                        <div class="modal-content" id="modal-content" style="max-width: 800px; height: 55%;">
+                                        <div class="modal-content" id="modal-content" style="max-width: 800px; height: auto;">
                                             <div class="modal-header">
                                                 <h4 class="modal-title">Update Admin Credentials</h4>
                                                 <button type="button" class="close" onclick="closeModal('profileupdateForm')">×</button>

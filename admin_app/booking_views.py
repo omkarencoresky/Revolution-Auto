@@ -11,12 +11,14 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.core.mail import send_mail
 from django.utils.html import strip_tags
+from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist
 from django.template.loader import render_to_string
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import never_cache 
 from django.contrib.auth.decorators import login_required
+from admin_app.utils.utils import specific_account_notification
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from admin_app.models import ServiceType, ServiceCategory, Services, SubService, SubServiceOption
 from admin_app.utils.utils import booking_pagination, Mechanic_pagination, Service_payment_pagination
@@ -42,6 +44,8 @@ def booking_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
     try:
         if request.method == 'GET':
             status = request.GET.get('status')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             if status != 'None':
                 booking_object = booking_pagination(request, status)
@@ -49,7 +53,12 @@ def booking_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
                 status = ''
                 booking_object = booking_pagination(request, status)
 
-            context = {'curl': curl, 'page_obj': booking_object, 'current_status': status}
+            context = {'curl': curl, 
+                'current_status': status,
+                'page_obj': booking_object,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
+            }
             return render(request, 'booking/booking_management.html', context)
         
         else:
@@ -225,10 +234,15 @@ def handle_service_status_and_car_details(request: HttpRequest, id: int) -> Http
                 quote_object.status = 'deleted'
 
                 quote_object.save()
+                unread_notification = Notification.get_unread_count(request.user.user_id)
+                notifications = specific_account_notification(request, request.user.user_id)
+
                 context = {
                     'curl': curl,
+                    'mechanics': mechanics,
                     'page_obj': booking_object,
-                    'mechanics': mechanics
+                    'notifications' : notifications,
+                    'unread_notification' : unread_notification,
                 }
                 
                 messages.success
@@ -276,6 +290,8 @@ def service_update_handler(request: HttpRequest, id: int) -> HttpResponse | Http
         if request.method == 'GET':
             booking_object = BookingAndQuote.objects.get(id=id)
             service_type = ServiceType.objects.all().order_by('id').filter(status=1)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
             
             # Get existing services data
             existing_services = []
@@ -319,8 +335,12 @@ def service_update_handler(request: HttpRequest, id: int) -> HttpResponse | Http
                     except Services.DoesNotExist:
                         continue
                         
-            context = {'booking_object': booking_object, 'service_type': service_type, 
-                        'existing_services': json.dumps(existing_services)}
+            context = {'service_type': service_type, 
+                    'notifications' : notifications,
+                    'booking_object': booking_object,
+                    'unread_notification' : unread_notification,
+                    'existing_services': json.dumps(existing_services),
+                }
             return render(request, 'booking/update_service.html', context)
         
         elif request.method == 'POST':
@@ -439,11 +459,13 @@ def booking_report_handler(request: HttpRequest, id: int) -> HttpResponse | Http
     """
     try:
         if request.method == 'GET':
+            sub_service_details = {}
             booking = BookingAndQuote.objects.get(id=id)
+            service_detail = SubServiceAndOption.objects.filter(booking_id=id) 
             # sub_service_details = get_service_sub_service_and_option(request, id)
 
-            service_detail = SubServiceAndOption.objects.filter(booking_id=id) 
-            sub_service_details = {}
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             if service_detail:
                 for x in service_detail:
@@ -469,7 +491,12 @@ def booking_report_handler(request: HttpRequest, id: int) -> HttpResponse | Http
                     serviceObject = Services.objects.get(id=serviceId)
                     sub_service_details[serviceObject.service_title] = {'description': serviceObject.description,'subservices': []}
 
-            context = {'curl': curl, 'booking':booking, 'sub_service_details': sub_service_details}
+            context = {'curl': curl, 
+                'booking':booking, 
+                'sub_service_details': sub_service_details,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
+                }
             return render(request, 'booking/booking_report.html', context)
         
         else:
@@ -500,13 +527,26 @@ def service_payment_handler(request: HttpRequest) -> HttpResponse | HttpResponse
     try:
         if request.method == 'GET':
             all_payment = Service_payment_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
-            context = {'curl': curl, 'page_obj': all_payment,}
+            context = {'curl': curl, 
+                'page_obj': all_payment,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
+                }
             return render(request, 'booking/payments.html', context)
         
         else:
             all_payment = Service_payment_pagination(request)
-            context = {'curl': curl, 'page_obj': all_payment,}
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
+            context = {'curl': curl, 
+                'page_obj': all_payment,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
+                }
             
             messages.error(request, 'In-valid method, try again')            
             return render(request, 'booking/payments.html', context)

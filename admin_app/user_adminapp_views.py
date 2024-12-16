@@ -8,12 +8,14 @@ import schemas.registration_schema
 from django.conf import settings
 from django.contrib import messages
 from user_app.models import CustomUser
+from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist
 from user_app.forms import CustomUserCreationForm
 from admin_app.utils.utils import user_pagination
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from admin_app.utils.utils import specific_account_notification
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from django.contrib.auth import authenticate, login as auth_login, logout
 from schemas.registration_schema import validate_registration, validate_update_profile_details_schema
@@ -37,10 +39,14 @@ def user_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedire
     try:
         if request.method == 'GET':
             user_pagination_object = user_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl' : admin_curl, 
+                'notifications' : notifications,
                 'page_obj' : user_pagination_object,
+                'unread_notification' : unread_notification,
             }
             
             return render(request, 'user/user_management.html', context)
@@ -91,10 +97,14 @@ def user_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedire
         
         else:
             user_pagination_object = user_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl' : admin_curl, 
+                'notifications' : notifications,
                 'page_obj' : user_pagination_object,
+                'unread_notification' : unread_notification,
             }
             
             return render(request, 'user/user_management.html', context)          
@@ -162,10 +172,14 @@ def user_action_handler(request: HttpRequest, id: int, role = None) -> HttpRespo
                 return redirect('user_data_handler') 
         else:
             user_pagination_object = user_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl' : admin_curl, 
+                'notifications' : notifications,
                 'page_obj' : user_pagination_object,
+                'unread_notification' : unread_notification,
             }
             
             return render(request, 'user/user_management.html', context)  

@@ -7,13 +7,15 @@ import schemas.location_schema
 from django.conf import settings
 from .forms import AddLocationForm
 from django.contrib import messages
+from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
-from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from django.core.exceptions import ObjectDoesNotExist
 from admin_app.utils.utils import locations_pagination
 from django.contrib.auth.decorators import login_required
 from schemas.location_schema import validate_location_schema
+from admin_app.utils.utils import specific_account_notification
+from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 
 curl = settings.CURRENT_URL
 admin_curl = f"{curl}/admin/"
@@ -31,10 +33,14 @@ def location_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     try:
         if request.method == 'GET':
             locations_pagination_data = locations_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl' : admin_curl,
                 'page_obj': locations_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request, 'location/location_management.html', context)
         
@@ -132,9 +138,14 @@ def location_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
             location = Location.objects.get(id=id)
 
             page_obj = locations_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': admin_curl,
                 'page_obj':page_obj,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
 
             if location:

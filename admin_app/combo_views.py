@@ -8,11 +8,13 @@ from django.conf import settings
 from django.db import transaction
 from django.contrib import messages
 from django.http import JsonResponse
+from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from schemas.combo_schema import validate_add_combo_schema
+from admin_app.utils.utils import specific_account_notification
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from admin_app.utils.utils import Service_combo_pagination, Users_combo_pagination
 from admin_app.models import ServiceType, Services, ServiceCategory, SubService, ComboDetails, ComboServiceDetails, ComboSubServiceDetails
@@ -34,10 +36,15 @@ def combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
         if request.method == 'GET':
             service_type = ServiceType.objects.all()
             combos = Service_combo_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': curl,
                 'page_obj': combos,
                 'service_type': service_type,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
             }
             return render(request, 'combo/combo_management.html', context)
         
@@ -133,9 +140,14 @@ def users_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpRespons
     try:
         if request.method == 'GET':
             combos = Users_combo_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': curl,
                 'page_obj': combos,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification
             }
             return render(request, 'combo/user_combo_management.html', context)
         

@@ -36,9 +36,13 @@ def register_mechanic_application(request: HttpRequest) -> HttpResponse | HttpRe
     """
     try:
         if request.method == 'GET':
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
-                'curl': curl
+                'curl': curl,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
             }
             return render(request, 'mechanic_registration.html', context)
         
@@ -76,9 +80,14 @@ def register_mechanic_application(request: HttpRequest) -> HttpResponse | HttpRe
                         mechanic.set_password(form.cleaned_data['password'])
                         mechanic.save()
                         
+                        unread_notification = Notification.get_unread_count(request.user.user_id)
+                        notifications = specific_account_notification(request, request.user.user_id)
                         messages.success(request, "Your Details recorded, wait until confirmation.")
+
                         context = {
-                            'curl': curl
+                            'curl': curl,
+                            'notifications' : notifications,
+                            'unread_notification' : unread_notification,
                         }
                         return render(request, 'home.html', context)
                     
@@ -92,8 +101,13 @@ def register_mechanic_application(request: HttpRequest) -> HttpResponse | HttpRe
             return redirect('register_mechanic_application')
         
         else:
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
-                'curl': curl
+                'curl': curl,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
             }
             return render(request, 'mechanic_registration.html', context)
         
@@ -128,8 +142,8 @@ def mechanic_dashboard(request: HttpRequest) -> HttpResponse | HttpResponseRedir
     try:
         if request.method == 'GET':
             
-            notifications = specific_account_notification(request, request.user.user_id)
             unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl':curl,

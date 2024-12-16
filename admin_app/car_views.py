@@ -7,6 +7,7 @@ import schemas.car_schema
 from schemas import car_schema
 from django.conf import settings
 from django.contrib import messages
+from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from django.template import TemplateDoesNotExist 
 from django.views.decorators.csrf import csrf_exempt
@@ -14,6 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.cache import never_cache
 from .models import CarBrand, CarYear, CarModel, CarTrim
 from django.contrib.auth.decorators import login_required
+from admin_app.utils.utils import specific_account_notification
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from .forms import AddBrandForm, AddYearForm, AddModelForm, AddTrimForm
 from admin_app.utils.utils import brand_pagination, year_pagination, model_pagination, trim_pagination
@@ -37,11 +39,15 @@ def car_brand_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
     """
     try:    
         if request.method == 'GET':
-            page_obj = brand_pagination(request)
+            page_obj = CarBrand.objects.all().order_by('id')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
             }
             return render(request, 'carmodel/car_brand.html', context)
         
@@ -88,9 +94,14 @@ def car_brand_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
                 return redirect('car_brand_data_handler')
         else:
             page_obj = brand_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
             }
             messages.error(request, 'Invalid request, Try again')
             return render(request, 'carmodel/car_brand.html', context) 
@@ -129,7 +140,7 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
 
         if request.method == 'POST':
 
-            brand = CarBrand.objects.get(id=id)
+            brand = brand_pagination(request)
             uploaded_file = request.FILES.get('image_url')
             
             if not uploaded_file:
@@ -176,9 +187,14 @@ def car_brand_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                 brand.delete()
 
             page_obj = brand_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' :notifications,
+                'unread_notification' : unread_notification,
             }
             
             messages.success(request,f"Deleted successfully")
@@ -225,12 +241,17 @@ def car_year_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     try:
         if request.method == 'GET':
 
-            brands = brand_pagination(request)
             page_obj = year_pagination(request)
+            brands = CarBrand.objects.all().order_by('id')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
-                'curl': admin_curl,
                 'brands': brands,
+                'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' :notifications,
+                'unread_notification' : unread_notification,
             }
 
             return render(request, 'carmodel/car_year.html', context) 
@@ -255,9 +276,14 @@ def car_year_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
                     form.save()
 
                     page_obj = year_pagination(request)
+                    unread_notification = Notification.get_unread_count(request.user.user_id)
+                    notifications = specific_account_notification(request, request.user.user_id)
+
                     context = {
                         'curl': admin_curl,
                         'page_obj': page_obj,
+                        'notifications' :notifications,
+                        'unread_notification' : unread_notification,
                     }
                     messages.success(request, "Added successfully!")
                     return redirect('car_year_data_handler')
@@ -338,9 +364,14 @@ def car_year_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
                 Year.delete()
 
             page_obj = year_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' :notifications,
+                'unread_notification' : unread_notification,
             }
             
             messages.success(request,f"Deleted successfully")
@@ -387,15 +418,19 @@ def car_model_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseR
     try:
         if request.method == 'GET':
 
-            years = year_pagination(request)
-            brands = brand_pagination(request)
             page_obj = model_pagination(request)
+            years = CarYear.objects.all().order_by('id')
+            brands = CarBrand.objects.all().order_by('id')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'years': years,
                 'brands': brands,
                 'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' :notifications,
+                'unread_notification' : unread_notification,
             }
             return render(request, 'carmodel/car_model.html', context)
         
@@ -466,7 +501,7 @@ def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
     """
     try:
         if request.method == 'POST':
-            model = CarModel.objects.get(id=id)
+            model = model_pagination(request)
 
             car_id = request.POST.get('car_id')
             year_id = request.POST.get('year_id')
@@ -505,13 +540,18 @@ def car_model_action_handler(request: HttpRequest, id: int) -> HttpResponse | Ht
                 model.delete()
 
             page_obj = model_pagination(request)
-            brands = brand_pagination(request)
-            years = year_pagination(request)
+            years = CarYear.objects.all().order_by('id')
+            brands = CarBrand.objects.all().order_by('id')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
+                'years': years,
+                'brands': brands,
                 'curl': admin_curl,
                 'page_obj': page_obj,
-                'brands': brands,
-                'years': years
+                'notifications' :notifications,
+                'unread_notification' : unread_notification,
             }
 
             messages.success(request, f"Deleted successfully")
@@ -560,28 +600,34 @@ def car_trim_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
         if request.method == 'GET':
 
             page_obj = trim_pagination(request)
-            brands = brand_pagination(request)
-            years = year_pagination(request)
-            models = model_pagination(request)
+            years = CarYear.objects.all().order_by('id')
+            brands = CarBrand.objects.all().order_by('id')
+            models = CarModel.objects.all().order_by('id')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context ={
                 'years': years,
                 'brands': brands,
                 'models': models,
                 'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' :notifications,
+                'unread_notification' : unread_notification,
             }
             return render(request, 'carmodel/car_trim.html', context)
 
         elif request.method == 'POST':
             form = AddTrimForm(request.POST)
-
             trim_name = request.POST.get('car_trim_name')
+
             data = {
                 'car_id': request.POST.get('car_id'),
                 'year_id': request.POST.get('year_id'),
                 'model_id': request.POST.get('model_id'),
                 'car_trim_name': trim_name   
                 }
+            
             car_schema.validate_car_trim_details(data)
             unique_trim = CarTrim.objects.filter(car_id=data.get('car_id'), year_id=data.get('year_id'), model_id=data.get('model_id'), car_trim_name=data.get('car_trim_name'),)
 
@@ -681,14 +727,19 @@ def car_trim_action_handler(request: HttpRequest, id: int) -> HttpResponse | Htt
         
         elif request.method == 'DELETE': 
             trim = CarTrim.objects.get(id=id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             if trim:
                 trim.delete()
             
             page_obj = trim_pagination(request)
+
             context = {
                 'curl': admin_curl,
                 'page_obj': page_obj,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification,
             }
             messages.success(request,f"Deleted successfully")
             return render(request, 'carmodel/car_trim.html',context , status=200)

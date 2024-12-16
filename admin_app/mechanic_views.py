@@ -7,12 +7,14 @@ from django.conf import settings
 import schemas.registration_schema
 from django.contrib import messages
 from user_app.models import CustomUser
+from admin_app.models import Notification
 from django.shortcuts import render, redirect
 from mechanic_app.forms import AddMechanicForm
 from django.template import TemplateDoesNotExist
 from django.core.exceptions import ObjectDoesNotExist
 from mechanic_app.utils.utils import mechanic_pagination
 from django.contrib.auth.decorators import login_required
+from admin_app.utils.utils import specific_account_notification
 from django.http import HttpResponse, HttpRequest, HttpResponseRedirect
 from schemas.registration_schema import validate_mechanic_register_detail_schema, validate_mechanic_update_detail_schema
 
@@ -37,10 +39,14 @@ def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
     try:
         if request.method == 'GET':
             page_obj = mechanic_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl' : admincurl,
                 'page_obj' : page_obj,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification
             }
 
             return render(request, 'mechanic/mechanic_management.html', context)
@@ -87,10 +93,14 @@ def mechanic_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRe
                 
         else:
             page_obj = mechanic_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl' : admincurl,
                 'page_obj' : page_obj,
+                'notifications' : notifications,
+                'unread_notification' : unread_notification
             }
             return render(request, 'mechanic/mechanic_management.html', context)
         

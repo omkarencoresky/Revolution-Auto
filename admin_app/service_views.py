@@ -46,9 +46,13 @@ def service_type_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
         if request.method == 'GET':
 
             service_type_pagination_data = service_type_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
             context = {
                 'curl': admin_curl,
-                'page_obj': service_type_pagination_data
+                'page_obj': service_type_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications,
             }
             return render(request, 'service/service_type.html', context)
         
@@ -64,22 +68,32 @@ def service_type_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
                     form.save()
 
                     service_type_pagination_data = service_type_pagination(request, status=1)
+                    unread_notification = Notification.get_unread_count(request.user.user_id)
+                    notifications = specific_account_notification(request, request.user.user_id)
+
                     context = {
                         'curl': admin_curl,
-                        'page_obj':service_type_pagination_data
+                        'page_obj':service_type_pagination_data,
+                        'unread_notification' : unread_notification,
+                        'notifications' : notifications,
                     }
                     messages.success(request, "Added Successfully!")
                     return redirect('service_type_data_handler')
                 
             else:
                 messages.error(request, "This serviece type already exists, try again ")
+                unread_notification = Notification.get_unread_count(request.user.user_id)
+                notifications = specific_account_notification(request, request.user.user_id)
+
                 return redirect('service_type_data_handler')   
             
         else:
             service_type_pagination_data = service_type_pagination(request, status=1)
             context = {
                 'curl':admin_curl,
-                'page_obj':service_type_pagination_data
+                'page_obj':service_type_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications,
             }
             return render(request, 'service/service_type.html', context)
     
@@ -189,10 +203,15 @@ def service_category_data_handler(request: HttpRequest) -> HttpResponse | HttpRe
 
             service_category_pagination_data = service_category_pagination(request)
             service_type_pagination_data = service_type_pagination(request, status=1)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+            
             context = {
                 'curl': admin_curl,
                 'page_obj': service_category_pagination_data,
                 'service_type': service_type_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications,
             }
             return render(request, 'service/service_category.html', context) 
         
@@ -211,9 +230,14 @@ def service_category_data_handler(request: HttpRequest) -> HttpResponse | HttpRe
                     
                     form.save()
                     service_category_pagination_data = service_category_pagination(request)
+                    unread_notification = Notification.get_unread_count(request.user.user_id)
+                    notifications = specific_account_notification(request, request.user.user_id)
+
                     context = {
                         'curl': admin_curl,
                         'page_obj': service_category_pagination_data,
+                        'unread_notification' : unread_notification,
+                        'notifications' : notifications,
                     }
 
                     messages.error(request, 'Added Successfully!!!')
@@ -226,10 +250,15 @@ def service_category_data_handler(request: HttpRequest) -> HttpResponse | HttpRe
 
             service_category_pagination_data = service_category_pagination(request)
             service_type_pagination_data = service_type_pagination(request, status=1)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+            
             context = {
                 'curl': admin_curl,
                 'page_obj': service_category_pagination_data,
                 'service_type': service_type_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications,
             }
             return render(request, 'service/service_category.html', context)
             
@@ -342,10 +371,15 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
 
             services_pagination_data = services_pagination(request)
             service_category_pagination_data = ServiceCategory.objects.all().order_by('id')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': admin_curl,
                 'page_obj': services_pagination_data,
-                'service_category': service_category_pagination_data
+                'service_category': service_category_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
 
             return render(request, 'service/services.html', context) 
@@ -366,9 +400,14 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
                     form.save()
 
                     services_pagination_data = services_pagination(request)
+                    unread_notification = Notification.get_unread_count(request.user.user_id)
+                    notifications = specific_account_notification(request, request.user.user_id)
+
                     context = {
                         'curl': admin_curl,
-                        'page_obj': services_pagination_data
+                        'page_obj': services_pagination_data,
+                        'unread_notification' : unread_notification,
+                        'notifications' : notifications
                     }
                     messages.success(request,"Added successfully!!!")
                     return redirect('service_data_handler')
@@ -383,11 +422,15 @@ def service_data_handler(request: HttpRequest) -> HttpResponse | HttpResponseRed
         else:
             services_pagination_data = services_pagination(request)
             service_category_pagination_data = service_category_pagination(request, status=1)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl': admin_curl,
                 'page_obj': services_pagination_data,
                 'service_category': service_category_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request, 'service/services.html', context) 
             
@@ -423,11 +466,12 @@ def service_action_handler(request: HttpRequest, id: int) -> HttpResponse | Http
     try:        
         if request.method == 'POST':
             services_object = Services.objects.get(id=id)
-
+            
             data = {
                 'description':request.POST.get('description'),
                 'service_title':request.POST.get('service_title'),
                 'service_category':request.POST.get('service_category'),
+                
             }
             validate_services_details(data)
 
@@ -501,10 +545,15 @@ def sub_services_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
 
             sub_services_pagination_data = SubService.objects.all().order_by('id')
             services_pagination_data = Services.objects.all().order_by('id').filter(status=1)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
+
             context = {
                 'curl': admin_curl,
                 'services': services_pagination_data,
                 'page_obj': sub_services_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request, 'service/sub_service.html',context)
         
@@ -532,10 +581,15 @@ def sub_services_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
 
                     services_pagination_data = services_pagination(request, status=1)
                     sub_services_pagination_data = sub_services_pagination(request)
+                    unread_notification = Notification.get_unread_count(request.user.user_id)
+                    notifications = specific_account_notification(request, request.user.user_id)
+
                     context = {
                         'curl': admin_curl,
                         'services': services_pagination_data,
                         'page_obj': sub_services_pagination_data,
+                        'unread_notification' : unread_notification,
+                        'notifications' : notifications
                     }
                     messages.success(request, 'Added Successful')
                     return redirect('sub_services_data_handler')      
@@ -547,11 +601,15 @@ def sub_services_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
         else:
             services_pagination_data = services_pagination(request)
             sub_services_pagination_data = sub_services_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl': admin_curl,
                 'services': services_pagination_data,
                 'page_obj': sub_services_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request, 'service/sub_service.html',context)
         
@@ -681,12 +739,16 @@ def sub_service_option_data_handler(request: HttpRequest) -> HttpResponse | Http
 
             inspection_pagination_data = Inspection.objects.all().order_by('id')
             sub_services_pagination_data = SubService.objects.all().order_by('id')
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
             sub_service_option_pagination_data = sub_service_option_pagination(request)
 
             context = {
                 'inspection': inspection_pagination_data,
                 'sub_service': sub_services_pagination_data,
                 'page_obj': sub_service_option_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
 
             return render(request,'service/sub_service_option.html', context)
@@ -738,10 +800,15 @@ def sub_service_option_data_handler(request: HttpRequest) -> HttpResponse | Http
                 inspection_pagination_data = inspection_pagination(request)
                 sub_services_pagination_data = sub_services_pagination(request, status=1)
                 sub_service_option_pagination_data = sub_service_option_pagination(request)
+                unread_notification = Notification.get_unread_count(request.user.user_id)
+                notifications = specific_account_notification(request, request.user.user_id)
+                
                 context = {
                         'inspection': inspection_pagination_data,
                         'sub_service': sub_services_pagination_data,
                         'page_obj': sub_service_option_pagination_data,
+                        'unread_notification' : unread_notification,
+                        'notifications' : notifications
                     }
                 messages.error(request, "Image is not selectd , try again.")
                 return render(request,'service/sub_service_option.html', context)
@@ -749,11 +816,15 @@ def sub_service_option_data_handler(request: HttpRequest) -> HttpResponse | Http
             inspection_pagination_data = inspection_pagination(request)
             sub_services_pagination_data = sub_services_pagination(request, status=1)
             sub_service_option_pagination_data = sub_service_option_pagination(request)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'page_obj': sub_service_option_pagination_data,
                 'inspection': inspection_pagination_data,
                 'sub_service': sub_services_pagination_data,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request,'service/sub_service_option.html', context)
     

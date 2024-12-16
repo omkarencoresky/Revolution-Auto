@@ -28,7 +28,7 @@
     <div id="addForm" class="modal-form" onclick="closeModalIfOutside(event, 'addForm')">
         <div class="modal-content" style="max-width: 800px; height: auto;">
             <div class="modal-header">
-                <h3 class="modal-title">Add User</h3>
+                <h3 class="modal-title">Add Car</h3>
                 <button type="button" class="close" onclick="closeModal('addForm')">×</button>
             </div>
             <div class="modal-body" id="modal-body">
@@ -185,7 +185,7 @@
 
                 <!---------------------------Car detail form ---------------------->
                 <div id="viewForm" class="modal-form" onclick="closeModalIfOutside(event, 'viewForm')">
-                    <div class="modal-content" style="max-width: 800px; height: 43%; width: 30%;">
+                    <div class="modal-content" style="max-width: 800px; height: auto; width: auto;">
                         <div class="modal-header">
                             <h4 class="modal-title w-100"
                                 style="text-align: center; font-size: 30px; font-weight: bold;">Car
@@ -243,7 +243,7 @@
                 <!---------------------------Car Service History form ---------------------->
 
                 <div id="historyForm" class="modal-form" onclick="closeModalIfOutside(event, 'historyForm')">
-                    <div class="modal-content" style="max-width: 800px; height: auto; width: 30%;">
+                    <div class="modal-content" style="max-width: 800px; max-height: 900px; height: auto; width: 40%;">
                         <div class="modal-header">
                             <h4 class="modal-title w-100"
                                 style="text-align: center; font-size: 30px; font-weight: bold;">Car Service History</h4>
@@ -251,8 +251,9 @@
                                 style="font-size: 30px; font-weight: bolder;">×</button>
                         </div>
                         <div class="modal-body" id="modal-body">
-                            <div class="history-form">
-                            </div>
+                            
+                            <div class="history-form"></div>
+
                             <div class="row w-100">
                                 <div class="w-100 modal_btn d-flex justify-content-around mt-3">
                                     <button type="button" class="btn btn-danger" data-dismiss="modal"

@@ -6,6 +6,7 @@ import schemas.car_schema
 import schemas.combo_schema
 import schemas.booking_schema
 import schemas.registration_schema
+
 from datetime import date
 from datetime import datetime
 from admin_app.models import *
@@ -443,7 +444,7 @@ def car_service_history(request: HttpRequest) -> HttpResponse | HttpResponseRedi
 
         car_details = UserCarRecord.objects.get(id=car_id)
         car_history_list = BookingAndQuote.objects.filter(user=user_id, car_brand=car_details.car_brand, car_year=car_details.car_year, 
-                                                            car_model=car_details.car_model, car_trim=car_details.car_trim, 
+                                                            car_model=car_details.car_model, car_trim=car_details.car_trim,
                                                             total_service_amount__isnull=False).values('service_location', 'car_services', 
                                                             'mechanic', 'total_service_amount', 'created_at', 'schedule_at')
         
@@ -672,9 +673,13 @@ def user_booking_data_handler(request: HttpRequest) -> HttpResponse | HttpRespon
         if request.method == 'GET':
 
             bookings = User_booking_pagination(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
             context = {
                 'curl': curl,
                 'page_obj': bookings,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request, 'user/user_booking.html',context)
         else:
@@ -1036,12 +1041,16 @@ def user_combo_data_handler(request: HttpRequest) -> HttpResponse | HttpResponse
 
             combos = Combos_pagination(request)
             user_car = User_Car_Record_pagination(request, user_id=request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl': curl,
                 'page_obj': combos,
                 'user_car' : user_car,
-                'current_date' : date.today()
+                'current_date' : date.today(),
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request, 'user/combo.html', context)
         
@@ -1197,13 +1206,17 @@ def user_combo_handler(request: HttpRequest) -> HttpResponse | HttpResponseRedir
     try:
         if request.method == 'GET':
 
-            combos = User_combos_pagination(request, request.user.user_id)
             locations = Location.objects.all()
+            combos = User_combos_pagination(request, request.user.user_id)
+            unread_notification = Notification.get_unread_count(request.user.user_id)
+            notifications = specific_account_notification(request, request.user.user_id)
 
             context = {
                 'curl': curl,
                 'page_obj': combos,
-                'locations': locations
+                'locations': locations,
+                'unread_notification' : unread_notification,
+                'notifications' : notifications
             }
             return render(request, 'user/user_combo.html', context)
         

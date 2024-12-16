@@ -107,7 +107,7 @@
     <div class="col-md-12">
         <div class="card d-flex w-100 mb-4">
             <div class="row no-gutters row-bordered row-border-light h-100" id="item-list">
-                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100">
+                <table class="table table-hover table-striped table-bordered shadow-sm mb-4 w-100" style="text-align: center;">
                     <caption class="caption-top fs-4 text-dark mb-2">All Available Users</caption>
                     <thead class="table-light">
                         <tr>
@@ -148,7 +148,7 @@
                                     style="color: #c4c1c1;;">Login as user</a>
                                 <a class="btn btn-dark"
                                     hx-post="{% url 'user_action_handler'  id=user.user_id role='admin' %}"
-                                    hx-confirm="Are you sure you want to change role for this user?"
+                                    hx-confirm='Are you sure you want to change role as "admin" for this user?'
                                     style="color: #c4c1c1;">Change role</a>
                             </td>
                         </tr>
