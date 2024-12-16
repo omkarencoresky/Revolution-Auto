@@ -4,7 +4,7 @@ from django.http import HttpRequest
 from django.core.paginator import Page
 from django.core.paginator import Paginator
 from django.core.exceptions import ObjectDoesNotExist
-from user_app.models import CustomUser, BookingAndQuote, ServicePayment, UserComboPackage
+from user_app.models import CustomUser, BookingAndQuote, ServicePayment, UserComboPackage, Membership
 
 
 
@@ -73,7 +73,7 @@ def brand_pagination(request: HttpRequest, status=None) -> Page:
         all_brands = CarBrand.objects.all().order_by('id')
 
         if status:
-            all_brands = all_brands.filter(status=status)   
+            all_brands = all_brands.filter(status=status)       
         # Pagination setup
         paginator = Paginator(all_brands, 10)  # Show 10 brands per page
         page_number = request.GET.get('page')  # Get the page number from the request
@@ -487,3 +487,30 @@ def Users_combo_pagination(request: HttpRequest) -> Page:
     
     except ObjectDoesNotExist:
         return None
+    
+
+
+def membership_pagination(request: HttpRequest) -> Page:
+    
+    """Paginate a list of all mechanics and return a Page object.
+
+    Args:
+    -  request (HttpRequest): The HTTP request object. It is used to access query parameters for mechanics pagination.
+
+    Returns:
+    -  page_obj: A Page object containing the paginated mechanics for the mechanics pagination.
+    """
+    try:
+        memberships = Membership.objects.filter().order_by('id')
+        
+        # Pagination setup
+        paginator = Paginator(memberships, 10)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        return page_obj
+    
+    except ObjectDoesNotExist:
+        return None
+    
+
+

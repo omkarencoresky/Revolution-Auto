@@ -1,7 +1,7 @@
 from django import forms
 from admin_app.models import *
-from user_app.models import CustomUser
 from admin_app.models import Notification
+from user_app.models import CustomUser, Membership
     
 
 
@@ -240,4 +240,14 @@ class AddNotification(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['recipient_id'].label_from_instance = lambda obj: f"{obj.email}"
+
+
+class AddMembership(forms.ModelForm):
+    
+    class Meta:
+        model = Membership
+        fields = ['discount_percentage', 'start_date', 'end_date', 'membership_description']
+        widgets = {
+            'membership_description': forms.Textarea(attrs={'required': False}),
+        }
     

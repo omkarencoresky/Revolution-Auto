@@ -17,7 +17,7 @@ Including another URLconf
 
 from django.urls import path
 from admin_app import admin_views, user_adminapp_views, booking_views
-from admin_app import car_views, location_views, service_views, mechanic_views, referral_views, combo_views
+from admin_app import car_views, location_views, service_views, mechanic_views, referral_views, combo_views, membership_views
 
 
 urlpatterns = [
@@ -108,6 +108,7 @@ urlpatterns = [
     # -------------------------------------Booking management urls--------------------- #
     path('combo-management/', combo_views.combo_data_handler, name = 'combo_data_handler'),
     path('user-combo-management/', combo_views.users_combo_data_handler, name = 'users_combo_data_handler'),
+    path('membership-management/', membership_views.membership_handler, name = 'membership_handler'),
 ]
 
 

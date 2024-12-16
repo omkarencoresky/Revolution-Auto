@@ -2271,7 +2271,7 @@ function userCarHistory(formId, carId, userId) {
     const modal = document.getElementById(formId);
     const historyFormContainer = document.querySelector('.history-form');
     const spinner = document.querySelector('.spinner');
-
+    
     // Show the spinner
     spinner.style.display = 'block';
 
@@ -2310,13 +2310,13 @@ function userCarHistory(formId, carId, userId) {
                             </div>
                             <div class="panel-footer">
                                 <div class="row m-0" style="background:#6481c252;">
-                                    <div class="col-sm-12 col-md-4 p-1" style="max-width:25%;">
+                                    <div class="col-sm-12 col-md-4 p-1" style="max-width:auto;">
                                         <strong>Location: </strong>${service.service_location || 'N/A'}
                                     </div>
-                                    <div class="col-sm-12 col-md-4 p-1" style="max-width:25%;">
+                                    <div class="col-sm-12 col-md-4 p-1" style="max-width:auto;">
                                         <strong>Price: </strong>${service.total_service_amount || 'N/A'}
                                     </div>
-                                    <div class="col-sm-12 col-md-4 p-1" style="max-width:25%;">
+                                    <div class="col-sm-12 col-md-4 p-1" style="max-width:auto;">
                                         <strong>Mechanic: </strong>${service.mechanic || 'N/A'}
                                     </div>
                                 </div>
@@ -2999,3 +2999,138 @@ function collectSelectedOptions(test){
     
 }
 
+
+
+function updateMembershipModal(formId, membershipId, discount_percentage, status, membership_description, start_date, end_date) {
+    const modal = document.getElementById(formId);
+    const Form = modal.querySelector('#update_membership_form');
+
+    // Update input fields
+    const discountPercentage = modal.querySelector('#discount_percentage');
+    discountPercentage.setAttribute('value', discount_percentage);
+
+    const Status = modal.querySelector('#status');
+    Status.setAttribute('value', status);
+
+    // Helper function: Format date for calendar input
+    const formatDateForCalendar = (dateString) => {
+        try {
+            const dateObj = new Date(dateString);
+            return dateObj.toISOString().split('T')[0];
+        } catch (error) {
+            console.error('Invalid date:', dateString, error);
+            return '';
+        }
+    };
+
+    const startDate = modal.querySelector('#start_date');
+    startDate.setAttribute('value', formatDateForCalendar(start_date));
+
+    const endDate = modal.querySelector('#end_date');
+    endDate.setAttribute('value', formatDateForCalendar(end_date));
+
+    // Handle CKEditor instance
+    const descriptionElement = modal.querySelector('#update_membership_description');
+
+    if (descriptionElement) {
+        // Check if an editor instance exists
+        if (descriptionElement.editorInstance) {
+            // CKEditor already exists, update its data
+            descriptionElement.editorInstance.setData(membership_description);
+        } else {
+            // CKEditor doesn't exist, create it
+            ClassicEditor.create(descriptionElement)
+                .then(editor => {
+                    descriptionElement.editorInstance = editor; // Attach instance to DOM element
+                    editor.setData(membership_description);
+                })
+                .catch(error => {
+                    console.error('Error initializing CKEditor:', error);
+                });
+        }
+    } else {
+        console.error('Description element not found');
+    }
+
+    // Set form action URL dynamically
+    const url = `/admin/Update-booking-management/${parseInt(membershipId)}`;
+    Form.setAttribute('action', url);
+
+    // Show the modal
+    modal.style.display = 'flex';
+}
+
+
+function viewMembershipModal(formId, membershipId, discount_percentage, status, membership_description, start_date, end_date) {
+    // Helper function: Format date for calendar input
+    const formatDateForCalendar = (dateString) => {
+        try {
+            const dateObj = new Date(dateString);
+            return dateObj.toISOString().split('T')[0];
+        } catch (error) {
+            console.error('Invalid date:', dateString, error);
+            return '';
+        }
+    };
+
+    const modal = document.getElementById(formId);
+    const Form = modal.querySelector('#update_membership_form');
+
+    // Update input fields
+    const discountPercentage = modal.querySelector('#discount_percentage');
+    discountPercentage.setAttribute('value', discount_percentage);
+    discountPercentage.setAttribute('readonly', true);
+
+    const Status = modal.querySelector('#status');
+    Status.innerHTML = '';
+
+    const option = document.createElement('option');
+    option.value = status;
+    option.textContent = status;
+    Status.appendChild(option);
+    Status.setAttribute('readonly', true);
+
+    const startDate = modal.querySelector('#start_date');
+    startDate.setAttribute('value', formatDateForCalendar(start_date));
+    startDate.setAttribute('readonly', true);
+
+    const endDate = modal.querySelector('#end_date');
+    endDate.setAttribute('value', formatDateForCalendar(end_date));
+    endDate.setAttribute('readonly', true);
+
+    const descriptionTextarea = modal.querySelector('#update_membership_description');
+    if (descriptionTextarea) {
+        // Check if an editor instance exists
+        if (descriptionTextarea.editorInstance) {
+            // CKEditor already exists, update its data
+            descriptionTextarea.editorInstance.destroy();
+        } 
+    }
+    
+    const descriptionDiv = document.createElement('div');
+    descriptionDiv.id = 'update_membership_description';
+    descriptionDiv.className = 'form-control';
+    descriptionDiv.style.minHeight = '450px';
+    descriptionDiv.style.overflowY = 'auto';
+    descriptionDiv.style.border = '1px solid #ccc';
+    descriptionDiv.style.padding = '10px';
+
+    descriptionDiv.innerHTML = membership_description;
+    descriptionTextarea.parentNode.append(descriptionDiv);
+    descriptionTextarea.remove()
+
+    const url = `/admin/Update-booking-management/${parseInt(membershipId)}`;
+    Form.setAttribute('action', url);
+
+    modal.style.display = 'flex';
+}
+
+
+// Used for the user data update form data
+function membershipPlan(formId) {
+    console.log('formId', formId    );
+    
+    const modal = document.getElementById(formId);
+
+    modal.style.display = 'flex';
+}

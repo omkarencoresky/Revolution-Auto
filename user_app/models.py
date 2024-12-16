@@ -29,17 +29,31 @@ class CustomManager(BaseUserManager):
 
 
 
+class Membership(models.Model):
+    id = models.AutoField(primary_key=True)
+    end_date = models.DateField(blank=False)
+    status = models.CharField(default=True)
+    start_date = models.DateField(blank=False, null=False)
+    membership_price = models.CharField(max_length=20, default=0)
+    membership_description = models.TextField(max_length=5000, blank=True)
+    discount_percentage = models.DecimalField(max_digits=10, decimal_places=3, null=False, blank=False)
+
+    class Meta:
+        db_table = 'membership_detail' 
+
+
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     USER = 'user'
     ADMIN = 'admin'
-    SUPER_ADMIN = 'superadmin'
     MECHANIC = 'mechanic'
+    SUPER_ADMIN = 'superadmin'
 
     ROLE_CHOICE = [
         (USER, 'user'),
         (ADMIN, 'admin'),
-        (SUPER_ADMIN, 'superadmin'),
         (MECHANIC, 'mechanic'),
+        (SUPER_ADMIN, 'superadmin'),
     ]
 
     user_id = models.AutoField(primary_key=True)
@@ -51,6 +65,8 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=100, blank=False)
     first_name = models.CharField(max_length=100, blank=False)
     approved = models.SmallIntegerField(default=1, blank=False)
+    is_prime_member = models.BooleanField(default=False)
+    membership_id = models.ForeignKey(Membership, on_delete=models.CASCADE, related_name='membership_id', blank=True, null=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICE, default=USER)
     profile_image = models.ImageField(upload_to='profile_images/', default=0)
     remember_token = models.CharField(max_length=100, blank=False, editable=False, unique=True)
@@ -252,3 +268,6 @@ class ForgetPasswordTracking(models.Model):
     
     class Meta:
         db_table = 'forget_password_tracking'
+
+
+
